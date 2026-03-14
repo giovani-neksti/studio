@@ -76,7 +76,7 @@ export async function POST(req: Request) {
       const projectId = process.env.GOOGLE_PROJECT_ID;
       const location = 'us-central1';
 
-      const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/imagen-3.0-generate-001:predict`;
+      const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/imagen-3.0-capability-001:predict`;
 
       // Injetando a imagem em base64 no payload do Vertex AI!
       const response = await fetch(endpoint, {
@@ -89,15 +89,14 @@ export async function POST(req: Request) {
           instances: [
             {
               prompt: finalPrompt,
-              image: {
+              context_image: {
                 bytesBase64Encoded: base64Image
               }
             }
           ],
           parameters: {
             sampleCount: 1,
-            aspectRatio: vertexAspectRatio,
-            addWatermark: false
+            editMode: "outpainting"
           }
         })
       });
