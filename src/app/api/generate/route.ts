@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { GoogleAuth } from 'google-auth-library';
+import { buildEnglishPrompt } from '@/lib/prompt-builder';
 
 // 50% METADE DO BANCO DE DADOS - SYSTEM PROMPT MESTRE
 function getMasterPrompt(niche: string) {
@@ -24,18 +25,18 @@ function getVertexAspectRatio(formatId: string): string {
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    
+
     // We receive multiple entries: 'file', 'selections', 'niche'
     const file = formData.get('file') as File;
     const selectionsStr = formData.get('selections') as string;
     const niche = formData.get('niche') as string;
-    
+
     if (!file || !selectionsStr) {
       return NextResponse.json({ error: 'Faltam arquivos ou seleções no payload.' }, { status: 400 });
     }
-    
+
     const selections = JSON.parse(selectionsStr);
-    
+
     // 1. Upload da imagem original para o Supabase (bucket: uploads)
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}_original_${file.name.replace(/\s/g, '_')}`;
@@ -44,39 +45,35 @@ export async function POST(req: Request) {
       .upload(fileName, fileBuffer, {
         contentType: file.type,
       });
-      
+
     if (uploadError) {
       console.error('Supabase Upload Error:', uploadError);
       return NextResponse.json({ error: 'Falha no upload da imagem original para o bucket.' }, { status: 500 });
     }
-    
+
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
     const base64Image = fileBuffer.toString('base64');
-    
+
     // 2. CONSTRUÇÃO DO PROMPT 50/50
     // METADE 1: BANCO DE DADOS (SYSTEM)
     const masterPrompt = getMasterPrompt(niche);
 
-    // METADE 2: FRONTEND (USER FEATURES)
-    const f2_background = selections.background || (selections.solidColor ? `Fundo de cor sólida ${selections.solidColor}` : 'Fundo neutral');
-    const f3_display = selections.display || selections.model || 'suporte invisível';
-    const f4_text = selections.text ? `Texto visível na imagem: "${selections.text}" na tipografia ${selections.typography || 'elegante'}.` : '';
-    
-    const userPrompt = `FEATURE 2 (Cenário): ${f2_background}. FEATURE 3 (Expositor/Modelo): O produto inserido sobre ${f3_display}. FEATURE 4 (Texto): ${f4_text}`;
-    
+    // METADE 2: FRONTEND (USER FEATURES TRADUZIDAS PARA INGLÊS PELO DICIONÁRIO)
+    const englishScenePrompt = buildEnglishPrompt(niche, selections);
+
     // FUSÃO BLINDADA
-    const finalPrompt = `${masterPrompt}\n\nORDENS DIRETAS DO FILTRO DO USUÁRIO:\n${userPrompt}`;
-    
+    const finalPrompt = `${masterPrompt}\n\nSCENE DESCRIPTION:\n${englishScenePrompt}`;
+
     const vertexAspectRatio = getVertexAspectRatio(selections.format);
-    
+
     // 3. Autenticação Vertex AI via google-auth-library
     let generatedBase64 = null;
-    
+
     try {
       const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
-      const privateKey = rawKey.startsWith('"') && rawKey.endsWith('"') 
-         ? rawKey.substring(1, rawKey.length - 1).replace(/\\n/g, '\n')
-         : rawKey.replace(/\\n/g, '\n');
+      const privateKey = rawKey.startsWith('"') && rawKey.endsWith('"')
+        ? rawKey.substring(1, rawKey.length - 1).replace(/\\n/g, '\n')
+        : rawKey.replace(/\\n/g, '\n');
 
       const auth = new GoogleAuth({
         credentials: {
@@ -90,7 +87,7 @@ export async function POST(req: Request) {
       const accessToken = await auth.getAccessToken();
       const projectId = process.env.GOOGLE_PROJECT_ID;
       const location = 'us-central1';
-      
+
       const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/imagen-3.0-fast-generate-001:predict`;
 
       // Chamada para a Vertex AI
@@ -119,23 +116,23 @@ export async function POST(req: Request) {
         throw new Error("A Vertex AI rejeitou a requisição: " + errorText);
       } else {
         const aiData = await response.json();
-        
+
         // Vertex AI structural fallback
-        generatedBase64 = 
+        generatedBase64 =
           (typeof aiData.predictions?.[0] === 'string' ? aiData.predictions[0] : null) ||
           aiData.predictions?.[0]?.bytesBase64Encoded ||
           aiData.predictions?.[0]?.bytesBase64;
-            
+
         if (!generatedBase64) {
-           throw new Error("Não encontrei base64 no aiData. Estrutura recebida: " + JSON.stringify(aiData).substring(0, 200));
+          throw new Error("Não encontrei base64 no aiData. Estrutura recebida: " + JSON.stringify(aiData).substring(0, 200));
         }
       }
-      
+
     } catch (aiError: any) {
       console.error("Falha na execução do Vertex AI Pipeline:", aiError);
       return NextResponse.json({ error: 'Serviço de IA Indisponível: ' + aiError.message }, { status: 502 });
     }
-    
+
     if (!generatedBase64) {
       return NextResponse.json({ error: 'A Inteligência Artificial não retornou a imagem base64.' }, { status: 500 });
     }
@@ -143,18 +140,18 @@ export async function POST(req: Request) {
     // 4. Upload da Imagem Gerada ao Supabase (bucket: compositions)
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
     const generatedFileName = `ai_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-    
+
     const { error: genUploadError } = await supabaseAdmin.storage
       .from('compositions')
       .upload(generatedFileName, generatedBuffer, {
         contentType: 'image/png',
       });
-      
+
     if (genUploadError) {
       console.error('Generated Upload Error no Supabase:', genUploadError);
       return NextResponse.json({ error: 'Falha ao salvar a imagem gerada no bucket de Composições.' }, { status: 500 });
     }
-    
+
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${generatedFileName}`;
 
     // 5. Inserir Registro Completo na Tabela (Metadata e Histórico)
@@ -167,7 +164,7 @@ export async function POST(req: Request) {
     });
 
     if (dbError) {
-       console.error("Supabase Database Insert Error:", dbError);
+      console.error("Supabase Database Insert Error:", dbError);
     }
 
     // 6. Retorno ao Front-End
