@@ -96,8 +96,7 @@ export async function POST(req: Request) {
           ],
           parameters: {
             sampleCount: 1,
-            aspectRatio: vertexAspectRatio,
-            editMode: "product-placement",
+            editConfig: { editMode: "product-placement" }
           }
         })
       });
