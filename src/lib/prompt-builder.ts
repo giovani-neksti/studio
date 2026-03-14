@@ -58,7 +58,7 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const displaySelection = selections.display || '';
     const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
 
-    // MUDANÇA AQUI: Instrução fortíssima para forçar a IA a escrever o texto
+    // Instrução fortíssima para forçar a IA a escrever o texto
     let textPrompt = "";
     if (selections.text) {
         const typoSelection = selections.typography || '';

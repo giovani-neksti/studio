@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 
       const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/imagen-3.0-fast-generate-001:predict`;
 
-      // MUDANÇA CIRÚRGICA: Injetando a imagem em base64 no payload do Vertex AI!
+      // Injetando a imagem em base64 no payload do Vertex AI!
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {

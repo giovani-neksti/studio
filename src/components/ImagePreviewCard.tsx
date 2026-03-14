@@ -55,7 +55,6 @@ export function ImagePreviewCard({
         : 'aspect-square';
 
   return (
-    // MUDANÇA CIRÚRGICA: justify-start e overflow-y-auto no container principal para permitir rolagem.
     <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-6 px-8 py-6 overflow-y-auto">
       <div
         className={`relative group ${aspectClass} max-h-[55vh] shrink-0 w-auto overflow-hidden rounded-2xl 
@@ -107,7 +106,7 @@ export function ImagePreviewCard({
         )}
       </div>
 
-      {/* CAIXA DO PROMPT EM TEMPO REAL - Agora com espaço para aparecer! */}
+      {/* CAIXA DO PROMPT EM TEMPO REAL */}
       {livePrompt && Object.keys(selections).length > 0 && (
         <div className="w-full max-w-[480px] bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 text-left shadow-sm mt-2 shrink-0">
           <div className="flex items-center gap-2 mb-2">
@@ -126,7 +125,7 @@ export function ImagePreviewCard({
             <RefreshCw className="w-4 h-4" /> Regenerar
           </Button>
           <Button variant="outline" size="sm" onClick={() => {
-            const link = document.createElement('a'); link.href = imageUrl; link.download = `studio-ai-${niche}.jpg`; link.click();
+            const link = document.createElement('a'); link.href = imageUrl; link.download = `studio-ai.jpg`; link.click();
           }} className="gap-2 border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)]">
             <Download className="w-4 h-4" /> Baixar HD
           </Button>
