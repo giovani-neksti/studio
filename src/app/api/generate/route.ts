@@ -90,13 +90,17 @@ export async function POST(req: Request) {
             {
               prompt: finalPrompt,
               image: {
-                bytesBase64Encoded: base64Image
+                bytesBase64Encoded: base64Image,
+                mimeType: file.type
               }
             }
           ],
           parameters: {
             sampleCount: 1,
-            editMode: "background-generation"
+            editMode: "inpainting-insert",
+            maskImageConfig: {
+              maskMode: "MASK_MODE_BACKGROUND"
+            }
           }
         })
       });
