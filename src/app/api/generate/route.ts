@@ -73,10 +73,15 @@ export async function POST(req: Request) {
     let generatedBase64 = null;
     
     try {
+      const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
+      const privateKey = rawKey.startsWith('"') && rawKey.endsWith('"') 
+         ? rawKey.substring(1, rawKey.length - 1).replace(/\\n/g, '\n')
+         : rawKey.replace(/\\n/g, '\n');
+
       const auth = new GoogleAuth({
         credentials: {
           client_email: process.env.GOOGLE_CLIENT_EMAIL,
-          private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          private_key: privateKey,
         },
         projectId: process.env.GOOGLE_PROJECT_ID,
         scopes: ['https://www.googleapis.com/auth/cloud-platform'],
