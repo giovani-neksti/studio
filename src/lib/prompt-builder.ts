@@ -1,5 +1,3 @@
-// src/lib/prompt-builder.ts
-
 export const jewelryDictionary: Record<string, Record<string, string>> = {
     produto: {
         "Colar": "a luxurious and intricate necklace",
@@ -49,30 +47,25 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
 };
 
 export function buildEnglishPrompt(niche: string, selections: any) {
-    // Por enquanto focado em Joias, mas pode expandir para os outros nichos depois
     const dict = jewelryDictionary;
 
-    // 1. Identifica o Produto
     const productCat = selections.category || '';
     const productText = dict.produto[productCat] || "a luxury jewelry piece";
 
-    // 2. Identifica o Fundo
     const bgSelection = selections.background || '';
     const backgroundText = dict.fundo[bgSelection] || "on a neutral studio background";
 
-    // 3. Identifica a Exibição
     const displaySelection = selections.display || '';
     const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
 
-    // 4. Texto e Tipografia
+    // MUDANÇA AQUI: Instrução fortíssima para forçar a IA a escrever o texto
     let textPrompt = "";
     if (selections.text) {
         const typoSelection = selections.typography || '';
         const typoText = dict.tipografia[typoSelection] || "written in a clean font";
-        textPrompt = `featuring the text '${selections.text}' ${typoText}.`;
+        textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText}.`;
     }
 
-    // 5. Monta a frase final em inglês com sufixos de qualidade
     const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, 8k resolution, octane render, sharp focus.`;
 
     return finalEnglishPrompt;

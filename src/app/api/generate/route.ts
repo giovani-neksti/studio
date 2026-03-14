@@ -3,7 +3,6 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { GoogleAuth } from 'google-auth-library';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
 
-// 50% METADE DO BANCO DE DADOS - SYSTEM PROMPT MESTRE
 function getMasterPrompt(niche: string) {
   const technicalFocus = niche === 'jewelry' ? 'Macro lens 100mm, extreme close-up, sharp focus on jewelry details' : 'Professional 50mm lenses, fashion editorial style';
 
@@ -11,7 +10,6 @@ function getMasterPrompt(niche: string) {
 DIRETRIZES TÉCNICAS E REALISMO: Fotografia publicitária de alto nível em 8k, texturas hiper-realistas, iluminação de estúdio profissional com softboxes e ray tracing avançado para reflexos realistas em superfícies metálicas e tecidos. Profundidade de campo cinematográfica (${technicalFocus}).`;
 }
 
-// MAPEAMENTO DE ASPECT RATIO PARA VERTEX AI
 function getVertexAspectRatio(formatId: string): string {
   const formatMap: Record<string, string> = {
     'square': '1:1',
@@ -26,7 +24,6 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
 
-    // We receive multiple entries: 'file', 'selections', 'niche'
     const file = formData.get('file') as File;
     const selectionsStr = formData.get('selections') as string;
     const niche = formData.get('niche') as string;
@@ -37,7 +34,6 @@ export async function POST(req: Request) {
 
     const selections = JSON.parse(selectionsStr);
 
-    // 1. Upload da imagem original para o Supabase (bucket: uploads)
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}_original_${file.name.replace(/\s/g, '_')}`;
     const { error: uploadError } = await supabaseAdmin.storage
@@ -54,19 +50,11 @@ export async function POST(req: Request) {
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
     const base64Image = fileBuffer.toString('base64');
 
-    // 2. CONSTRUÇÃO DO PROMPT 50/50
-    // METADE 1: BANCO DE DADOS (SYSTEM)
     const masterPrompt = getMasterPrompt(niche);
-
-    // METADE 2: FRONTEND (USER FEATURES TRADUZIDAS PARA INGLÊS PELO DICIONÁRIO)
     const englishScenePrompt = buildEnglishPrompt(niche, selections);
-
-    // FUSÃO BLINDADA
     const finalPrompt = `${masterPrompt}\n\nSCENE DESCRIPTION:\n${englishScenePrompt}`;
-
     const vertexAspectRatio = getVertexAspectRatio(selections.format);
 
-    // 3. Autenticação Vertex AI via google-auth-library
     let generatedBase64 = null;
 
     try {
@@ -90,7 +78,7 @@ export async function POST(req: Request) {
 
       const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/imagen-3.0-fast-generate-001:predict`;
 
-      // Chamada para a Vertex AI
+      // MUDANÇA CIRÚRGICA: Injetando a imagem em base64 no payload do Vertex AI!
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -101,6 +89,9 @@ export async function POST(req: Request) {
           instances: [
             {
               prompt: finalPrompt,
+              image: {
+                bytesBase64Encoded: base64Image
+              }
             }
           ],
           parameters: {
@@ -117,7 +108,6 @@ export async function POST(req: Request) {
       } else {
         const aiData = await response.json();
 
-        // Vertex AI structural fallback
         generatedBase64 =
           (typeof aiData.predictions?.[0] === 'string' ? aiData.predictions[0] : null) ||
           aiData.predictions?.[0]?.bytesBase64Encoded ||
@@ -137,7 +127,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'A Inteligência Artificial não retornou a imagem base64.' }, { status: 500 });
     }
 
-    // 4. Upload da Imagem Gerada ao Supabase (bucket: compositions)
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
     const generatedFileName = `ai_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
 
@@ -149,12 +138,11 @@ export async function POST(req: Request) {
 
     if (genUploadError) {
       console.error('Generated Upload Error no Supabase:', genUploadError);
-      return NextResponse.json({ error: 'Falha ao salvar a imagem gerada no bucket de Composições.' }, { status: 500 });
+      return NextResponse.json({ error: 'Falha ao salvar a imagem gerada.' }, { status: 500 });
     }
 
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${generatedFileName}`;
 
-    // 5. Inserir Registro Completo na Tabela (Metadata e Histórico)
     const { error: dbError } = await supabaseAdmin.from('generations').insert({
       niche: niche,
       original_image_url: originalUrl,
@@ -167,7 +155,6 @@ export async function POST(req: Request) {
       console.error("Supabase Database Insert Error:", dbError);
     }
 
-    // 6. Retorno ao Front-End
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error) {

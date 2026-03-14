@@ -10,7 +10,7 @@ interface ImagePreviewCardProps {
   selections: Record<string, string>;
   niche: string;
   onGenerate: () => void;
-  livePrompt?: string; // <-- AQUI ESTÁ A MÁGICA
+  livePrompt?: string;
 }
 
 const placeholderMessages = [
@@ -55,9 +55,10 @@ export function ImagePreviewCard({
         : 'aspect-square';
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 h-full gap-6 px-8 py-6 min-h-0">
+    // MUDANÇA CIRÚRGICA: justify-start e overflow-y-auto no container principal para permitir rolagem.
+    <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-6 px-8 py-6 overflow-y-auto">
       <div
-        className={`relative group ${aspectClass} max-h-[65vh] w-auto overflow-hidden rounded-2xl 
+        className={`relative group ${aspectClass} max-h-[55vh] shrink-0 w-auto overflow-hidden rounded-2xl 
           border border-[var(--border)] bg-[var(--card)] 
           shadow-2xl transition-all duration-500`}
         style={{
@@ -106,9 +107,9 @@ export function ImagePreviewCard({
         )}
       </div>
 
-      {/* CAIXA DO PROMPT EM TEMPO REAL */}
+      {/* CAIXA DO PROMPT EM TEMPO REAL - Agora com espaço para aparecer! */}
       {livePrompt && Object.keys(selections).length > 0 && (
-        <div className="w-full max-w-[480px] bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 text-left shadow-sm mt-2">
+        <div className="w-full max-w-[480px] bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 text-left shadow-sm mt-2 shrink-0">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-[var(--primary)]" />
             <p className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-wider">Prompt em Tempo Real (Inglês)</p>
@@ -120,7 +121,7 @@ export function ImagePreviewCard({
       )}
 
       {imageUrl && (
-        <div className="flex gap-3 mt-2">
+        <div className="flex gap-3 mt-2 shrink-0">
           <Button variant="outline" size="sm" onClick={onGenerate} className="gap-2 border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)]">
             <RefreshCw className="w-4 h-4" /> Regenerar
           </Button>
