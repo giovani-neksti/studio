@@ -245,26 +245,27 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {config.humanDisplayOptions.map((model) => (
                   <button
                     key={model.id}
                     onClick={() => onSelect('display', model.name)}
-                    className={`group relative aspect-square rounded-xl overflow-hidden border-2 transition-all p-0 text-left
+                    className={`flex flex-col gap-1 px-4 py-3 rounded-xl border text-left transition-all relative
                       ${selections.display === model.name 
-                        ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/20 shadow-lg scale-[1.02]' 
-                        : 'border-[var(--border)] hover:border-[var(--primary)]/50 opacity-80 hover:opacity-100 hover:scale-[1.01]'}`}
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/20 shadow-sm' 
+                        : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50 hover:bg-[var(--accent)]'}`}
                   >
-                    <img src={model.imageUrl} alt={model.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-2.5">
-                      <span className="text-white font-bold text-sm drop-shadow-md">{model.name}</span>
-                      <span className="text-white/80 text-[10px] leading-tight drop-shadow-sm line-clamp-1">{model.type}</span>
+                    <div className="flex items-center justify-between">
+                      <span className={`font-bold text-sm ${selections.display === model.name ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                        {model.name}
+                      </span>
+                      {selections.display === model.name && (
+                        <CheckCircle2 className="w-4 h-4 text-[var(--primary)]" />
+                      )}
                     </div>
-                    {selections.display === model.name && (
-                      <div className="absolute top-2 right-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-full p-0.5 shadow-md">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      </div>
-                    )}
+                    <span className="text-[11px] text-[var(--muted-foreground)] leading-tight font-medium">
+                      {model.type}
+                    </span>
                   </button>
                 ))}
               </div>
