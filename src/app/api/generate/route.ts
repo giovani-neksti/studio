@@ -10,7 +10,9 @@ export async function POST(req: Request) {
     const selectionsStr = formData.get('selections') as string;
     const niche = formData.get('niche') as string;
 
-    if (!file || !selectionsStr) return NextResponse.json({ error: 'Faltam arquivos ou seleções.' }, { status: 400 });
+    if (!file || !selectionsStr) {
+      return NextResponse.json({ error: 'Faltam arquivos ou seleções.' }, { status: 400 });
+    }
 
     const selections = JSON.parse(selectionsStr);
     const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -21,10 +23,10 @@ export async function POST(req: Request) {
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Prompt (Lógica do prompt-builder que você validou)
+    // 2. Prompt (Lógica do prompt-builder)
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // 3. Autenticação e Endpoint Mestre
+    // 3. Autenticação e Configuração do Endpoint
     const auth = new GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -37,13 +39,12 @@ export async function POST(req: Request) {
     const accessToken = await auth.getAccessToken();
     const projectId = process.env.GOOGLE_PROJECT_ID;
 
-    // MODELO FLAGSHIP: Gemini 3 Pro Image (Garante Proporção e Fidelidade)
-    // Usando a versão v1beta1 para garantir acesso ao modelo Preview
+    // MODELO ESTÁVEL (Nano Banana 1) - Garantido em us-central1
     const location = 'us-central1';
-    const modelId = 'gemini-3-pro-image-preview';
-    const endpoint = `https://${location}-aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
+    const modelId = 'gemini-2.5-flash-image';
+    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
 
-    // 4. Chamada Multimodal (Integração Produto + IA)
+    // 4. Chamada Multimodal
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -66,33 +67,32 @@ export async function POST(req: Request) {
           }
         ],
         generationConfig: {
-          responseModalities: ["IMAGE"], // Fundamental para modelos Gemini de Imagem
+          responseModalities: ["IMAGE"], // Fundamental para o Gemini Image
           candidateCount: 1,
-          temperature: 0.8,
-          // Ajuste fino de fidelidade ao prompt e ao produto
-          guidanceScale: 20.0
+          temperature: 0.7
         }
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Erro na API Flagship: ${JSON.stringify(errorData)}`);
+      throw new Error(`Erro na API: ${JSON.stringify(errorData)}`);
     }
 
     const aiData = await response.json();
+
+    // Extração da imagem
     const generatedPart = aiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     const generatedBase64 = generatedPart?.inlineData?.data;
 
-    if (!generatedBase64) throw new Error("O modelo Pro não retornou imagem.");
+    if (!generatedBase64) throw new Error("A IA não retornou imagem.");
 
     // 5. Salvar resultado (compositions)
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
-    const genFileName = `ai_pro_${Date.now()}.png`;
+    const genFileName = `ai_${Date.now()}.png`;
     await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, { contentType: 'image/png' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
-    // 6. Registro completo
     await supabaseAdmin.from('generations').insert({
       niche,
       original_image_url: originalUrl,
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error: any) {
-    console.error("Falha no Modelo Flagship:", error);
+    console.error("Falha Nano Banana:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
