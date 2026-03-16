@@ -101,7 +101,6 @@ function StudioContent() {
 
   return (
     <div className={`${config.themeClass} h-screen flex flex-col overflow-hidden`}>
-      {/* HEADER MOBILE-FIRST */}
       <header className="h-14 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="flex items-center gap-1.5 md:gap-2 cursor-pointer" onClick={() => router.push('/')}>
@@ -144,18 +143,12 @@ function StudioContent() {
         </div>
       </header>
 
-      {/* ÁREA PRINCIPAL DIVIDIDA INTELIGENTEMENTE */}
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-
-        {/* SIDEBAR: Fica em baixo no Mobile (55%), e à Esquerda no Desktop (100% altura) */}
         <div className="w-full md:w-[320px] lg:w-[380px] h-[55%] md:h-full flex-shrink-0 flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] md:shadow-none min-h-0">
           <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
         </div>
 
-        {/* PREVIEW & BOTÃO GERAR: Fica em cima no Mobile (45%), e à Direita no Desktop (100% altura) */}
         <main className="flex-1 flex flex-col h-[45%] md:h-full bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden">
-
-          {/* BOTÃO GERAR */}
           <div className="flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 pb-2 z-10 bg-gradient-to-b from-[var(--background)] to-transparent">
             <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
               {isGenerating ? (
@@ -166,7 +159,6 @@ function StudioContent() {
             </button>
           </div>
 
-          {/* ÁREA DE VISUALIZAÇÃO */}
           <div className="flex-1 overflow-hidden flex flex-col min-h-0">
             <ImagePreviewCard
               isGenerating={isGenerating}
@@ -178,7 +170,6 @@ function StudioContent() {
             />
           </div>
 
-          {/* GALERIA RODAPÉ (Desktop apenas, Mobile acede pelo botão na navbar ou com menos espaço) */}
           {recentImages.length > 0 && (
             <div className="hidden md:flex flex-shrink-0 h-[96px] border-t border-[var(--border)] bg-[var(--card)] px-6 py-3 items-center justify-between">
               <div className="flex flex-col h-full justify-center">
@@ -199,7 +190,9 @@ function StudioContent() {
       </div>
 
       {nicheMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setNicheMenuOpen(false)} />}
-      <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} />
+
+      {/* NOVO: A galeria agora recebe as recentImages */}
+      <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} />
       <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} />
     </div>
   );
