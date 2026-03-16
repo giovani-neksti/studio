@@ -68,6 +68,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
       <ScrollArea className="flex-1 min-h-0">
         <div className="py-3">
+          {/* PASSO 1: UPLOAD E CATEGORIA */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
             <div className="space-y-3">
               <div className="grid grid-cols-1 gap-2">
@@ -100,21 +101,22 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
+          {/* PASSO 2: FUNDO / CENÁRIO */}
           <SectionWrapper title="2. Ambientação" icon={<ImageIcon className="w-4 h-4" />}>
             <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
-              <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)]' : ''}`}>Cor Sólida</button>
-              <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'scenario' ? 'bg-[var(--card)]' : ''}`}>Cenário IA</button>
+              <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] text-[var(--foreground)] shadow-sm' : 'text-[var(--muted-foreground)]'}`}>Cor Sólida</button>
+              <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'scenario' ? 'bg-[var(--card)] text-[var(--foreground)] shadow-sm' : 'text-[var(--muted-foreground)]'}`}>Cenário IA</button>
             </div>
             {bgTab === 'solid' ? (
               <div className="grid grid-cols-5 gap-2">
                 {config.solidColors.map((color) => (
-                  <button key={color.name} onClick={() => { onSelect('background', color.name); onSelect('backgroundHex', color.hex); }} className="aspect-square rounded-full border border-white/10" style={{ backgroundColor: color.hex }} />
+                  <button key={color.name} onClick={() => { onSelect('background', color.name); onSelect('backgroundHex', color.hex); }} className={`aspect-square rounded-full border border-white/10 ${selections.background === color.name ? 'ring-2 ring-[var(--primary)]' : ''}`} style={{ backgroundColor: color.hex }} />
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {config.scenarios.map((scenario) => (
-                  <button key={scenario.title} onClick={() => onSelect('background', scenario.title)} className={`text-left p-2 rounded-lg border text-xs ${selections.background === scenario.title ? 'border-[var(--primary)]' : 'border-[var(--border)]'}`}>
+                  <button key={scenario.title} onClick={() => onSelect('background', scenario.title)} className={`text-left p-2 rounded-lg border text-xs ${selections.background === scenario.title ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)]'}`}>
                     {scenario.title}
                   </button>
                 ))}
@@ -124,19 +126,20 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
+          {/* PASSO 3: EXIBIÇÃO / MODELO */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect className="w-4 h-4" />}>
             <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
-              <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)]' : ''}`}>Expositor</button>
-              <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'human' ? 'bg-[var(--card)]' : ''}`}>Modelo</button>
+              <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] text-[var(--foreground)] shadow-sm' : 'text-[var(--muted-foreground)]'}`}>Expositor</button>
+              <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'human' ? 'bg-[var(--card)] text-[var(--foreground)] shadow-sm' : 'text-[var(--muted-foreground)]'}`}>Modelo</button>
             </div>
             <div className="space-y-2">
               {(displayTab === 'expositor' ? config.displayOptions : config.humanDisplayOptions).map((opt: any) => (
-                <button key={opt.id} onClick={() => onSelect('display', opt.label || opt.name)} className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${selections.display === (opt.label || opt.name) ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)]'}`}>
+                <button key={opt.id} onClick={() => onSelect('display', opt.label || opt.name)} className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${selections.display === (opt.label || opt.name) ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold' : 'border-[var(--border)]'}`}>
                   <div className="flex justify-between items-center">
                     <span>{opt.label || opt.name}</span>
                     {selections.display === (opt.label || opt.name) && <CheckCircle2 className="w-4 h-4 text-[var(--primary)]" />}
                   </div>
-                  <p className="text-[10px] opacity-50">{opt.type || ''}</p>
+                  <p className="text-[10px] opacity-50 font-normal mt-0.5">{opt.type || ''}</p>
                 </button>
               ))}
             </div>
@@ -144,13 +147,43 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
+          {/* PASSO 4: ASSINATURA VISUAL */}
           <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
-            <Input placeholder="Texto Principal" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="mb-2" />
-            <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-transparent">
+            <Input
+              placeholder="Ex: Lançamento"
+              value={selections.text || ''}
+              onChange={(e) => onSelect('text', e.target.value)}
+              className="mb-2 bg-[#eef2ff] text-black h-9"
+            />
+            <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]">
               <option value="" disabled>Escolha a Fonte</option>
               {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
             </select>
           </SectionWrapper>
+
+          <Separator className="mx-4 my-2 opacity-50" />
+
+          {/* PASSO 5: FORMATO DE SAÍDA */}
+          <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-4 h-4" />}>
+            <div className="grid grid-cols-2 gap-2">
+              {config.formats.map((fmt) => (
+                <button
+                  key={fmt.id}
+                  onClick={() => onSelect('format', fmt.ratio)}
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all text-center
+                    ${selections.format === fmt.ratio
+                      ? 'border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)] shadow-sm ring-1 ring-[var(--primary)]/30'
+                      : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50'}`}
+                >
+                  <span className="font-bold text-[13px] mb-[2px] text-[var(--foreground)]">{fmt.ratio}</span>
+                  <span className={`text-[11px] font-medium leading-tight mb-1 ${selections.format === fmt.ratio ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>{fmt.label}</span>
+                  <span className="text-[9px] text-[var(--foreground)] opacity-60 leading-tight">{fmt.pixels}</span>
+                </button>
+              ))}
+            </div>
+          </SectionWrapper>
+
+          <div className="h-8" />
         </div>
       </ScrollArea>
     </aside>
