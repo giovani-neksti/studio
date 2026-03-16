@@ -16,15 +16,15 @@ export async function POST(req: Request) {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const base64Image = fileBuffer.toString('base64');
 
-    // 1. Upload original
+    // 1. Upload original para histórico
     const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Prompt
+    // 2. Construção do Prompt em Inglês
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // 3. Google Auth
+    // 3. Configuração Google Vertex AI
     const auth = new GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -35,22 +35,22 @@ export async function POST(req: Request) {
     });
 
     const accessToken = await auth.getAccessToken();
-    // MODELO CORRETO PARA EDIÇÃO (CAPABILITY)
     const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${process.env.GOOGLE_PROJECT_ID}/locations/us-central1/publishers/google/models/imagen-3.0-capability-001:predict`;
 
+    // 4. Chamada com Detecção de Fundo (Fidelidade do Produto)
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         instances: [{
           prompt: finalPrompt,
-          image: { bytesBase64Encoded: base64Image } // A chave correta aqui é 'image' para Imagen 3
+          image: { bytesBase64Encoded: base64Image }
         }],
         parameters: {
           sampleCount: 1,
-          editMode: "outpainting", // Essencial para mudar o fundo
+          editMode: "outpainting",
           maskImageConfig: {
-            maskMode: "MASK_MODE_BACKGROUND" // COMANDO CHAVE: IA detecta o produto e troca o fundo
+            maskMode: "MASK_MODE_BACKGROUND" // IA detecta e troca o fundo, mantém o brinco real
           }
         }
       })
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: generatedUrl });
   } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ error: 'Erro: ' + error.message }, { status: 500 });
+    console.error("API Error:", error);
+    return NextResponse.json({ error: 'Erro na IA: ' + error.message }, { status: 500 });
   }
 }

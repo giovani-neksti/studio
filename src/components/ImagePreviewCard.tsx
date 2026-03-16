@@ -37,19 +37,20 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
           <img src={imageUrl} alt="Resultado" className="w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center opacity-40">
-            <Sparkles className="w-10 h-10" />
+            <Sparkles className="w-10 h-10 text-[var(--primary)]" />
             <p className="text-sm">Aguardando seleções</p>
           </div>
         )}
       </div>
 
+      {/* PAINEL DE PROMPT EM TEMPO REAL */}
       {livePrompt && Object.keys(selections).length > 0 && (
         <div className="w-full max-w-[480px] bg-black/40 border border-[var(--border)] rounded-xl p-4 text-left shrink-0">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" />
             <p className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-wider">Prompt em Tempo Real (Inglês)</p>
           </div>
-          <p className="text-[11px] text-[var(--muted-foreground)] font-mono leading-relaxed">{livePrompt}</p>
+          <p className="text-[11px] text-[var(--muted-foreground)] font-mono leading-relaxed break-words">{livePrompt}</p>
         </div>
       )}
 
