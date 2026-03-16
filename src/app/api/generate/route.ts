@@ -18,15 +18,15 @@ export async function POST(req: Request) {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const base64Image = fileBuffer.toString('base64');
 
-    // 1. Upload original para o Supabase
+    // 1. Upload original para histórico
     const fileName = `${Date.now()}_original_${file.name.replace(/\s/g, '_')}`;
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Prompt (Usando a sua lógica do prompt-builder que funcionou no teste)
+    // 2. Prompt (Lógica do prompt-builder)
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // 3. Autenticação Vertex AI
+    // 3. Autenticação e Configuração do Endpoint
     const auth = new GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -38,13 +38,13 @@ export async function POST(req: Request) {
 
     const accessToken = await auth.getAccessToken();
     const projectId = process.env.GOOGLE_PROJECT_ID;
-    const location = 'us-central1'; // Localização principal do Nano Banana 2
+
+    // CORREÇÃO CRÍTICA: Local 'global' e versão 'v1beta1' para modelos Preview
+    const location = 'global';
     const modelId = 'gemini-3.1-flash-image-preview';
+    const endpoint = `https://us-central1-aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/us-central1/publishers/google/models/${modelId}:generateContent`;
 
-    // ENDPOINT DO NANO BANANA 2 (Note o :generateContent em vez de :predict)
-    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
-
-    // 4. Chamada Multimodal (Texto + Imagem de Referência)
+    // 4. Chamada Multimodal (Nano Banana 2)
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
           }
         ],
         generationConfig: {
-          responseModalities: ["IMAGE"], // Força o retorno de imagem
+          responseModalities: ["IMAGE"], // Ativa a geração de imagem no Gemini
           candidateCount: 1,
           temperature: 0.7
         }
@@ -75,13 +75,15 @@ export async function POST(req: Request) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Erro na API Nano Banana: ${errorText}`);
+      const errorData = await response.json();
+      console.error("Erro API Vertex:", errorData);
+      // Fallback para o modelo estável se o 3.1 ainda estiver com acesso restrito no seu projeto
+      throw new Error(`Erro na API Nano Banana: ${JSON.stringify(errorData)}`);
     }
 
     const aiData = await response.json();
 
-    // Extrai a imagem gerada da estrutura do Gemini
+    // Extração da imagem da estrutura multimodal do Gemini
     const generatedPart = aiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     const generatedBase64 = generatedPart?.inlineData?.data;
 
@@ -93,7 +95,6 @@ export async function POST(req: Request) {
     await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, { contentType: 'image/png' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
-    // 6. Registrar no histórico
     await supabaseAdmin.from('generations').insert({
       niche,
       original_image_url: originalUrl,
@@ -105,7 +106,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error: any) {
-    console.error("Erro Crítico Nano Banana:", error);
+    console.error("Falha no Pipeline Nano Banana:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
