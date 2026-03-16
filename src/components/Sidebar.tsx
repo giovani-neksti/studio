@@ -32,7 +32,7 @@ function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
       <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--accent)] rounded-lg transition-colors">
         <div className="flex items-center gap-2.5">
           <span className="text-[var(--primary)] opacity-70">{icon}</span>
-          <span className="text-sm font-semibold text-[var(--foreground)] opacity-90">{title}</span>
+          <span className="text-sm font-semibold text-[var(--foreground)] opacity-90 tracking-wide">{title}</span>
         </div>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -59,7 +59,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
       <div className="px-5 py-5 border-b border-[var(--border)] shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{config.icon}</span>
-          <h2 className="text-[var(--foreground)] font-bold text-base">Composição — {config.label}</h2>
+          <h2 className="text-[var(--foreground)] font-bold text-base leading-tight">Composição — {config.label}</h2>
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                       <div className="p-3 bg-[var(--background)]">
                         <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
                           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                          <span className="text-xs truncate block">{hasUpload ? selections[uploadKey]?.name : 'Carregar Imagem'}</span>
+                          <span className="text-xs truncate block">{hasUpload ? selections[uploadKey]?.name : 'Fazer Upload'}</span>
                         </div>
                       </div>
                     )}
@@ -142,12 +142,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           {/* PASSO 4 */}
           <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
-            <Input
-              placeholder="Ex: Lançamento"
-              value={selections.text || ''}
-              onChange={(e) => onSelect('text', e.target.value)}
-              className="mb-2 bg-[#eef2ff] text-black h-9 border-none"
-            />
+            <Input placeholder="Ex: Lançamento" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="mb-2 bg-[#eef2ff] text-black h-9 border-none" />
             <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]">
               <option value="" disabled>Escolha a Fonte</option>
               {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
@@ -169,8 +164,8 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                       : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50'}`}
                 >
                   <span className="font-bold text-[13px] mb-[2px] text-[var(--foreground)]">{fmt.ratio}</span>
-                  <span className={`text-[11px] font-medium leading-tight mb-1 ${selections.format === fmt.ratio ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>{fmt.label}</span>
-                  <span className="text-[9px] text-[var(--foreground)] opacity-60 leading-tight">{fmt.pixels}</span>
+                  <span className="text-[11px] font-medium mb-1">{fmt.label}</span>
+                  <span className="text-[9px] opacity-50">{fmt.pixels}</span>
                 </button>
               ))}
             </div>

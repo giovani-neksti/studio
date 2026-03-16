@@ -43,7 +43,7 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         )}
       </div>
 
-      {/* PAINEL DE PROMPT RESTAURADO */}
+      {/* PAINEL DE PROMPT EM TEMPO REAL */}
       {livePrompt && Object.keys(selections).length > 0 && (
         <div className="w-full max-w-[480px] bg-black/40 border border-[var(--border)] rounded-xl p-4 text-left shrink-0">
           <div className="flex items-center gap-2 mb-2">

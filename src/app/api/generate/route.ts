@@ -10,25 +10,21 @@ export async function POST(req: Request) {
     const selectionsStr = formData.get('selections') as string;
     const niche = formData.get('niche') as string;
 
-    if (!file || !selectionsStr) {
-      return NextResponse.json({ error: 'Faltam dados para a geração.' }, { status: 400 });
-    }
+    if (!file || !selectionsStr) return NextResponse.json({ error: 'Faltam dados.' }, { status: 400 });
 
     const selections = JSON.parse(selectionsStr);
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const base64Image = fileBuffer.toString('base64');
 
-    // 1. Upload da imagem original para o Supabase
+    // 1. Upload original
     const fileName = `${Date.now()}_original_${file.name.replace(/\s/g, '_')}`;
-    await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, {
-      contentType: file.type,
-    });
+    await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Construção do Prompt em Inglês
+    // 2. Prompt (O prompt deve descrever o NOVO cenário/fundo)
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // 3. Autenticação e Configuração do Endpoint Vertex AI
+    // 3. Google Auth
     const auth = new GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -41,59 +37,54 @@ export async function POST(req: Request) {
     const accessToken = await auth.getAccessToken();
     const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${process.env.GOOGLE_PROJECT_ID}/locations/us-central1/publishers/google/models/imagen-3.0-capability-001:predict`;
 
-    // 4. Chamada da API seguindo a documentação Imagen 3 Editing
+    // 4. Chamada REST oficial (Usando structure de referenceImages e Enums em Maiúsculo)
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         instances: [{
           prompt: finalPrompt,
-          image: {
-            bytesBase64Encoded: base64Image,
-            mimeType: file.type
-          }
+          referenceImages: [
+            {
+              referenceType: "REFERENCE_TYPE_RAW", // A imagem do seu brinco
+              referenceId: 1,
+              referenceImage: { bytesBase64Encoded: base64Image, mimeType: file.type }
+            },
+            {
+              referenceType: "REFERENCE_TYPE_MASK", // Comando para detectar o fundo automaticamente
+              referenceId: 2,
+              maskImageConfig: { maskMode: "MASK_MODE_BACKGROUND" }
+            }
+          ]
         }],
         parameters: {
           sampleCount: 1,
-          editMode: "inpainting-insert", // Modo correto para troca de fundo
-          maskImageConfig: {
-            maskMode: "MASK_MODE_BACKGROUND" // IA preserva o produto e troca o fundo automaticamente
-          },
-          addWatermark: false
+          editMode: "EDIT_MODE_BGSWAP", // Comando oficial para troca de fundo via REST API
+          addWatermark: false,
+          includeSafetyAttributes: true
         }
       })
     });
 
     const aiData = await response.json();
-    if (!response.ok) {
-      throw new Error(JSON.stringify(aiData));
-    }
+    if (!response.ok) throw new Error(JSON.stringify(aiData));
 
     const generatedBase64 = aiData.predictions?.[0]?.bytesBase64Encoded || aiData.predictions?.[0];
     if (!generatedBase64) throw new Error("A IA não retornou imagem.");
 
-    // 5. Salvar resultado final
+    // 5. Salvar resultado
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
     const genFileName = `ai_${Date.now()}.png`;
-    await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, {
-      contentType: 'image/png',
-    });
+    await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, { contentType: 'image/png' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
     await supabaseAdmin.from('generations').insert({
-      niche,
-      original_image_url: originalUrl,
-      generated_image_url: generatedUrl,
-      prompt: finalPrompt,
-      selections
+      niche, original_image_url: originalUrl, generated_image_url: generatedUrl, prompt: finalPrompt, selections
     });
 
     return NextResponse.json({ url: generatedUrl });
   } catch (error: any) {
-    console.error("Erro Crítico API:", error);
+    console.error("Erro Vertex AI:", error);
     return NextResponse.json({ error: 'Erro na IA: ' + error.message }, { status: 500 });
   }
 }
