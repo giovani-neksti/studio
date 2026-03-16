@@ -34,16 +34,16 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
             <p className="text-sm">Gerando composição{dots}</p>
           </div>
         ) : imageUrl ? (
-          <img src={imageUrl} alt="IA Result" className="w-full h-full object-cover" />
+          <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center opacity-40">
             <Sparkles className="w-10 h-10 text-[var(--primary)]" />
-            <p className="text-sm">Selecione as opções e gere a imagem</p>
+            <p className="text-sm">Aguardando seleções</p>
           </div>
         )}
       </div>
 
-      {/* PAINEL DE PROMPT - ESSENCIAL PARA DEBUG E FEEDBACK */}
+      {/* PAINEL DE PROMPT EM TEMPO REAL */}
       {livePrompt && Object.keys(selections).length > 0 && (
         <div className="w-full max-w-[480px] bg-black/40 border border-[var(--border)] rounded-xl p-4 text-left shrink-0">
           <div className="flex items-center gap-2 mb-2">
