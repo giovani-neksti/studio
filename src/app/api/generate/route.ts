@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const base64Image = fileBuffer.toString('base64');
 
-    // 1. Upload original para histórico
+    // 1. Upload original
     const fileName = `${Date.now()}_original_${file.name.replace(/\s/g, '_')}`;
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
@@ -39,12 +39,12 @@ export async function POST(req: Request) {
     const accessToken = await auth.getAccessToken();
     const projectId = process.env.GOOGLE_PROJECT_ID;
 
-    // CORREÇÃO CRÍTICA: Local 'global' e versão 'v1beta1' para modelos Preview
-    const location = 'global';
-    const modelId = 'gemini-3.1-flash-image-preview';
-    const endpoint = `https://us-central1-aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/us-central1/publishers/google/models/${modelId}:generateContent`;
+    // MODELO ESTÁVEL (Nano Banana 1) - Garantido em us-central1
+    const location = 'us-central1';
+    const modelId = 'gemini-2.5-flash-image';
+    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
 
-    // 4. Chamada Multimodal (Nano Banana 2)
+    // 4. Chamada Multimodal
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
           }
         ],
         generationConfig: {
-          responseModalities: ["IMAGE"], // Ativa a geração de imagem no Gemini
+          responseModalities: ["IMAGE"], // Fundamental para o Gemini Image
           candidateCount: 1,
           temperature: 0.7
         }
@@ -76,18 +76,16 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Erro API Vertex:", errorData);
-      // Fallback para o modelo estável se o 3.1 ainda estiver com acesso restrito no seu projeto
-      throw new Error(`Erro na API Nano Banana: ${JSON.stringify(errorData)}`);
+      throw new Error(`Erro na API: ${JSON.stringify(errorData)}`);
     }
 
     const aiData = await response.json();
 
-    // Extração da imagem da estrutura multimodal do Gemini
+    // Extração da imagem
     const generatedPart = aiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     const generatedBase64 = generatedPart?.inlineData?.data;
 
-    if (!generatedBase64) throw new Error("A IA não retornou a imagem base64.");
+    if (!generatedBase64) throw new Error("A IA não retornou imagem.");
 
     // 5. Salvar resultado (compositions)
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
@@ -106,7 +104,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error: any) {
-    console.error("Falha no Pipeline Nano Banana:", error);
+    console.error("Falha Nano Banana:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
