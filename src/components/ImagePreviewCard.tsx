@@ -13,7 +13,6 @@ interface ImagePreviewCardProps {
   livePrompt?: string;
 }
 
-// AS MENSAGENS MÁGICAS DE CARREGAMENTO
 const loadingMessages = [
   "Analisando formato e escala da peça...",
   "Ajustando luzes de estúdio (Rim Lighting)...",
@@ -27,27 +26,22 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
   const [dots, setDots] = useState('');
   const [messageIndex, setMessageIndex] = useState(0);
 
-  // Efeito 1: Animação dos pontinhos (...)
   useEffect(() => {
     if (!isGenerating) return;
     const interval = setInterval(() => setDots((d) => (d.length >= 3 ? '' : d + '.')), 500);
     return () => clearInterval(interval);
   }, [isGenerating]);
 
-  // Efeito 2: Rotação inteligente das mensagens de carregamento
   useEffect(() => {
     if (!isGenerating) {
-      setMessageIndex(0); // Reseta quando acaba
+      setMessageIndex(0);
       return;
     }
-
-    // Muda a mensagem a cada 4 segundos, parando na última para não voltar ao início do nada
     const messageInterval = setInterval(() => {
       setMessageIndex((prevIndex) =>
         prevIndex < loadingMessages.length - 1 ? prevIndex + 1 : prevIndex
       );
     }, 4000);
-
     return () => clearInterval(messageInterval);
   }, [isGenerating]);
 
@@ -55,23 +49,23 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
   const aspectClass = format.includes('9:16') ? 'aspect-[9/16]' : format.includes('4:5') ? 'aspect-[4/5]' : 'aspect-square';
 
   return (
-    <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-6 px-8 py-6 overflow-y-auto min-h-0">
-      <div className={`relative group ${aspectClass} max-h-[55vh] shrink-0 w-auto overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-2xl transition-all duration-500`}>
+    <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-4 md:gap-6 px-4 py-2 md:px-8 md:py-6 overflow-y-auto min-h-0">
+
+      {/* IMAGEM / LOADING RESPONSIVOS (max-h 30vh no mobile, 55vh no desktop) */}
+      <div className={`relative group ${aspectClass} max-h-[30vh] md:max-h-[55vh] shrink-0 w-auto overflow-hidden rounded-xl md:rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-xl md:shadow-2xl transition-all duration-500`}>
         {isGenerating ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[var(--card)]/95 backdrop-blur-sm z-10 px-6 text-center">
-            {/* Novo Design de Loading Elegante */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 md:gap-5 bg-[var(--card)]/95 backdrop-blur-sm z-10 px-4 md:px-6 text-center">
             <div className="relative flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full border-2 border-[var(--primary)]/20 border-t-[var(--primary)] animate-spin" />
-              <Sparkles className="absolute w-5 h-5 text-[var(--primary)] animate-pulse" />
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-full border-2 border-[var(--primary)]/20 border-t-[var(--primary)] animate-spin" />
+              <Sparkles className="absolute w-4 h-4 md:w-5 md:h-5 text-[var(--primary)] animate-pulse" />
             </div>
 
-            <div className="h-12 flex items-center justify-center">
-              <p className="text-sm font-medium text-[var(--foreground)] animate-pulse transition-opacity duration-300">
+            <div className="h-8 md:h-12 flex items-center justify-center">
+              <p className="text-[11px] md:text-sm font-medium text-[var(--foreground)] animate-pulse transition-opacity duration-300">
                 {loadingMessages[messageIndex]}{dots}
               </p>
             </div>
 
-            {/* Barra de Progresso Falsa Visual */}
             <div className="w-3/4 h-1 bg-[var(--border)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[var(--primary)] transition-all duration-1000 ease-out"
@@ -82,16 +76,16 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         ) : imageUrl ? (
           <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover" />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center opacity-40">
-            <Sparkles className="w-10 h-10 text-[var(--primary)]" />
-            <p className="text-sm">Aguardando seleções</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 md:gap-4 p-4 md:p-8 text-center opacity-40">
+            <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-[var(--primary)]" />
+            <p className="text-[11px] md:text-sm">Aguardando seleções</p>
           </div>
         )}
       </div>
 
-      {/* PAINEL DE PROMPT EM TEMPO REAL */}
+      {/* PAINEL DE PROMPT OCULTO NO MOBILE PARA POUPAR ESPAÇO, VISÍVEL NO DESKTOP */}
       {livePrompt && Object.keys(selections).length > 0 && (
-        <div className="w-full max-w-[480px] bg-black/40 border border-[var(--border)] rounded-xl p-4 text-left shrink-0">
+        <div className="hidden md:block w-full max-w-[480px] bg-black/40 border border-[var(--border)] rounded-xl p-4 text-left shrink-0">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" />
             <p className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-wider">Prompt em Tempo Real (Inglês)</p>
@@ -100,13 +94,14 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         </div>
       )}
 
+      {/* BOTÕES DE AÇÃO */}
       {imageUrl && (
-        <div className="flex gap-3 shrink-0 mb-8">
-          <Button variant="outline" size="sm" onClick={onGenerate} className="gap-2 border-[var(--border)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] hover:border-transparent transition-all">
-            <RefreshCw className="w-4 h-4" /> Regenerar
+        <div className="flex gap-2 md:gap-3 shrink-0 mb-4 md:mb-8">
+          <Button variant="outline" size="sm" onClick={onGenerate} className="gap-1.5 md:gap-2 border-[var(--border)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] text-xs md:text-sm h-8 md:h-9 px-3 md:px-4">
+            <RefreshCw className="w-3.5 h-3.5" /> Regenerar
           </Button>
-          <Button variant="outline" size="sm" onClick={() => window.open(imageUrl)} className="gap-2 border-[var(--border)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] hover:border-transparent transition-all">
-            <Download className="w-4 h-4" /> Baixar HD
+          <Button variant="outline" size="sm" onClick={() => window.open(imageUrl)} className="gap-1.5 md:gap-2 border-[var(--border)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] text-xs md:text-sm h-8 md:h-9 px-3 md:px-4">
+            <Download className="w-3.5 h-3.5" /> Baixar HD
           </Button>
         </div>
       )}

@@ -97,30 +97,33 @@ function StudioContent() {
   };
 
   const canGenerate = !isGenerating && credits > 0 && hasUpload;
-
-  // AQUI É ONDE O TEXTO É GERADO PARA A TELA:
   const currentPrompt = buildEnglishPrompt(niche, selections);
 
   return (
     <div className={`${config.themeClass} h-screen flex flex-col overflow-hidden`}>
-      <header className="h-14 flex-shrink-0 flex items-center justify-between px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-20">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[var(--primary)] flex items-center justify-center">
-              <span className="text-[var(--primary-foreground)] font-bold text-xs">S</span>
+      {/* HEADER MOBILE-FIRST */}
+      <header className="h-14 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-1.5 md:gap-2 cursor-pointer" onClick={() => router.push('/')}>
+            <div className="w-6 h-6 md:w-7 md:h-7 rounded-lg bg-[var(--primary)] flex items-center justify-center">
+              <span className="text-[var(--primary-foreground)] font-bold text-xs md:text-sm">S</span>
             </div>
-            <span className="text-[var(--foreground)] font-bold text-sm">Studio AI</span>
+            <span className="hidden sm:inline text-[var(--foreground)] font-bold text-sm">Studio AI</span>
           </div>
-          <div className="h-5 w-px bg-[var(--border)]" />
+
+          <div className="hidden sm:block h-5 w-px bg-[var(--border)]" />
+
           <div className="relative">
-            <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--muted)] border border-[var(--border)] text-[var(--foreground)] text-sm transition-colors duration-150">
-              <span>{config.icon}</span><span className="font-medium">{config.label}</span><ChevronDown className={`w-3.5 h-3.5 text-[var(--muted-foreground)] transition-transform ${nicheMenuOpen ? 'rotate-180' : ''}`} />
+            <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 md:gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--muted)] border border-[var(--border)] text-[var(--foreground)] text-xs md:text-sm transition-colors duration-150">
+              <span className="text-sm md:text-base">{config.icon}</span>
+              <span className="font-medium hidden xs:inline">{config.label}</span>
+              <ChevronDown className={`w-3 h-3 md:w-3.5 md:h-3.5 text-[var(--muted-foreground)] transition-transform ${nicheMenuOpen ? 'rotate-180' : ''}`} />
             </button>
             {nicheMenuOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-52 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
+              <div className="absolute top-full left-0 mt-1.5 w-48 md:w-52 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
                 {Object.entries(nicheConfigs).map(([key, cfg]) => (
-                  <button key={key} onClick={() => switchNiche(key)} className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-[var(--accent)] text-left ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}>
-                    <span>{cfg.icon}</span><span>{cfg.label}</span>{key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
+                  <button key={key} onClick={() => switchNiche(key)} className={`w-full flex items-center gap-3 px-3 py-2.5 md:py-3 text-xs md:text-sm transition-colors hover:bg-[var(--accent)] text-left ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}>
+                    <span className="text-base">{cfg.icon}</span><span>{cfg.label}</span>{key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
                   </button>
                 ))}
               </div>
@@ -128,36 +131,42 @@ function StudioContent() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-semibold" style={{ borderColor: credits > 2 ? 'var(--primary)' : '#ef4444', color: credits > 2 ? 'var(--primary)' : '#ef4444', backgroundColor: credits > 2 ? 'var(--niche-glow, rgba(255,255,255,0.05))' : 'rgba(239,68,68,0.08)' }}>
-            <Gem className="w-3.5 h-3.5" />{credits} Créditos
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1.5 px-2 py-1 md:px-3 md:py-1.5 rounded-full border text-xs md:text-sm font-semibold whitespace-nowrap" style={{ borderColor: credits > 2 ? 'var(--primary)' : '#ef4444', color: credits > 2 ? 'var(--primary)' : '#ef4444', backgroundColor: credits > 2 ? 'var(--niche-glow, rgba(255,255,255,0.05))' : 'rgba(239,68,68,0.08)' }}>
+            <Gem className="w-3 h-3 md:w-3.5 md:h-3.5" />{credits} <span className="hidden sm:inline">Créditos</span>
           </div>
-          <Button variant="default" size="sm" onClick={() => setIsPricingOpen(true)} className="gap-2 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 text-sm hidden sm:flex">
+          <Button variant="default" size="sm" onClick={() => setIsPricingOpen(true)} className="gap-2 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 text-xs md:text-sm hidden lg:flex h-8">
             <CreditCard className="w-3.5 h-3.5" />Adquirir Assinatura
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--accent)] text-sm">
-            <LogOut className="w-3.5 h-3.5" />Sair
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-1.5 md:gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--accent)] text-xs md:text-sm h-8 px-2 md:px-3">
+            <LogOut className="w-3 h-3 md:w-3.5 md:h-3.5" /><span className="hidden sm:inline">Sair</span>
           </Button>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <div className="w-[30%] min-w-[280px] max-w-[380px] flex-shrink-0 overflow-hidden">
+      {/* ÁREA PRINCIPAL DIVIDIDA INTELIGENTEMENTE */}
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+
+        {/* SIDEBAR: Fica em baixo no Mobile (55%), e à Esquerda no Desktop (100% altura) */}
+        <div className="w-full md:w-[320px] lg:w-[380px] h-[55%] md:h-full flex-shrink-0 flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] md:shadow-none min-h-0">
           <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
         </div>
 
-        <main className="flex-1 flex flex-col overflow-hidden bg-[var(--background)]">
-          <div className="flex-shrink-0 px-8 pt-5 pb-3">
-            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.99]" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', boxShadow: canGenerate ? `0 4px 32px var(--niche-glow, rgba(255,255,255,0.1))` : undefined }}>
+        {/* PREVIEW & BOTÃO GERAR: Fica em cima no Mobile (45%), e à Direita no Desktop (100% altura) */}
+        <main className="flex-1 flex flex-col h-[45%] md:h-full bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden">
+
+          {/* BOTÃO GERAR */}
+          <div className="flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 pb-2 z-10 bg-gradient-to-b from-[var(--background)] to-transparent">
+            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
               {isGenerating ? (
-                <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Construindo Composição...</span></>
+                <><div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-[var(--background)]/30 border-t-[var(--background)] animate-spin" /><span>Criando Magia...</span></>
               ) : (
-                <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça para gerar'}</span>{credits > 0 && hasUpload && <span className="ml-1 opacity-60 text-sm font-normal">(−1 crédito)</span>}</>
+                <><Sparkles className="w-4 h-4 md:w-5 md:h-5" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span>{credits > 0 && hasUpload && <span className="ml-1 opacity-80 text-xs md:text-sm font-normal hidden xs:inline">(−1 crédito)</span>}</>
               )}
             </button>
-            {credits === 0 && <p className="text-center text-sm text-red-400 mt-2 flex items-center justify-center gap-1">Você não tem mais créditos. <span className="underline cursor-pointer hover:text-red-300">Adquirir mais créditos →</span></p>}
           </div>
 
+          {/* ÁREA DE VISUALIZAÇÃO */}
           <div className="flex-1 overflow-hidden flex flex-col min-h-0">
             <ImagePreviewCard
               isGenerating={isGenerating}
@@ -165,19 +174,20 @@ function StudioContent() {
               selections={selections}
               niche={niche}
               onGenerate={handleGenerate}
-              livePrompt={currentPrompt} // <-- ENVIANDO PARA O CARD AQUI
+              livePrompt={currentPrompt}
             />
           </div>
 
+          {/* GALERIA RODAPÉ (Desktop apenas, Mobile acede pelo botão na navbar ou com menos espaço) */}
           {recentImages.length > 0 && (
-            <div className="flex-shrink-0 h-[104px] border-t border-[var(--border)] bg-[var(--card)] px-6 py-4 flex items-center justify-between">
+            <div className="hidden md:flex flex-shrink-0 h-[96px] border-t border-[var(--border)] bg-[var(--card)] px-6 py-3 items-center justify-between">
               <div className="flex flex-col h-full justify-center">
-                <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-1.5">
-                  <span className="text-sm font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">Galeria de Criações</span><Images className="w-4 h-4 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
+                <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-2">
+                  <span className="text-xs font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors uppercase tracking-wider">Galeria de Criações</span><Images className="w-3.5 h-3.5 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
                 </button>
                 <div className="flex items-center gap-2">
-                  {recentImages.slice(0, 4).map((img, idx) => (
-                    <div key={idx} className="w-12 h-12 rounded-md overflow-hidden border border-[var(--border)] cursor-pointer hover:border-[var(--primary)] transition-colors" onClick={() => setImageUrl(img)}>
+                  {recentImages.slice(0, 5).map((img, idx) => (
+                    <div key={idx} className="w-10 h-10 rounded-md overflow-hidden border border-[var(--border)] cursor-pointer hover:border-[var(--primary)] transition-colors shadow-sm" onClick={() => setImageUrl(img)}>
                       <img src={img} alt={`Recente ${idx}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -188,7 +198,7 @@ function StudioContent() {
         </main>
       </div>
 
-      {nicheMenuOpen && <div className="fixed inset-0 z-10" onClick={() => setNicheMenuOpen(false)} />}
+      {nicheMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setNicheMenuOpen(false)} />}
       <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} />
       <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} />
     </div>

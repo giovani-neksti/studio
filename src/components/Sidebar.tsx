@@ -51,15 +51,15 @@ const getCategoryIcon = (cat: string) => {
 function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <div className="mb-1">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--accent)] rounded-lg transition-colors">
-        <div className="flex items-center gap-2.5">
-          <span className="text-[var(--primary)] opacity-70">{icon}</span>
-          <span className="text-sm font-semibold text-[var(--foreground)] opacity-90 tracking-wide">{title}</span>
+    <div className="mb-0.5 md:mb-1">
+      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-3 py-2.5 md:px-4 md:py-3 text-left hover:bg-[var(--accent)] rounded-lg transition-colors">
+        <div className="flex items-center gap-2 md:gap-2.5">
+          <span className="text-[var(--primary)] opacity-70 w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center">{icon}</span>
+          <span className="text-xs md:text-sm font-semibold text-[var(--foreground)] opacity-90 tracking-wide">{title}</span>
         </div>
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="px-4 pb-4 pt-1">{children}</div>}
+      {isOpen && <div className="px-3 pb-3 pt-1 md:px-4 md:pb-4">{children}</div>}
     </div>
   );
 }
@@ -88,19 +88,18 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const hasProps = config.propOptions && config.propOptions.length > 0;
 
   return (
-    <aside className="h-full flex flex-col bg-[var(--card)] border-r border-[var(--border)]">
-      <div className="px-5 py-5 border-b border-[var(--border)] shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{config.icon}</span>
-          <h2 className="text-[var(--foreground)] font-bold text-base leading-tight">Composição — {config.label}</h2>
-        </div>
+    <div className="flex flex-col h-full w-full min-h-0 bg-[var(--card)]">
+      {/* Escondido no mobile para poupar espaço vertical, já temos o cabeçalho global */}
+      <div className="hidden md:flex px-5 py-4 border-b border-[var(--border)] shrink-0 items-center gap-3">
+        <span className="text-xl">{config.icon}</span>
+        <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
       </div>
 
       <ScrollArea className="flex-1 min-h-0">
-        <div className="py-3">
+        <div className="py-2 md:py-3">
           {/* PASSO 1: CATEGORIA */}
-          <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
-            <div className="grid grid-cols-2 gap-2">
+          <SectionWrapper title="1. Produtos & Categorias" icon={<Layers />}>
+            <div className="grid grid-cols-2 gap-1.5 md:gap-2">
               {config.categories.map((cat) => {
                 const uploadKey = `upload_${cat}`;
                 const hasUpload = !!selections[uploadKey];
@@ -111,16 +110,16 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   <button
                     key={cat}
                     onClick={() => onSelect('category', cat)}
-                    className={`relative flex flex-col items-center justify-center p-3 rounded-xl border transition-all
+                    className={`relative flex flex-col items-center justify-center p-2.5 md:p-3 rounded-lg md:rounded-xl border transition-all
                       ${isActive
                         ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
                         : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
                   >
                     {hasUpload && (
-                      <CheckCircle2 className="absolute top-2 right-2 w-3.5 h-3.5 text-green-500" />
+                      <CheckCircle2 className="absolute top-1.5 right-1.5 w-3 h-3 text-green-500" />
                     )}
-                    <span className="text-2xl mb-1.5">{icon}</span>
-                    <span className={`text-[11px] font-medium leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                    <span className="text-xl md:text-2xl mb-1">{icon}</span>
+                    <span className={`text-[10px] md:text-[11px] font-medium leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
                       {cat}
                     </span>
                   </button>
@@ -129,14 +128,14 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             </div>
 
             {activeCategory && (
-              <div className="mt-3">
+              <div className="mt-2.5 md:mt-3">
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-4 border-2 border-dashed border-[var(--primary)]/50 bg-[var(--primary)]/5 rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors"
+                  className="p-3 md:p-4 border-2 border-dashed border-[var(--primary)]/40 bg-[var(--primary)]/5 rounded-lg md:rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors"
                 >
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                  <UploadCloud className="w-5 h-5 mx-auto mb-2 text-[var(--primary)] opacity-80" />
-                  <span className="text-xs font-medium text-[var(--primary)] block truncate">
+                  <UploadCloud className="w-4 h-4 md:w-5 md:h-5 mx-auto mb-1.5 text-[var(--primary)] opacity-80" />
+                  <span className="text-[11px] md:text-xs font-medium text-[var(--primary)] block truncate">
                     {selections[activeUploadKey!] ? selections[activeUploadKey!].name : `Fazer Upload de ${activeCategory}`}
                   </span>
                 </div>
@@ -144,14 +143,12 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             )}
 
             {hasMaterials && (
-              <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium">
-                  Material Predominante
-                </p>
+              <div className="mt-3 pt-3 md:mt-4 md:pt-4 border-t border-[var(--border)]">
+                <p className="text-[11px] md:text-xs text-[var(--muted-foreground)] mb-1.5 font-medium">Material Predominante</p>
                 <select
                   value={selections.material || ''}
                   onChange={(e) => onSelect('material', e.target.value)}
-                  className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]"
+                  className="w-full h-8 md:h-9 px-2 md:px-3 rounded-md text-xs md:text-sm border bg-[var(--background)] text-[var(--foreground)]"
                 >
                   <option value="" disabled>Selecione o Material</option>
                   {config.materialOptions?.map((mat) => (
@@ -162,19 +159,19 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             )}
           </SectionWrapper>
 
-          <Separator className="mx-4 my-2 opacity-50" />
+          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
-          {/* PASSO 2: AMBIENTAÇÃO & ADEREÇOS */}
-          <SectionWrapper title="2. Ambientação & Adereços" icon={<ImageIcon className="w-4 h-4" />}>
+          {/* PASSO 2: AMBIENTAÇÃO */}
+          <SectionWrapper title="2. Ambientação & Adereços" icon={<ImageIcon />}>
             {hasScenarios && (
-              <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
-                <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cor Sólida</button>
-                <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'scenario' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cenário IA</button>
+              <div className="flex p-0.5 md:p-1 bg-[var(--accent)] rounded-lg mb-3">
+                <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Cor Sólida</button>
+                <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${bgTab === 'scenario' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Cenário IA</button>
               </div>
             )}
 
             {(!hasScenarios || bgTab === 'solid') ? (
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-1.5 md:gap-2">
                 {config.solidColors.map((color) => (
                   <button
                     key={color.name}
@@ -186,23 +183,20 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5 md:gap-2">
                 {config.scenarios?.map((scenario) => (
-                  <button key={scenario.title} onClick={() => onSelect('background', scenario.title)} className={`text-left p-2 rounded-lg border text-xs ${selections.background === scenario.title ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)]'}`}>{scenario.title}</button>
+                  <button key={scenario.title} onClick={() => onSelect('background', scenario.title)} className={`text-left p-2 rounded-md border text-[10px] md:text-xs ${selections.background === scenario.title ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-medium' : 'border-[var(--border)]'}`}>{scenario.title}</button>
                 ))}
               </div>
             )}
 
-            {/* SELETOR DE ADEREÇOS (PROPS) */}
             {hasProps && (
-              <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium">
-                  Adereços de Composição
-                </p>
+              <div className="mt-3 pt-3 md:mt-4 md:pt-4 border-t border-[var(--border)]">
+                <p className="text-[11px] md:text-xs text-[var(--muted-foreground)] mb-1.5 font-medium">Adereços de Composição</p>
                 <select
                   value={selections.prop || 'none'}
                   onChange={(e) => onSelect('prop', e.target.value)}
-                  className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]"
+                  className="w-full h-8 md:h-9 px-2 md:px-3 rounded-md text-xs md:text-sm border bg-[var(--background)] text-[var(--foreground)]"
                 >
                   {config.propOptions?.map((prop) => (
                     <option key={prop.id} value={prop.id}>{prop.label}</option>
@@ -212,58 +206,51 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             )}
           </SectionWrapper>
 
-          <Separator className="mx-4 my-2 opacity-50" />
+          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
-          {/* PASSO 3: TIPO DE EXIBIÇÃO */}
-          <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect className="w-4 h-4" />}>
-            <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
-              <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Expositor</button>
-              <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'human' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Modelo</button>
+          {/* PASSO 3: EXIBIÇÃO */}
+          <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect />}>
+            <div className="flex p-0.5 md:p-1 bg-[var(--accent)] rounded-lg mb-3">
+              <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Expositor</button>
+              <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${displayTab === 'human' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Modelo</button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5 md:space-y-2">
               {(displayTab === 'expositor' ? config.displayOptions : config.humanDisplayOptions).map((opt: any) => (
-                <button key={opt.id} onClick={() => onSelect('display', opt.label || opt.name)} className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${selections.display === (opt.label || opt.name) ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold' : 'border-[var(--border)]'}`}>
+                <button key={opt.id} onClick={() => onSelect('display', opt.label || opt.name)} className={`w-full text-left px-2.5 py-1.5 md:px-3 md:py-2 rounded-md text-[11px] md:text-sm border ${selections.display === (opt.label || opt.name) ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold' : 'border-[var(--border)]'}`}>
                   <div className="flex justify-between items-center">
                     <span>{opt.label || opt.name}</span>
-                    {selections.display === (opt.label || opt.name) && <CheckCircle2 className="w-4 h-4 text-[var(--primary)]" />}
+                    {selections.display === (opt.label || opt.name) && <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-[var(--primary)]" />}
                   </div>
-                  <p className="text-[10px] opacity-50 font-normal mt-0.5">{opt.type || ''}</p>
+                  {opt.type && <p className="text-[9px] md:text-[10px] opacity-60 font-normal mt-0.5">{opt.type}</p>}
                 </button>
               ))}
             </div>
           </SectionWrapper>
 
-          <Separator className="mx-4 my-2 opacity-50" />
+          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
           {/* PASSO 4: ASSINATURA VISUAL */}
-          <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
-            <div className="space-y-3">
-              <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[#eef2ff] text-black h-9 border-none" />
+          <SectionWrapper title="4. Assinatura Visual" icon={<Type />}>
+            <div className="space-y-2.5 md:space-y-3">
+              <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[var(--accent)] text-[var(--foreground)] h-8 md:h-9 border-none text-xs md:text-sm" />
 
-              <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]">
+              <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-8 md:h-9 px-2 md:px-3 rounded-md text-xs md:text-sm border bg-[var(--background)] text-[var(--foreground)]">
                 <option value="" disabled>Escolha a Fonte</option>
                 {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
               </select>
 
               {selections.text && (
-                <div className="pt-2">
-                  <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium flex items-center gap-1.5">
-                    <AlignVerticalSpaceAround className="w-3.5 h-3.5" /> Posição do Texto
+                <div className="pt-1.5 md:pt-2">
+                  <p className="text-[10px] md:text-xs text-[var(--muted-foreground)] mb-1.5 font-medium flex items-center gap-1">
+                    <AlignVerticalSpaceAround className="w-3 h-3 md:w-3.5 md:h-3.5" /> Posição do Texto
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5 md:gap-2">
                     {config.textPositionOptions?.map((pos: any) => (
-                      <button
-                        key={pos.id}
-                        onClick={() => onSelect('textPosition', pos.id)}
-                        className={`flex flex-col items-center p-2 rounded-lg border transition-all
-                          ${selections.textPosition === pos.id
-                            ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
-                            : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
-                      >
-                        <div className={`w-full aspect-square mb-1.5 border border-dashed rounded flex p-1 ${pos.gridClass} ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--border)]'}`}>
-                          <div className={`h-1.5 w-6 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
+                      <button key={pos.id} onClick={() => onSelect('textPosition', pos.id)} className={`flex flex-col items-center p-1.5 md:p-2 rounded-md border transition-all ${selections.textPosition === pos.id ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30' : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}>
+                        <div className={`w-full aspect-square mb-1 border border-dashed rounded flex p-1 ${pos.gridClass} ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--border)]'}`}>
+                          <div className={`h-1 w-4 md:h-1.5 md:w-5 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
                         </div>
-                        <span className={`text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}>{pos.label}</span>
+                        <span className={`text-[9px] md:text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}>{pos.label}</span>
                       </button>
                     ))}
                   </div>
@@ -272,30 +259,30 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             </div>
           </SectionWrapper>
 
-          <Separator className="mx-4 my-2 opacity-50" />
+          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
           {/* PASSO 5: FORMATO DE SAÍDA */}
-          <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-4 h-4" />}>
-            <div className="grid grid-cols-2 gap-2">
+          <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 />}>
+            <div className="grid grid-cols-2 gap-1.5 md:gap-2">
               {config.formats.map((fmt) => (
                 <button
                   key={fmt.id}
                   onClick={() => onSelect('format', fmt.ratio)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all text-center
+                  className={`flex flex-col items-center justify-center p-2 md:p-3 rounded-lg md:rounded-xl border transition-all text-center
                     ${selections.format === fmt.ratio
                       ? 'border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)] shadow-sm'
                       : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50'}`}
                 >
-                  <span className="font-bold text-[13px] mb-[2px] text-[var(--foreground)]">{fmt.ratio}</span>
-                  <span className="text-[11px] font-medium mb-1">{fmt.label}</span>
-                  <span className="text-[9px] opacity-50">{fmt.pixels}</span>
+                  <span className="font-bold text-xs md:text-[13px] mb-0.5 text-[var(--foreground)]">{fmt.ratio}</span>
+                  <span className="text-[10px] md:text-[11px] font-medium mb-1">{fmt.label}</span>
+                  <span className="text-[8px] md:text-[9px] opacity-50 hidden md:block">{fmt.pixels}</span>
                 </button>
               ))}
             </div>
           </SectionWrapper>
-          <div className="h-8" />
+          <div className="h-6 md:h-8" />
         </div>
       </ScrollArea>
-    </aside>
+    </div>
   );
 }
