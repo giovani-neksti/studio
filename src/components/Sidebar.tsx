@@ -49,10 +49,8 @@ const getCategoryIcon = (cat: string) => {
   return '🏷️';
 };
 
-// NOVO: Mapeamento de Ícones para os Expositores
 const getDisplayIcon = (id: string) => {
   switch (id) {
-    // Joalharia
     case 'bust': return '👤';
     case 'box': return '🎁';
     case 'pedestal': return '🏛️';
@@ -60,14 +58,12 @@ const getDisplayIcon = (id: string) => {
     case 'cushion': return '🛋️';
     case 'surface': return '🪞';
     case 'floating': return '✨';
-    // Roupas
     case 'ghost_mannequin': return '👻';
     case 'hanger_wood': return '🪵';
     case 'hanger_metal': return '🪝';
     case 'flat_lay_folded': return '👕';
     case 'flat_lay_open': return '👚';
     case 'clothesline': return '〰️';
-    // Sapatos
     case 'acrylic_box': return '🧊';
     case 'dynamic_angle': return '📐';
     case 'shoebox_top': return '📦';
@@ -236,7 +232,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
-          {/* PASSO 3: EXIBIÇÃO (AGORA COM GRELHA PARA EXPOSITORES) */}
+          {/* PASSO 3: EXIBIÇÃO */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect />}>
             <div className="flex p-0.5 md:p-1 bg-[var(--accent)] rounded-lg mb-3">
               <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Expositor</button>
@@ -264,16 +260,31 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 })}
               </div>
             ) : (
-              <div className="space-y-1.5 md:space-y-2">
-                {config.humanDisplayOptions.map((opt: any) => (
-                  <button key={opt.id} onClick={() => onSelect('display', opt.name)} className={`w-full text-left px-2.5 py-1.5 md:px-3 md:py-2 rounded-md text-[11px] md:text-sm border ${selections.display === opt.name ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold' : 'border-[var(--border)]'}`}>
-                    <div className="flex justify-between items-center">
-                      <span>{opt.name}</span>
-                      {selections.display === opt.name && <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-[var(--primary)]" />}
-                    </div>
-                    {opt.type && <p className="text-[9px] md:text-[10px] opacity-60 font-normal mt-0.5">{opt.type}</p>}
-                  </button>
-                ))}
+              // NOVO: Layout 3x3 (Apenas texto) para as Modelos Humanas
+              <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+                {config.humanDisplayOptions.map((opt: any) => {
+                  const isActive = selections.display === opt.name;
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => onSelect('display', opt.name)}
+                      className={`relative flex flex-col items-center justify-center p-2 md:p-2.5 rounded-lg border transition-all text-center h-16 md:h-20
+                        ${isActive
+                          ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
+                          : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
+                    >
+                      {isActive && <CheckCircle2 className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--primary)]" />}
+                      <span className={`text-[10px] md:text-[11px] font-bold leading-tight mb-0.5 ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                        {opt.name}
+                      </span>
+                      {opt.type && (
+                        <span className="text-[8px] md:text-[9px] opacity-60 leading-tight line-clamp-2">
+                          {opt.type}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </SectionWrapper>
