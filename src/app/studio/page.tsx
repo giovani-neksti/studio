@@ -9,7 +9,7 @@ import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
 import { Button } from '@/components/ui/button';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 
 function StudioContent() {
   const searchParams = useSearchParams();
