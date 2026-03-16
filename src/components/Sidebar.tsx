@@ -49,6 +49,32 @@ const getCategoryIcon = (cat: string) => {
   return '🏷️';
 };
 
+// NOVO: Mapeamento de Ícones para os Expositores
+const getDisplayIcon = (id: string) => {
+  switch (id) {
+    // Joalharia
+    case 'bust': return '👤';
+    case 'box': return '🎁';
+    case 'pedestal': return '🏛️';
+    case 'cone': return '🔺';
+    case 'cushion': return '🛋️';
+    case 'surface': return '🪞';
+    case 'floating': return '✨';
+    // Roupas
+    case 'ghost_mannequin': return '👻';
+    case 'hanger_wood': return '🪵';
+    case 'hanger_metal': return '🪝';
+    case 'flat_lay_folded': return '👕';
+    case 'flat_lay_open': return '👚';
+    case 'clothesline': return '〰️';
+    // Sapatos
+    case 'acrylic_box': return '🧊';
+    case 'dynamic_angle': return '📐';
+    case 'shoebox_top': return '📦';
+    default: return '🪄';
+  }
+};
+
 function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
@@ -72,7 +98,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const activeCategory = selections.category;
   const activeUploadKey = activeCategory ? `upload_${activeCategory}` : null;
 
-  // Garante valores padrão quando se escreve um texto
   useEffect(() => {
     if (selections.text) {
       if (!selections.textPosition) onSelect('textPosition', 'bottom');
@@ -211,28 +236,51 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
-          {/* PASSO 3: EXIBIÇÃO */}
+          {/* PASSO 3: EXIBIÇÃO (AGORA COM GRELHA PARA EXPOSITORES) */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect />}>
             <div className="flex p-0.5 md:p-1 bg-[var(--accent)] rounded-lg mb-3">
               <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Expositor</button>
               <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${displayTab === 'human' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Modelo</button>
             </div>
-            <div className="space-y-1.5 md:space-y-2">
-              {(displayTab === 'expositor' ? config.displayOptions : config.humanDisplayOptions).map((opt: any) => (
-                <button key={opt.id} onClick={() => onSelect('display', opt.label || opt.name)} className={`w-full text-left px-2.5 py-1.5 md:px-3 md:py-2 rounded-md text-[11px] md:text-sm border ${selections.display === (opt.label || opt.name) ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold' : 'border-[var(--border)]'}`}>
-                  <div className="flex justify-between items-center">
-                    <span>{opt.label || opt.name}</span>
-                    {selections.display === (opt.label || opt.name) && <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-[var(--primary)]" />}
-                  </div>
-                  {opt.type && <p className="text-[9px] md:text-[10px] opacity-60 font-normal mt-0.5">{opt.type}</p>}
-                </button>
-              ))}
-            </div>
+
+            {displayTab === 'expositor' ? (
+              <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+                {config.displayOptions.map((opt: any) => {
+                  const isActive = selections.display === opt.label;
+                  const icon = getDisplayIcon(opt.id);
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => onSelect('display', opt.label)}
+                      className={`relative flex flex-col items-center justify-center p-2.5 md:p-3 rounded-lg md:rounded-xl border transition-all ${isActive ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30' : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
+                    >
+                      {isActive && <CheckCircle2 className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" />}
+                      <span className="text-xl md:text-2xl mb-1">{icon}</span>
+                      <span className={`text-[10px] md:text-[11px] font-medium leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                        {opt.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-1.5 md:space-y-2">
+                {config.humanDisplayOptions.map((opt: any) => (
+                  <button key={opt.id} onClick={() => onSelect('display', opt.name)} className={`w-full text-left px-2.5 py-1.5 md:px-3 md:py-2 rounded-md text-[11px] md:text-sm border ${selections.display === opt.name ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold' : 'border-[var(--border)]'}`}>
+                    <div className="flex justify-between items-center">
+                      <span>{opt.name}</span>
+                      {selections.display === opt.name && <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-[var(--primary)]" />}
+                    </div>
+                    {opt.type && <p className="text-[9px] md:text-[10px] opacity-60 font-normal mt-0.5">{opt.type}</p>}
+                  </button>
+                ))}
+              </div>
+            )}
           </SectionWrapper>
 
           <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
-          {/* PASSO 4: ASSINATURA VISUAL (COM COR E TAMANHO) */}
+          {/* PASSO 4: ASSINATURA VISUAL */}
           <SectionWrapper title="4. Assinatura Visual" icon={<TypeIcon />}>
             <div className="space-y-2.5 md:space-y-3">
               <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[var(--accent)] text-[var(--foreground)] h-8 md:h-9 border-none text-xs md:text-sm" />
@@ -244,10 +292,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
               {selections.text && (
                 <div className="pt-2 flex flex-col gap-3">
-
-                  {/* GRID PARA TAMANHO E COR LADO A LADO */}
                   <div className="flex items-start gap-3 w-full">
-                    {/* Bloco de Tamanho */}
                     <div className="flex-1">
                       <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium">Tamanho</p>
                       <div className="flex w-full bg-[var(--background)] border border-[var(--border)] rounded-md overflow-hidden h-7 md:h-8">
@@ -266,7 +311,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                       </div>
                     </div>
 
-                    {/* Bloco de Cor */}
                     <div className="flex-shrink-0">
                       <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium">Cor da Letra</p>
                       <div className="flex items-center gap-1.5 md:gap-2 h-7 md:h-8">
@@ -286,7 +330,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     </div>
                   </div>
 
-                  {/* Posição do Texto */}
                   <div>
                     <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium flex items-center gap-1">
                       <AlignVerticalSpaceAround className="w-3 h-3 md:w-3.5 md:h-3.5" /> Posição na Imagem
@@ -302,7 +345,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                       ))}
                     </div>
                   </div>
-
                 </div>
               )}
             </div>
