@@ -23,10 +23,10 @@ export async function POST(req: Request) {
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Prompt (Lógica do seu prompt-builder oficial)
+    // 2. Construção do Prompt (Lógica oficial do seu prompt-builder)
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // 3. Autenticação e Configuração do Endpoint
+    // 3. Autenticação Vertex AI
     const auth = new GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -39,16 +39,15 @@ export async function POST(req: Request) {
     const accessToken = await auth.getAccessToken();
     const projectId = process.env.GOOGLE_PROJECT_ID;
 
-    /**
-     * UPGRADE: Alterado de 'flash' para 'pro'
-     * Modelo: Gemini 2.5 Pro Image (Nano Banana Pro Estável)
-     * Foco: Máxima qualidade, detalhes de texturas e anatomia humana.
+    /** * O MODELO "FODÃO": Gemini 3 Pro Image (Nano Banana Pro)
+     * Local: Modelos Preview exigem a localização 'global' para evitar erros 404.
+     * Endpoint: v1beta1 é necessário para acessar os recursos de imagem da série 3.
      */
-    const location = 'us-central1';
-    const modelId = 'gemini-2.5-pro-image';
-    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
+    const location = 'global';
+    const modelId = 'gemini-3-pro-image-preview';
+    const endpoint = `https://aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
 
-    // 4. Chamada Multimodal
+    // 4. Chamada Multimodal (Mantendo sua estrutura estável)
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -71,7 +70,7 @@ export async function POST(req: Request) {
           }
         ],
         generationConfig: {
-          responseModalities: ["IMAGE"], // Comando para o motor Gemini Image
+          responseModalities: ["IMAGE"], // Comando mestre do motor de imagem
           candidateCount: 1,
           temperature: 0.7
         }
@@ -80,24 +79,22 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Erro na API: ${JSON.stringify(errorData)}`);
+      throw new Error(`Erro na API Nano Banana Pro: ${JSON.stringify(errorData)}`);
     }
 
     const aiData = await response.json();
-
-    // Extração da imagem do array de candidatos
     const generatedPart = aiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     const generatedBase64 = generatedPart?.inlineData?.data;
 
-    if (!generatedBase64) throw new Error("A IA não retornou imagem.");
+    if (!generatedBase64) throw new Error("A IA Pro não retornou a imagem. Verifique os filtros de segurança.");
 
-    // 5. Salvar resultado (compositions)
+    // 5. Salvar imagem gerada (compositions)
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
-    const genFileName = `ai_${Date.now()}.png`;
+    const genFileName = `ai_pro_${Date.now()}.png`;
     await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, { contentType: 'image/png' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
-    // Registro no banco de dados
+    // 6. Registro no banco de dados
     await supabaseAdmin.from('generations').insert({
       niche,
       original_image_url: originalUrl,
@@ -109,7 +106,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error: any) {
-    console.error("Falha Nano Banana Pro:", error);
+    console.error("Falha Crítica no motor Pro:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
