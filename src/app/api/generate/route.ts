@@ -10,8 +10,6 @@ export async function POST(req: Request) {
     const selectionsStr = formData.get('selections') as string;
     const niche = formData.get('niche') as string;
 
-    if (!file || !selectionsStr) return NextResponse.json({ error: 'Faltam dados.' }, { status: 400 });
-
     const selections = JSON.parse(selectionsStr);
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const base64Image = fileBuffer.toString('base64');
@@ -21,10 +19,10 @@ export async function POST(req: Request) {
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Prompt (O prompt deve descrever o NOVO cenário/fundo)
+    // 2. Prompt (O mesmo que você usou no Nano Banana)
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // 3. Google Auth
+    // 3. Auth Google
     const auth = new GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -35,33 +33,29 @@ export async function POST(req: Request) {
     });
 
     const accessToken = await auth.getAccessToken();
-    const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${process.env.GOOGLE_PROJECT_ID}/locations/us-central1/publishers/google/models/imagen-3.0-capability-001:predict`;
+    const projectId = process.env.GOOGLE_PROJECT_ID;
 
-    // 4. Chamada REST oficial (Usando structure de referenceImages e Enums em Maiúsculo)
+    // USANDO O MODELO DO NANO BANANA 2 NO VERTEX AI
+    const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/gemini-3-flash-image:predict`;
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         instances: [{
           prompt: finalPrompt,
-          referenceImages: [
-            {
-              referenceType: "REFERENCE_TYPE_RAW", // A imagem do seu brinco
-              referenceId: 1,
-              referenceImage: { bytesBase64Encoded: base64Image, mimeType: file.type }
-            },
-            {
-              referenceType: "REFERENCE_TYPE_MASK", // Comando para detectar o fundo automaticamente
-              referenceId: 2,
-              maskImageConfig: { maskMode: "MASK_MODE_BACKGROUND" }
-            }
-          ]
+          // O Gemini 3 Flash Image aceita a imagem como uma entrada de "contexto"
+          image: {
+            bytesBase64Encoded: base64Image,
+            mimeType: file.type
+          }
         }],
         parameters: {
           sampleCount: 1,
-          editMode: "EDIT_MODE_BGSWAP", // Comando oficial para troca de fundo via REST API
+          // Ativa o modo de composição de alta fidelidade
+          compositionMode: "PRODUCT_INTEGRATION",
           addWatermark: false,
-          includeSafetyAttributes: true
+          guidanceScale: 15.0 // Aumenta a obediência ao prompt (importante para o texto "Teste")
         }
       })
     });
@@ -70,12 +64,10 @@ export async function POST(req: Request) {
     if (!response.ok) throw new Error(JSON.stringify(aiData));
 
     const generatedBase64 = aiData.predictions?.[0]?.bytesBase64Encoded || aiData.predictions?.[0];
-    if (!generatedBase64) throw new Error("A IA não retornou imagem.");
 
-    // 5. Salvar resultado
-    const generatedBuffer = Buffer.from(generatedBase64, 'base64');
+    // 4. Salvar resultado
     const genFileName = `ai_${Date.now()}.png`;
-    await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, { contentType: 'image/png' });
+    await supabaseAdmin.storage.from('compositions').upload(genFileName, Buffer.from(generatedBase64, 'base64'), { contentType: 'image/png' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
     await supabaseAdmin.from('generations').insert({
@@ -84,7 +76,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: generatedUrl });
   } catch (error: any) {
-    console.error("Erro Vertex AI:", error);
-    return NextResponse.json({ error: 'Erro na IA: ' + error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Erro no motor Nano Banana: ' + error.message }, { status: 500 });
   }
 }
