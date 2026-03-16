@@ -50,8 +50,6 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Lin": "worn beautifully by an Asian high-fashion model named Lin with delicate features and glass skin",
         "Maya": "worn stunningly by a Black high-fashion model named Maya with radiant deep skin tone",
         "Valentina": "worn passionately by a Latina high-fashion model named Valentina with sun-kissed skin",
-
-        // NOVAS POSES ANATÓMICAS E ATUALIZADAS
         "Close Pescoço": "extreme macro close-up on the model's neck and collarbone wearing the jewelry, focusing entirely on the necklace or pendant",
         "Mão / Manicure": "extreme macro close-up on a high-fashion model's hand with an elegant nude manicure, focusing entirely on the ring on her finger",
         "Pulso": "extreme macro close-up on a high-fashion model's resting wrist and lower arm, focusing entirely on the bracelet or watch",
@@ -96,7 +94,8 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText} and is ${positionText}.`;
     }
 
-    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, 8k resolution, octane render, sharp focus.`;
+    // A MÁGICA ACONTECE AQUI NESTA STRING FINAL
+    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
 
     return finalEnglishPrompt;
 }
