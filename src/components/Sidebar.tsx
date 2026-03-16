@@ -7,15 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import {
-  ChevronDown,
-  Layers,
-  Image as ImageIcon,
-  Maximize2,
-  Type,
-  UploadCloud,
-  CheckCircle2,
-  BoxSelect,
-  Shirt,
+  ChevronDown, Layers, ImageIcon, Maximize2, Type, UploadCloud, CheckCircle2, BoxSelect, Shirt
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -32,7 +24,7 @@ function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
       <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--accent)] rounded-lg transition-colors">
         <div className="flex items-center gap-2.5">
           <span className="text-[var(--primary)] opacity-70">{icon}</span>
-          <span className="text-sm font-semibold text-[var(--foreground)] opacity-90 tracking-wide">{title}</span>
+          <span className="text-sm font-semibold text-[var(--foreground)] opacity-90">{title}</span>
         </div>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -119,7 +111,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 3: MODELOS EM LISTA */}
+          {/* PASSO 3: LISTA DE MODELOS */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect className="w-4 h-4" />}>
             <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
               <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Expositor</button>
@@ -132,7 +124,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     <span>{opt.label || opt.name}</span>
                     {selections.display === (opt.label || opt.name) && <CheckCircle2 className="w-4 h-4 text-[var(--primary)]" />}
                   </div>
-                  <p className="text-[10px] opacity-50">{opt.type || ''}</p>
+                  <p className="text-[10px] opacity-50 font-normal mt-0.5">{opt.type || ''}</p>
                 </button>
               ))}
             </div>
@@ -142,7 +134,12 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           {/* PASSO 4 */}
           <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
-            <Input placeholder="Ex: Lançamento" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="mb-2 bg-[#eef2ff] text-black h-9 border-none" />
+            <Input
+              placeholder="Ex: Lançamento"
+              value={selections.text || ''}
+              onChange={(e) => onSelect('text', e.target.value)}
+              className="mb-2 bg-[#eef2ff] text-black h-9 border-none"
+            />
             <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]">
               <option value="" disabled>Escolha a Fonte</option>
               {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
@@ -151,7 +148,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 5 RESTAURADO */}
+          {/* PASSO 5: RESTAURADO */}
           <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-4 h-4" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.formats.map((fmt) => (

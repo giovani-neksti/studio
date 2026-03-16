@@ -16,13 +16,14 @@ export async function POST(req: Request) {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const base64Image = fileBuffer.toString('base64');
 
-    // 1. Upload original
+    // 1. Upload original para o Supabase
     const fileName = `${Date.now()}_original_${file.name.replace(/\s/g, '_')}`;
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Prompt (O prompt deve descrever o NOVO cenário/fundo)
-    const finalPrompt = buildEnglishPrompt(niche, selections);
+    // 2. Prompt (Otimizado com termos de integração de luz e escala)
+    const rawPrompt = buildEnglishPrompt(niche, selections);
+    const finalPrompt = `${rawPrompt}. The product must be placed with realistic scale, physically accurate shadows, and matching studio lighting.`;
 
     // 3. Google Auth
     const auth = new GoogleAuth({
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
     const accessToken = await auth.getAccessToken();
     const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${process.env.GOOGLE_PROJECT_ID}/locations/us-central1/publishers/google/models/imagen-3.0-capability-001:predict`;
 
-    // 4. Chamada REST oficial (Usando structure de referenceImages e Enums em Maiúsculo)
+    // 4. Chamada REST oficial para Product Placement
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
@@ -46,12 +47,12 @@ export async function POST(req: Request) {
           prompt: finalPrompt,
           referenceImages: [
             {
-              referenceType: "REFERENCE_TYPE_RAW", // A imagem do seu brinco
+              referenceType: "REFERENCE_TYPE_RAW", // Imagem real do brinco
               referenceId: 1,
               referenceImage: { bytesBase64Encoded: base64Image, mimeType: file.type }
             },
             {
-              referenceType: "REFERENCE_TYPE_MASK", // Comando para detectar o fundo automaticamente
+              referenceType: "REFERENCE_TYPE_MASK", // Detecção de objeto para integração
               referenceId: 2,
               maskImageConfig: { maskMode: "MASK_MODE_BACKGROUND" }
             }
@@ -59,9 +60,8 @@ export async function POST(req: Request) {
         }],
         parameters: {
           sampleCount: 1,
-          editMode: "EDIT_MODE_BGSWAP", // Comando oficial para troca de fundo via REST API
-          addWatermark: false,
-          includeSafetyAttributes: true
+          editMode: "EDIT_MODE_PRODUCT_PLACEMENT", // Modo especializado em proporção e luz
+          addWatermark: false
         }
       })
     });
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: generatedUrl });
   } catch (error: any) {
-    console.error("Erro Vertex AI:", error);
+    console.error("Erro na Vertex AI:", error);
     return NextResponse.json({ error: 'Erro na IA: ' + error.message }, { status: 500 });
   }
 }
