@@ -76,7 +76,6 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     themeClass: 'theme-jewelry',
     icon: '💎',
     tagline: 'Componha cenários de luxo ao redor das suas joias',
-    // NOVO: Adicionado 'Bracelete Pandora' (Total 8 Itens para grelha 2x4)
     categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Relógio', 'Broche', 'Pingente', 'Bracelete Pandora'],
 
     materialOptions: [
@@ -119,13 +118,17 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'surface', label: 'Sem Expositor (Surface)' },
       { id: 'floating', label: 'Levitação 3D' },
     ],
+    // NOVO: Adicionado Mão, Pulso e Orelha (Perfil) ao final da lista
     humanDisplayOptions: [
       { id: 'model_helena', name: 'Helena', type: 'Padrão / Caucasiana', imageUrl: 'https://images.unsplash.com/photo-1542596594-649edbc13630?w=400&q=80' },
       { id: 'model_zara', name: 'Zara', type: 'Negra / Sofisticada', imageUrl: 'https://images.unsplash.com/photo-1531123897727-8f129e1bfd8c?w=400&q=80' },
       { id: 'model_lin', name: 'Lin', type: 'Oriental / Delicada', imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80' },
       { id: 'model_maya', name: 'Maya', type: 'Indiana / Expressiva', imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80' },
       { id: 'model_valentina', name: 'Valentina', type: 'Ruiva / Editorial', imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80' },
-      { id: 'model_close_neck', name: 'Close', type: 'Foco no Pescoço', imageUrl: 'https://images.unsplash.com/photo-1599643478514-46bfa3321526?w=400&q=80' }
+      { id: 'model_close_neck', name: 'Close Pescoço', type: 'Foco no Colar', imageUrl: 'https://images.unsplash.com/photo-1599643478514-46bfa3321526?w=400&q=80' },
+      { id: 'model_close_hand', name: 'Mão / Manicure', type: 'Foco no Anel', imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b2548e?w=400&q=80' },
+      { id: 'model_close_wrist', name: 'Pulso', type: 'Pulseira / Relógio', imageUrl: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&q=80' },
+      { id: 'model_close_ear', name: 'Perfil / Orelha', type: 'Foco no Brinco', imageUrl: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,
     textPositionOptions: sharedTextPosition,

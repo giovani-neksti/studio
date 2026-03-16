@@ -50,7 +50,12 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Lin": "worn beautifully by an Asian high-fashion model named Lin with delicate features and glass skin",
         "Maya": "worn stunningly by a Black high-fashion model named Maya with radiant deep skin tone",
         "Valentina": "worn passionately by a Latina high-fashion model named Valentina with sun-kissed skin",
-        "Close": "extreme macro close-up on the model's skin wearing the jewelry, focusing entirely on the product"
+
+        // NOVAS POSES ANATÓMICAS E ATUALIZADAS
+        "Close Pescoço": "extreme macro close-up on the model's neck and collarbone wearing the jewelry, focusing entirely on the necklace or pendant",
+        "Mão / Manicure": "extreme macro close-up on a high-fashion model's hand with an elegant nude manicure, focusing entirely on the ring on her finger",
+        "Pulso": "extreme macro close-up on a high-fashion model's resting wrist and lower arm, focusing entirely on the bracelet or watch",
+        "Perfil / Orelha": "extreme macro close-up side profile shot of a high-fashion model's ear with her hair elegantly pulled back, focusing entirely on the earring"
     },
     tipografia: {
         "Playfair (Elegante)": "written elegantly in a sophisticated serif Playfair-style typography",
