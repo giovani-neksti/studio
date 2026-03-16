@@ -100,7 +100,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               })}
             </div>
 
-            {/* SELETOR DE MATERIAL (Aparece se o nicho tiver configurado) */}
+            {/* SELETOR DE MATERIAL */}
             {hasMaterials && (
               <div className="mt-4 pt-4 border-t border-[var(--border)]">
                 <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium">
@@ -154,7 +154,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 3 */}
+          {/* PASSO 3: TIPO DE EXIBIÇÃO */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect className="w-4 h-4" />}>
             <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
               <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Expositor</button>
@@ -175,7 +175,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 4 */}
+          {/* PASSO 4: ASSINATURA VISUAL */}
           <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
             <div className="space-y-3">
               <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[#eef2ff] text-black h-9 border-none" />
@@ -214,7 +214,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 5 */}
+          {/* PASSO 5: FORMATO DE SAÍDA */}
           <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-4 h-4" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.formats.map((fmt) => (
@@ -223,4 +223,19 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   onClick={() => onSelect('format', fmt.ratio)}
                   className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all text-center
                     ${selections.format === fmt.ratio
-                      ? 'border-[var(--primary)] bg-
+                      ? 'border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)] shadow-sm'
+                      : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50'}`}
+                >
+                  <span className="font-bold text-[13px] mb-[2px] text-[var(--foreground)]">{fmt.ratio}</span>
+                  <span className="text-[11px] font-medium mb-1">{fmt.label}</span>
+                  <span className="text-[9px] opacity-50">{fmt.pixels}</span>
+                </button>
+              ))}
+            </div>
+          </SectionWrapper>
+          <div className="h-8" />
+        </div>
+      </ScrollArea>
+    </aside>
+  );
+}
