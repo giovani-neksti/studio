@@ -24,7 +24,6 @@ interface SidebarProps {
   onSelect: (key: string, value: any) => void;
 }
 
-// Função para Mapear Ícones Ilustrados por Categoria
 const getCategoryIcon = (cat: string) => {
   if (cat.includes('Colar')) return '📿';
   if (cat.includes('Brinco')) return '✨';
@@ -86,6 +85,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
   const hasScenarios = config.scenarios && config.scenarios.length > 0;
   const hasMaterials = config.materialOptions && config.materialOptions.length > 0;
+  const hasProps = config.propOptions && config.propOptions.length > 0;
 
   return (
     <aside className="h-full flex flex-col bg-[var(--card)] border-r border-[var(--border)]">
@@ -98,7 +98,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
       <ScrollArea className="flex-1 min-h-0">
         <div className="py-3">
-          {/* PASSO 1: CATEGORIA COM GRELHA DE ÍCONES (2 Colunas) E NOVO CAMPO MATERIAL */}
+          {/* PASSO 1: CATEGORIA */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.categories.map((cat) => {
@@ -128,7 +128,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               })}
             </div>
 
-            {/* ÁREA DE UPLOAD (Aparece em baixo da grelha quando a categoria está selecionada) */}
             {activeCategory && (
               <div className="mt-3">
                 <div
@@ -144,7 +143,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               </div>
             )}
 
-            {/* SELETOR DE MATERIAL */}
             {hasMaterials && (
               <div className="mt-4 pt-4 border-t border-[var(--border)]">
                 <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium">
@@ -166,8 +164,8 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 2: AMBIENTAÇÃO */}
-          <SectionWrapper title="2. Fundo (Cor Sólida)" icon={<ImageIcon className="w-4 h-4" />}>
+          {/* PASSO 2: AMBIENTAÇÃO & ADEREÇOS */}
+          <SectionWrapper title="2. Ambientação & Adereços" icon={<ImageIcon className="w-4 h-4" />}>
             {hasScenarios && (
               <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
                 <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cor Sólida</button>
@@ -192,6 +190,24 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 {config.scenarios?.map((scenario) => (
                   <button key={scenario.title} onClick={() => onSelect('background', scenario.title)} className={`text-left p-2 rounded-lg border text-xs ${selections.background === scenario.title ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)]'}`}>{scenario.title}</button>
                 ))}
+              </div>
+            )}
+
+            {/* SELETOR DE ADEREÇOS (PROPS) */}
+            {hasProps && (
+              <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium">
+                  Adereços de Composição
+                </p>
+                <select
+                  value={selections.prop || 'none'}
+                  onChange={(e) => onSelect('prop', e.target.value)}
+                  className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]"
+                >
+                  {config.propOptions?.map((prop) => (
+                    <option key={prop.id} value={prop.id}>{prop.label}</option>
+                  ))}
+                </select>
               </div>
             )}
           </SectionWrapper>

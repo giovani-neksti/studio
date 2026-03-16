@@ -33,6 +33,11 @@ export interface MaterialOption {
   label: string;
 }
 
+export interface PropOption {
+  id: string;
+  label: string;
+}
+
 export interface NicheConfig {
   label: string;
   themeClass: string;
@@ -40,6 +45,7 @@ export interface NicheConfig {
   tagline: string;
   categories: string[];
   materialOptions?: MaterialOption[];
+  propOptions?: PropOption[]; // NOVO: Elementos de composição (Props)
   solidColors: { name: string; hex: string }[];
   scenarios: { title: string; desc: string }[];
   displayOptions: DisplayOption[];
@@ -85,6 +91,15 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'gemstone', label: 'Pedraria Predominante' },
     ],
 
+    // NOVO: Adereços Minimalistas para Joalharia
+    propOptions: [
+      { id: 'none', label: 'Sem Adereços (Apenas Fundo)' },
+      { id: 'water_drops', label: 'Gotas de Água Fresca' },
+      { id: 'orchid_petal', label: 'Pétala de Orquídea Branca' },
+      { id: 'raw_quartz', label: 'Pedra de Quartzo Bruto' },
+      { id: 'gold_bokeh', label: 'Pó de Ouro Desfocado' }
+    ],
+
     solidColors: [
       { name: 'Preto Veludo', hex: '#111111' },
       { name: 'Branco Neve', hex: '#FFFFFF' },
@@ -118,7 +133,6 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'surface', label: 'Sem Expositor (Surface)' },
       { id: 'floating', label: 'Levitação 3D' },
     ],
-    // NOVO: Adicionado Mão, Pulso e Orelha (Perfil) ao final da lista
     humanDisplayOptions: [
       { id: 'model_helena', name: 'Helena', type: 'Padrão / Caucasiana', imageUrl: 'https://images.unsplash.com/photo-1542596594-649edbc13630?w=400&q=80' },
       { id: 'model_zara', name: 'Zara', type: 'Negra / Sofisticada', imageUrl: 'https://images.unsplash.com/photo-1531123897727-8f129e1bfd8c?w=400&q=80' },

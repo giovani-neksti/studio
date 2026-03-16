@@ -15,6 +15,13 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "gold_rose": "featuring soft pinkish-gold reflections, elegant rose gold material, and warm metallic luster",
         "gemstone": "focusing on brilliant gemstone refractions, internal light scattering, and sharp diamond-like caustics"
     },
+    // NOVO: Dicionário de Adereços (Props)
+    props: {
+        "water_drops": "with delicate cinematic water droplets scattered elegantly on the surface",
+        "orchid_petal": "with a single pure white orchid petal resting softly in the background",
+        "raw_quartz": "with a piece of raw white quartz crystal placed artistically nearby",
+        "gold_bokeh": "surrounded by magical out-of-focus gold dust floating in the air (golden bokeh)"
+    },
     fundo: {
         "Preto Veludo": "on a seamless pitch-black velvet backdrop, absorbing light for maximum dramatic contrast",
         "Branco Neve": "on a pure snow-white seamless studio background, bright clinical soft-box lighting",
@@ -83,6 +90,10 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const displaySelection = selections.display || '';
     const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
 
+    // NOVO: Adicionar Prop (Se selecionado)
+    const propSelection = selections.prop || 'none';
+    const propText = propSelection !== 'none' && dict.props[propSelection] ? `, ${dict.props[propSelection]}` : "";
+
     let textPrompt = "";
     if (selections.text) {
         const typoSelection = selections.typography || '';
@@ -94,8 +105,7 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText} and is ${positionText}.`;
     }
 
-    // A MÁGICA ACONTECE AQUI NESTA STRING FINAL
-    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
+    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
 
     return finalEnglishPrompt;
 }
