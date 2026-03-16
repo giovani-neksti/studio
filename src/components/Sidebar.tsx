@@ -55,6 +55,7 @@ const getDisplayIcon = (id: string) => {
     case 'box': return '🎁';
     case 'pedestal': return '🏛️';
     case 'cone': return '🔺';
+    case 'velvet_hand': return '🖐️'; // NOVO Ícone
     case 'cushion': return '🛋️';
     case 'surface': return '🪞';
     case 'floating': return '✨';
@@ -260,7 +261,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 })}
               </div>
             ) : (
-              // NOVO: Layout 3x3 (Apenas texto) para as Modelos Humanas
               <div className="grid grid-cols-3 gap-1.5 md:gap-2">
                 {config.humanDisplayOptions.map((opt: any) => {
                   const isActive = selections.display === opt.name;

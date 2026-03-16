@@ -63,8 +63,8 @@ export interface NicheConfig {
   humanDisplayOptions: HumanModelOption[];
   typographyOptions: { label: string; class: string }[];
   textPositionOptions: TextPositionOption[];
-  textColorOptions: TextColorOption[]; // NOVO
-  textSizeOptions: TextSizeOption[]; // NOVO
+  textColorOptions: TextColorOption[];
+  textSizeOptions: TextSizeOption[];
   formats: FormatOption[];
 }
 
@@ -75,7 +75,6 @@ const sharedFormats: FormatOption[] = [
   { id: 'landscape', label: 'Banner Horizontal', ratio: '1.91:1', pixels: '1200x628', social: 'LinkedIn / Site' }
 ];
 
-// MAIS OPÇÕES DE FONTES EDITORIAIS
 const sharedTypography = [
   { label: 'Sem Texto', class: '' },
   { label: 'Playfair (Elegante)', class: 'font-serif' },
@@ -93,7 +92,6 @@ const sharedTextPosition: TextPositionOption[] = [
   { id: 'bottom', label: 'Inferior', gridClass: 'items-end justify-center' },
 ];
 
-// NOVAS CORES E TAMANHOS DE TEXTO (Focadas em Joalharia)
 const sharedTextColors: TextColorOption[] = [
   { id: 'white', label: 'Branco', hex: '#FFFFFF' },
   { id: 'black', label: 'Preto', hex: '#000000' },
@@ -155,11 +153,13 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     ],
     scenarios: [],
 
+    // NOVO: Adicionado "Mão de Veludo" (Total 8 Itens para grelha 2x4)
     displayOptions: [
       { id: 'bust', label: 'Busto de Veludo (Colar)' },
       { id: 'box', label: 'Caixa de Joia Premium' },
       { id: 'pedestal', label: 'Pedestal em Mármore' },
       { id: 'cone', label: 'Expositor de Anel (Cone)' },
+      { id: 'velvet_hand', label: 'Mão de Veludo (Anel)' },
       { id: 'cushion', label: 'Almofada de Cetim' },
       { id: 'surface', label: 'Sem Expositor (Surface)' },
       { id: 'floating', label: 'Levitação 3D' },

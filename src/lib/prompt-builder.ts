@@ -48,6 +48,7 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Caixa de Joia Premium": "placed inside an open, luxurious leather premium jewelry box",
         "Pedestal em Mármore": "resting on a sleek, polished white marble pedestal",
         "Expositor de Anel (Cone)": "mounted on a minimalist cone-shaped ring display",
+        "Mão de Veludo (Anel)": "displayed elegantly on a premium black velvet jewelry mannequin hand",
         "Almofada de Cetim": "resting gently on a soft, luxurious silk satin cushion",
         "Sem Expositor (Surface)": "laying flat directly on the highly reflective surface",
         "Levitação 3D": "floating gracefully in mid-air with a zero-gravity dynamic effect",
@@ -70,7 +71,6 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Cormorant (Script)": "written beautifully in a cursive flowing script typography",
         "Impact (Display)": "written boldly in a thick, high-impact display typography"
     },
-    // NOVOS DICIONÁRIOS DE TEXTO
     corTexto: {
         "white": "colored in crisp pure white",
         "black": "colored in solid deep black",
@@ -113,7 +113,6 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         const typoSelection = selections.typography || '';
         const typoText = dict.tipografia[typoSelection] || "written in a clean font";
 
-        // Novos campos
         const colorSelection = selections.textColor || 'white';
         const colorText = dict.corTexto[colorSelection] || dict.corTexto['white'];
 
@@ -123,7 +122,6 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         const posSelection = selections.textPosition || 'bottom';
         const positionText = dict.posicaoTexto[posSelection] || dict.posicaoTexto['bottom'];
 
-        // Prompt do Texto Completo
         textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText}, ${colorText}, ${sizeText}, and is ${positionText}.`;
     }
 
