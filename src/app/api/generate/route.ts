@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     // MODELO ESTÁVEL (Nano Banana 1) - Garantido em us-central1
     const location = 'us-central1';
-    const modelId = 'gemini-3-pro-image-preview';
+    const modelId = 'imagen-4.1-plus-001';
     const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
 
     // 4. Chamada Multimodal
