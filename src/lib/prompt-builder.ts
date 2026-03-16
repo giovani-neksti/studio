@@ -6,9 +6,9 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Pulseira": "a sophisticated luxury bracelet",
         "Relógio": "a premium luxury watch",
         "Broche": "an exquisite designer brooch",
-        "Pingente": "a beautiful delicate pendant"
+        "Pingente": "a beautiful delicate pendant",
+        "Bracelete Pandora": "a premium charm bracelet loaded with intricate silver and glass charms, Pandora style"
     },
-    // NOVO: Dicionário de Material
     material: {
         "gold_yellow": "featuring rich warm golden reflections and highly polished yellow gold material properties",
         "gold_white": "featuring cool pristine silver highlights, bright white gold material, and sharp metallic reflections",
@@ -71,7 +71,6 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const productCat = selections.category || '';
     const productText = dict.produto[productCat] || "a luxury jewelry piece";
 
-    // NOVO: Lê o material escolhido
     const materialSelection = selections.material || '';
     const materialText = dict.material[materialSelection] ? `, ${dict.material[materialSelection]}` : "";
 
@@ -92,7 +91,6 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText} and is ${positionText}.`;
     }
 
-    // INJEÇÃO SEGURA NA STRING (Mantido o resto intacto)
     const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, 8k resolution, octane render, sharp focus.`;
 
     return finalEnglishPrompt;

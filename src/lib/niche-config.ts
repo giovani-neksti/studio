@@ -39,7 +39,7 @@ export interface NicheConfig {
   icon: string;
   tagline: string;
   categories: string[];
-  materialOptions?: MaterialOption[]; // NOVO: Opcional, pois sapatos e roupas podem não precisar
+  materialOptions?: MaterialOption[];
   solidColors: { name: string; hex: string }[];
   scenarios: { title: string; desc: string }[];
   displayOptions: DisplayOption[];
@@ -49,7 +49,6 @@ export interface NicheConfig {
   formats: FormatOption[];
 }
 
-// Fixed shared options
 const sharedFormats: FormatOption[] = [
   { id: 'square', label: 'Feed Quadrado', ratio: '1:1', pixels: '1080x1080', social: 'Instagram / Facebook' },
   { id: 'portrait', label: 'Post Retrato', ratio: '4:5', pixels: '1080x1350', social: 'Instagram Feed' },
@@ -77,9 +76,9 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     themeClass: 'theme-jewelry',
     icon: '💎',
     tagline: 'Componha cenários de luxo ao redor das suas joias',
-    categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Relógio', 'Broche', 'Pingente'],
+    // NOVO: Adicionado 'Bracelete Pandora' (Total 8 Itens para grelha 2x4)
+    categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Relógio', 'Broche', 'Pingente', 'Bracelete Pandora'],
 
-    // NOVO: Materiais de Joalharia
     materialOptions: [
       { id: 'gold_yellow', label: 'Ouro Amarelo' },
       { id: 'gold_white', label: 'Ouro Branco / Prata' },
@@ -87,7 +86,6 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'gemstone', label: 'Pedraria Predominante' },
     ],
 
-    // 20 CORES PREMIUM DE MOSTRUÁRIO
     solidColors: [
       { name: 'Preto Veludo', hex: '#111111' },
       { name: 'Branco Neve', hex: '#FFFFFF' },

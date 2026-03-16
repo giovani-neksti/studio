@@ -13,7 +13,8 @@ import {
   Type,
   CheckCircle2,
   BoxSelect,
-  AlignVerticalSpaceAround
+  AlignVerticalSpaceAround,
+  UploadCloud
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -22,6 +23,31 @@ interface SidebarProps {
   selections: Record<string, any>;
   onSelect: (key: string, value: any) => void;
 }
+
+// Função para Mapear Ícones Ilustrados por Categoria
+const getCategoryIcon = (cat: string) => {
+  if (cat.includes('Colar')) return '📿';
+  if (cat.includes('Brinco')) return '✨';
+  if (cat.includes('Anel')) return '💍';
+  if (cat.includes('Pulseira')) return '⛓️';
+  if (cat.includes('Relógio')) return '⌚';
+  if (cat.includes('Broche')) return '🏵️';
+  if (cat.includes('Pingente')) return '🧿';
+  if (cat.includes('Pandora')) return '🔮';
+
+  if (cat.includes('Camisa') || cat.includes('Blusa')) return '👚';
+  if (cat.includes('Calça') || cat.includes('Saia')) return '👖';
+  if (cat.includes('Vestido')) return '👗';
+  if (cat.includes('Casaco')) return '🧥';
+  if (cat.includes('Acessórios')) return '👜';
+
+  if (cat.includes('Tênis Urbano') || cat.includes('Esportivo')) return '👟';
+  if (cat.includes('Salto Alto')) return '👠';
+  if (cat.includes('Bota')) return '🥾';
+  if (cat.includes('Sapato')) return '👞';
+
+  return '🏷️';
+};
 
 function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -72,33 +98,51 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
       <ScrollArea className="flex-1 min-h-0">
         <div className="py-3">
-          {/* PASSO 1: CATEGORIA E NOVO CAMPO MATERIAL */}
+          {/* PASSO 1: CATEGORIA COM GRELHA DE ÍCONES (2 Colunas) E NOVO CAMPO MATERIAL */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {config.categories.map((cat) => {
                 const uploadKey = `upload_${cat}`;
                 const hasUpload = !!selections[uploadKey];
                 const isActive = selections.category === cat;
+                const icon = getCategoryIcon(cat);
+
                 return (
-                  <div key={cat} className={`flex flex-col border rounded-xl overflow-hidden ${isActive ? 'border-[var(--primary)]' : 'border-[var(--border)]'}`}>
-                    <button onClick={() => onSelect('category', cat)} className={`px-3 py-2.5 text-sm flex items-center justify-between ${isActive ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : ''}`}>
-                      <div className="flex items-center gap-2">
-                        {hasUpload ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <div className="w-4 h-4 rounded-full border border-dashed opacity-40" />}
-                        {cat}
-                      </div>
-                    </button>
-                    {isActive && (
-                      <div className="p-3 bg-[var(--background)]">
-                        <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
-                          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                          <span className="text-xs truncate block">{hasUpload ? selections[uploadKey]?.name : 'Fazer Upload'}</span>
-                        </div>
-                      </div>
+                  <button
+                    key={cat}
+                    onClick={() => onSelect('category', cat)}
+                    className={`relative flex flex-col items-center justify-center p-3 rounded-xl border transition-all
+                      ${isActive
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
+                        : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
+                  >
+                    {hasUpload && (
+                      <CheckCircle2 className="absolute top-2 right-2 w-3.5 h-3.5 text-green-500" />
                     )}
-                  </div>
+                    <span className="text-2xl mb-1.5">{icon}</span>
+                    <span className={`text-[11px] font-medium leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                      {cat}
+                    </span>
+                  </button>
                 );
               })}
             </div>
+
+            {/* ÁREA DE UPLOAD (Aparece em baixo da grelha quando a categoria está selecionada) */}
+            {activeCategory && (
+              <div className="mt-3">
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-4 border-2 border-dashed border-[var(--primary)]/50 bg-[var(--primary)]/5 rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors"
+                >
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                  <UploadCloud className="w-5 h-5 mx-auto mb-2 text-[var(--primary)] opacity-80" />
+                  <span className="text-xs font-medium text-[var(--primary)] block truncate">
+                    {selections[activeUploadKey!] ? selections[activeUploadKey!].name : `Fazer Upload de ${activeCategory}`}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* SELETOR DE MATERIAL */}
             {hasMaterials && (
