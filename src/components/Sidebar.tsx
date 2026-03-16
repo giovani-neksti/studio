@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   BoxSelect,
   AlignVerticalSpaceAround,
-  UploadCloud
+  UploadCloud,
+  Type as TypeIcon
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -71,9 +72,12 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const activeCategory = selections.category;
   const activeUploadKey = activeCategory ? `upload_${activeCategory}` : null;
 
+  // Garante valores padrão quando se escreve um texto
   useEffect(() => {
-    if (selections.text && !selections.textPosition) {
-      onSelect('textPosition', 'bottom');
+    if (selections.text) {
+      if (!selections.textPosition) onSelect('textPosition', 'bottom');
+      if (!selections.textSize) onSelect('textSize', 'medium');
+      if (!selections.textColor) onSelect('textColor', 'white');
     }
   }, [selections.text]);
 
@@ -89,7 +93,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
   return (
     <div className="flex flex-col h-full w-full min-h-0 bg-[var(--card)]">
-      {/* Escondido no mobile para poupar espaço vertical, já temos o cabeçalho global */}
       <div className="hidden md:flex px-5 py-4 border-b border-[var(--border)] shrink-0 items-center gap-3">
         <span className="text-xl">{config.icon}</span>
         <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
@@ -161,7 +164,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
-          {/* PASSO 2: AMBIENTAÇÃO */}
+          {/* PASSO 2: AMBIENTAÇÃO & ADEREÇOS */}
           <SectionWrapper title="2. Ambientação & Adereços" icon={<ImageIcon />}>
             {hasScenarios && (
               <div className="flex p-0.5 md:p-1 bg-[var(--accent)] rounded-lg mb-3">
@@ -229,8 +232,8 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
 
-          {/* PASSO 4: ASSINATURA VISUAL */}
-          <SectionWrapper title="4. Assinatura Visual" icon={<Type />}>
+          {/* PASSO 4: ASSINATURA VISUAL (COM COR E TAMANHO) */}
+          <SectionWrapper title="4. Assinatura Visual" icon={<TypeIcon />}>
             <div className="space-y-2.5 md:space-y-3">
               <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[var(--accent)] text-[var(--foreground)] h-8 md:h-9 border-none text-xs md:text-sm" />
 
@@ -240,20 +243,66 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               </select>
 
               {selections.text && (
-                <div className="pt-1.5 md:pt-2">
-                  <p className="text-[10px] md:text-xs text-[var(--muted-foreground)] mb-1.5 font-medium flex items-center gap-1">
-                    <AlignVerticalSpaceAround className="w-3 h-3 md:w-3.5 md:h-3.5" /> Posição do Texto
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5 md:gap-2">
-                    {config.textPositionOptions?.map((pos: any) => (
-                      <button key={pos.id} onClick={() => onSelect('textPosition', pos.id)} className={`flex flex-col items-center p-1.5 md:p-2 rounded-md border transition-all ${selections.textPosition === pos.id ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30' : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}>
-                        <div className={`w-full aspect-square mb-1 border border-dashed rounded flex p-1 ${pos.gridClass} ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--border)]'}`}>
-                          <div className={`h-1 w-4 md:h-1.5 md:w-5 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
-                        </div>
-                        <span className={`text-[9px] md:text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}>{pos.label}</span>
-                      </button>
-                    ))}
+                <div className="pt-2 flex flex-col gap-3">
+
+                  {/* GRID PARA TAMANHO E COR LADO A LADO */}
+                  <div className="flex items-start gap-3 w-full">
+                    {/* Bloco de Tamanho */}
+                    <div className="flex-1">
+                      <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium">Tamanho</p>
+                      <div className="flex w-full bg-[var(--background)] border border-[var(--border)] rounded-md overflow-hidden h-7 md:h-8">
+                        {config.textSizeOptions?.map(size => {
+                          const isActive = selections.textSize === size.id || (!selections.textSize && size.id === 'medium');
+                          return (
+                            <button
+                              key={size.id}
+                              onClick={() => onSelect('textSize', size.id)}
+                              className={`flex-1 flex items-center justify-center text-[10px] transition-colors ${isActive ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold' : 'hover:bg-[var(--accent)] text-[var(--foreground)]'}`}
+                            >
+                              {size.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Bloco de Cor */}
+                    <div className="flex-shrink-0">
+                      <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium">Cor da Letra</p>
+                      <div className="flex items-center gap-1.5 md:gap-2 h-7 md:h-8">
+                        {config.textColorOptions?.map(color => {
+                          const isActive = selections.textColor === color.id || (!selections.textColor && color.id === 'white');
+                          return (
+                            <button
+                              key={color.id}
+                              title={color.label}
+                              onClick={() => onSelect('textColor', color.id)}
+                              className={`w-5 h-5 md:w-6 md:h-6 rounded-full border shadow-sm transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[var(--primary)] scale-110' : 'border-gray-500/30 hover:scale-110'}`}
+                              style={{ backgroundColor: color.hex }}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Posição do Texto */}
+                  <div>
+                    <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium flex items-center gap-1">
+                      <AlignVerticalSpaceAround className="w-3 h-3 md:w-3.5 md:h-3.5" /> Posição na Imagem
+                    </p>
+                    <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+                      {config.textPositionOptions?.map((pos: any) => (
+                        <button key={pos.id} onClick={() => onSelect('textPosition', pos.id)} className={`flex flex-col items-center p-1.5 md:p-2 rounded-md border transition-all ${selections.textPosition === pos.id ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30' : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}>
+                          <div className={`w-full aspect-square mb-1 border border-dashed rounded flex p-1 ${pos.gridClass} ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--border)]'}`}>
+                            <div className={`h-1 w-4 md:h-1.5 md:w-5 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
+                          </div>
+                          <span className={`text-[9px] md:text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}>{pos.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
               )}
             </div>

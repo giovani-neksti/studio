@@ -15,7 +15,6 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "gold_rose": "featuring soft pinkish-gold reflections, elegant rose gold material, and warm metallic luster",
         "gemstone": "focusing on brilliant gemstone refractions, internal light scattering, and sharp diamond-like caustics"
     },
-    // NOVO: Dicionário de Adereços (Props)
     props: {
         "water_drops": "with delicate cinematic water droplets scattered elegantly on the surface",
         "orchid_petal": "with a single pure white orchid petal resting softly in the background",
@@ -64,9 +63,25 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
     },
     tipografia: {
         "Playfair (Elegante)": "written elegantly in a sophisticated serif Playfair-style typography",
+        "Didot (Alta Costura)": "written elegantly in a high-fashion editorial Didot-style serif typography",
+        "Cinzel (Clássica)": "written boldly in a classic, cinematic roman Cinzel-style serif typography",
+        "Montserrat (Minimalista)": "written cleanly in a minimalist geometric Montserrat-style sans-serif typography",
         "Inter (Moderna)": "written cleanly in a modern sans-serif Inter-style typography",
         "Cormorant (Script)": "written beautifully in a cursive flowing script typography",
         "Impact (Display)": "written boldly in a thick, high-impact display typography"
+    },
+    // NOVOS DICIONÁRIOS DE TEXTO
+    corTexto: {
+        "white": "colored in crisp pure white",
+        "black": "colored in solid deep black",
+        "gold": "colored in luxurious metallic gold",
+        "silver": "colored in sleek metallic silver",
+        "rose_gold": "colored in elegant metallic rose gold"
+    },
+    tamanhoTexto: {
+        "small": "in a small, subtle, and understated size",
+        "medium": "in a medium, balanced, and readable size",
+        "large": "in a large, bold, and prominent size"
     },
     posicaoTexto: {
         "top": "positioned explicitly at the TOP part of the image, keeping the center and product clear",
@@ -90,7 +105,6 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const displaySelection = selections.display || '';
     const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
 
-    // NOVO: Adicionar Prop (Se selecionado)
     const propSelection = selections.prop || 'none';
     const propText = propSelection !== 'none' && dict.props[propSelection] ? `, ${dict.props[propSelection]}` : "";
 
@@ -99,10 +113,18 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         const typoSelection = selections.typography || '';
         const typoText = dict.tipografia[typoSelection] || "written in a clean font";
 
+        // Novos campos
+        const colorSelection = selections.textColor || 'white';
+        const colorText = dict.corTexto[colorSelection] || dict.corTexto['white'];
+
+        const sizeSelection = selections.textSize || 'medium';
+        const sizeText = dict.tamanhoTexto[sizeSelection] || dict.tamanhoTexto['medium'];
+
         const posSelection = selections.textPosition || 'bottom';
         const positionText = dict.posicaoTexto[posSelection] || dict.posicaoTexto['bottom'];
 
-        textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText} and is ${positionText}.`;
+        // Prompt do Texto Completo
+        textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText}, ${colorText}, ${sizeText}, and is ${positionText}.`;
     }
 
     const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;

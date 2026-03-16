@@ -11,7 +11,7 @@ export interface HumanModelOption {
   id: string;
   name: string;
   type: string;
-  imageUrl: string; // Used for the visual grid
+  imageUrl: string;
 }
 
 export interface FormatOption {
@@ -25,7 +25,18 @@ export interface FormatOption {
 export interface TextPositionOption {
   id: string;
   label: string;
-  gridClass: string; // Used to style the visual square indicator
+  gridClass: string;
+}
+
+export interface TextColorOption {
+  id: string;
+  label: string;
+  hex: string;
+}
+
+export interface TextSizeOption {
+  id: string;
+  label: string;
 }
 
 export interface MaterialOption {
@@ -45,13 +56,15 @@ export interface NicheConfig {
   tagline: string;
   categories: string[];
   materialOptions?: MaterialOption[];
-  propOptions?: PropOption[]; // NOVO: Elementos de composição (Props)
+  propOptions?: PropOption[];
   solidColors: { name: string; hex: string }[];
   scenarios: { title: string; desc: string }[];
   displayOptions: DisplayOption[];
   humanDisplayOptions: HumanModelOption[];
   typographyOptions: { label: string; class: string }[];
   textPositionOptions: TextPositionOption[];
+  textColorOptions: TextColorOption[]; // NOVO
+  textSizeOptions: TextSizeOption[]; // NOVO
   formats: FormatOption[];
 }
 
@@ -62,9 +75,13 @@ const sharedFormats: FormatOption[] = [
   { id: 'landscape', label: 'Banner Horizontal', ratio: '1.91:1', pixels: '1200x628', social: 'LinkedIn / Site' }
 ];
 
+// MAIS OPÇÕES DE FONTES EDITORIAIS
 const sharedTypography = [
   { label: 'Sem Texto', class: '' },
   { label: 'Playfair (Elegante)', class: 'font-serif' },
+  { label: 'Didot (Alta Costura)', class: 'font-serif' },
+  { label: 'Cinzel (Clássica)', class: 'font-serif' },
+  { label: 'Montserrat (Minimalista)', class: 'font-sans' },
   { label: 'Inter (Moderna)', class: 'font-sans uppercase tracking-widest' },
   { label: 'Cormorant (Script)', class: 'font-serif italic' },
   { label: 'Impact (Display)', class: 'font-sans font-black' }
@@ -74,6 +91,21 @@ const sharedTextPosition: TextPositionOption[] = [
   { id: 'top', label: 'Superior', gridClass: 'items-start justify-center' },
   { id: 'center', label: 'Centro', gridClass: 'items-center justify-center' },
   { id: 'bottom', label: 'Inferior', gridClass: 'items-end justify-center' },
+];
+
+// NOVAS CORES E TAMANHOS DE TEXTO (Focadas em Joalharia)
+const sharedTextColors: TextColorOption[] = [
+  { id: 'white', label: 'Branco', hex: '#FFFFFF' },
+  { id: 'black', label: 'Preto', hex: '#000000' },
+  { id: 'gold', label: 'Dourado', hex: '#D4AF37' },
+  { id: 'silver', label: 'Prata', hex: '#C0C0C0' },
+  { id: 'rose_gold', label: 'Ouro Rosa', hex: '#B76E79' }
+];
+
+const sharedTextSizes: TextSizeOption[] = [
+  { id: 'small', label: 'Pequena' },
+  { id: 'medium', label: 'Média' },
+  { id: 'large', label: 'Grande' }
 ];
 
 export const nicheConfigs: Record<NicheKey, NicheConfig> = {
@@ -91,7 +123,6 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'gemstone', label: 'Pedraria Predominante' },
     ],
 
-    // NOVO: Adereços Minimalistas para Joalharia
     propOptions: [
       { id: 'none', label: 'Sem Adereços (Apenas Fundo)' },
       { id: 'water_drops', label: 'Gotas de Água Fresca' },
@@ -146,6 +177,8 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     ],
     typographyOptions: sharedTypography,
     textPositionOptions: sharedTextPosition,
+    textColorOptions: sharedTextColors,
+    textSizeOptions: sharedTextSizes,
     formats: sharedFormats,
   },
 
@@ -183,6 +216,8 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     ],
     typographyOptions: sharedTypography,
     textPositionOptions: sharedTextPosition,
+    textColorOptions: sharedTextColors,
+    textSizeOptions: sharedTextSizes,
     formats: sharedFormats,
   },
 
@@ -217,6 +252,8 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     ],
     typographyOptions: sharedTypography,
     textPositionOptions: sharedTextPosition,
+    textColorOptions: sharedTextColors,
+    textSizeOptions: sharedTextSizes,
     formats: sharedFormats,
   },
 };
