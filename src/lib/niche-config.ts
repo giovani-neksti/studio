@@ -1,4 +1,3 @@
-// lib/niche-config.ts
 // Configuration for the Composition Paradigm (Fotografia de Produto assistida por IA)
 
 export type NicheKey = 'jewelry' | 'clothing' | 'shoes';
@@ -23,6 +22,12 @@ export interface FormatOption {
   social: string;
 }
 
+export interface TextPositionOption {
+  id: string;
+  label: string;
+  gridClass: string; // Used to style the visual square indicator
+}
+
 export interface NicheConfig {
   label: string;
   themeClass: string;
@@ -34,6 +39,7 @@ export interface NicheConfig {
   displayOptions: DisplayOption[];
   humanDisplayOptions: HumanModelOption[];
   typographyOptions: { label: string; class: string }[];
+  textPositionOptions: TextPositionOption[]; // NOVO
   formats: FormatOption[];
 }
 
@@ -51,6 +57,13 @@ const sharedTypography = [
   { label: 'Inter (Moderna)', class: 'font-sans uppercase tracking-widest' },
   { label: 'Cormorant (Script)', class: 'font-serif italic' },
   { label: 'Impact (Display)', class: 'font-sans font-black' }
+];
+
+// NOVA OPÇÃO COMPARTILHADA DE POSIÇÃO DO TEXTO
+const sharedTextPosition: TextPositionOption[] = [
+  { id: 'top', label: 'Superior', gridClass: 'items-start justify-center' },
+  { id: 'center', label: 'Centro', gridClass: 'items-center justify-center' },
+  { id: 'bottom', label: 'Inferior', gridClass: 'items-end justify-center' },
 ];
 
 export const nicheConfigs: Record<NicheKey, NicheConfig> = {
@@ -95,9 +108,10 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'model_close_neck', name: 'Close', type: 'Foco no Pescoço', imageUrl: 'https://images.unsplash.com/photo-1599643478514-46bfa3321526?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,
+    textPositionOptions: sharedTextPosition,
     formats: sharedFormats,
   },
-  
+
   clothing: {
     label: 'Moda & Roupas',
     themeClass: 'theme-clothing',
@@ -138,6 +152,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'model_faceless', name: 'Sem Rosto', type: 'Apenas Tronco', imageUrl: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,
+    textPositionOptions: sharedTextPosition,
     formats: sharedFormats,
   },
 
@@ -180,6 +195,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'jumping', name: 'Salto', type: 'Ação Áerea', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,
+    textPositionOptions: sharedTextPosition,
     formats: sharedFormats,
   },
 };

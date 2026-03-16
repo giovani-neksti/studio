@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { NicheConfig } from '@/lib/niche-config';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   BoxSelect,
   Shirt,
+  AlignVerticalSpaceAround
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -48,6 +49,13 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const activeCategory = selections.category;
   const activeUploadKey = activeCategory ? `upload_${activeCategory}` : null;
 
+  // Garante um valor padrão (Inferior) para a posição do texto quando o utilizador escreve algo
+  useEffect(() => {
+    if (selections.text && !selections.textPosition) {
+      onSelect('textPosition', 'bottom');
+    }
+  }, [selections.text]);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && activeUploadKey) {
       onSelect(activeUploadKey, e.target.files[0]);
@@ -65,7 +73,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
       <ScrollArea className="flex-1 min-h-0">
         <div className="py-3">
-          {/* PASSO 1 */}
+          {/* PASSO 1: UPLOAD E CATEGORIA */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
             <div className="grid grid-cols-1 gap-2">
               {config.categories.map((cat) => {
@@ -96,7 +104,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 2 */}
+          {/* PASSO 2: AMBIENTAÇÃO */}
           <SectionWrapper title="2. Ambientação" icon={<ImageIcon className="w-4 h-4" />}>
             <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
               <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cor Sólida</button>
@@ -119,7 +127,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 3: MODELOS EM LISTA */}
+          {/* PASSO 3: TIPO DE EXIBIÇÃO */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect className="w-4 h-4" />}>
             <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
               <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Expositor</button>
@@ -132,7 +140,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     <span>{opt.label || opt.name}</span>
                     {selections.display === (opt.label || opt.name) && <CheckCircle2 className="w-4 h-4 text-[var(--primary)]" />}
                   </div>
-                  <p className="text-[10px] opacity-50">{opt.type || ''}</p>
+                  <p className="text-[10px] opacity-50 font-normal mt-0.5">{opt.type || ''}</p>
                 </button>
               ))}
             </div>
@@ -140,18 +148,48 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 4 */}
+          {/* PASSO 4: ASSINATURA VISUAL COM POSICIONAMENTO */}
           <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
-            <Input placeholder="Ex: Lançamento" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="mb-2 bg-[#eef2ff] text-black h-9 border-none" />
-            <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]">
-              <option value="" disabled>Escolha a Fonte</option>
-              {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
-            </select>
+            <div className="space-y-3">
+              <Input placeholder="Ex: Lançamento" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[#eef2ff] text-black h-9 border-none" />
+
+              <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]">
+                <option value="" disabled>Escolha a Fonte</option>
+                {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
+              </select>
+
+              {/* OPÇÕES DE POSIÇÃO DO TEXTO (SÓ APARECEM SE HOUVER TEXTO) */}
+              {selections.text && (
+                <div className="pt-2">
+                  <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium flex items-center gap-1.5">
+                    <AlignVerticalSpaceAround className="w-3.5 h-3.5" /> Posição do Texto
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {config.textPositionOptions?.map((pos: any) => (
+                      <button
+                        key={pos.id}
+                        onClick={() => onSelect('textPosition', pos.id)}
+                        className={`flex flex-col items-center p-2 rounded-lg border transition-all
+                          ${selections.textPosition === pos.id
+                            ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
+                            : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
+                      >
+                        {/* Indicador visual da posição (Quadrado com a linha no lugar certo) */}
+                        <div className={`w-full aspect-square mb-1.5 border border-dashed rounded flex p-1 ${pos.gridClass} ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--border)]'}`}>
+                          <div className={`h-1.5 w-6 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
+                        </div>
+                        <span className={`text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}>{pos.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </SectionWrapper>
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 5 RESTAURADO */}
+          {/* PASSO 5: FORMATO DE SAÍDA */}
           <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-4 h-4" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.formats.map((fmt) => (

@@ -43,6 +43,11 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Inter (Moderna)": "written cleanly in a modern sans-serif Inter-style typography",
         "Cormorant (Script)": "written beautifully in a cursive flowing script typography",
         "Impact (Display)": "written boldly in a thick, high-impact display typography"
+    },
+    posicaoTexto: {
+        "top": "positioned explicitly at the TOP part of the image, keeping the center and product clear",
+        "center": "positioned prominently in the dead CENTER of the image",
+        "bottom": "positioned explicitly at the BOTTOM part of the image, keeping the center and product clear"
     }
 };
 
@@ -58,12 +63,17 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const displaySelection = selections.display || '';
     const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
 
-    // Instrução fortíssima para forçar a IA a escrever o texto
+    // Instrução combinada para Texto e Posição
     let textPrompt = "";
     if (selections.text) {
         const typoSelection = selections.typography || '';
         const typoText = dict.tipografia[typoSelection] || "written in a clean font";
-        textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText}.`;
+
+        // Pega a posição escolhida ou usa 'bottom' como padrão de segurança
+        const posSelection = selections.textPosition || 'bottom';
+        const positionText = dict.posicaoTexto[posSelection] || dict.posicaoTexto['bottom'];
+
+        textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText} and is ${positionText}.`;
     }
 
     const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, 8k resolution, octane render, sharp focus.`;
