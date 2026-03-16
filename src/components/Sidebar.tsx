@@ -59,6 +59,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   };
 
   const hasScenarios = config.scenarios && config.scenarios.length > 0;
+  const hasMaterials = config.materialOptions && config.materialOptions.length > 0;
 
   return (
     <aside className="h-full flex flex-col bg-[var(--card)] border-r border-[var(--border)]">
@@ -71,7 +72,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
       <ScrollArea className="flex-1 min-h-0">
         <div className="py-3">
-          {/* PASSO 1 */}
+          {/* PASSO 1: CATEGORIA E NOVO CAMPO MATERIAL */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
             <div className="grid grid-cols-1 gap-2">
               {config.categories.map((cat) => {
@@ -98,11 +99,30 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 );
               })}
             </div>
+
+            {/* SELETOR DE MATERIAL (Aparece se o nicho tiver configurado) */}
+            {hasMaterials && (
+              <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium">
+                  Material Predominante
+                </p>
+                <select
+                  value={selections.material || ''}
+                  onChange={(e) => onSelect('material', e.target.value)}
+                  className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]"
+                >
+                  <option value="" disabled>Selecione o Material</option>
+                  {config.materialOptions?.map((mat) => (
+                    <option key={mat.id} value={mat.id}>{mat.label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </SectionWrapper>
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 2: AMBIENTAÇÃO (LIMPO SÓ PARA CORES SE NÃO HOUVER CENÁRIOS) */}
+          {/* PASSO 2: AMBIENTAÇÃO */}
           <SectionWrapper title="2. Fundo (Cor Sólida)" icon={<ImageIcon className="w-4 h-4" />}>
             {hasScenarios && (
               <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
@@ -203,19 +223,4 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   onClick={() => onSelect('format', fmt.ratio)}
                   className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all text-center
                     ${selections.format === fmt.ratio
-                      ? 'border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)] shadow-sm'
-                      : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50'}`}
-                >
-                  <span className="font-bold text-[13px] mb-[2px] text-[var(--foreground)]">{fmt.ratio}</span>
-                  <span className="text-[11px] font-medium mb-1">{fmt.label}</span>
-                  <span className="text-[9px] opacity-50">{fmt.pixels}</span>
-                </button>
-              ))}
-            </div>
-          </SectionWrapper>
-          <div className="h-8" />
-        </div>
-      </ScrollArea>
-    </aside>
-  );
-}
+                      ? 'border-[var(--primary)] bg-

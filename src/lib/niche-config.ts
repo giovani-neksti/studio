@@ -28,12 +28,18 @@ export interface TextPositionOption {
   gridClass: string; // Used to style the visual square indicator
 }
 
+export interface MaterialOption {
+  id: string;
+  label: string;
+}
+
 export interface NicheConfig {
   label: string;
   themeClass: string;
   icon: string;
   tagline: string;
   categories: string[];
+  materialOptions?: MaterialOption[]; // NOVO: Opcional, pois sapatos e roupas podem não precisar
   solidColors: { name: string; hex: string }[];
   scenarios: { title: string; desc: string }[];
   displayOptions: DisplayOption[];
@@ -73,6 +79,14 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     tagline: 'Componha cenários de luxo ao redor das suas joias',
     categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Relógio', 'Broche', 'Pingente'],
 
+    // NOVO: Materiais de Joalharia
+    materialOptions: [
+      { id: 'gold_yellow', label: 'Ouro Amarelo' },
+      { id: 'gold_white', label: 'Ouro Branco / Prata' },
+      { id: 'gold_rose', label: 'Ouro Rosa' },
+      { id: 'gemstone', label: 'Pedraria Predominante' },
+    ],
+
     // 20 CORES PREMIUM DE MOSTRUÁRIO
     solidColors: [
       { name: 'Preto Veludo', hex: '#111111' },
@@ -96,7 +110,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { name: 'Lavanda Escuro', hex: '#5C4D5C' },
       { name: 'Verde Oliva', hex: '#555D3B' },
     ],
-    scenarios: [], // Removido como pedido
+    scenarios: [],
 
     displayOptions: [
       { id: 'bust', label: 'Busto de Veludo (Colar)' },

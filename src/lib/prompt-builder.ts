@@ -8,7 +8,13 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Broche": "an exquisite designer brooch",
         "Pingente": "a beautiful delicate pendant"
     },
-    // AS 20 CORES PREMIUM TRADUZIDAS PARA PROMPTS DE ALTA QUALIDADE
+    // NOVO: Dicionário de Material
+    material: {
+        "gold_yellow": "featuring rich warm golden reflections and highly polished yellow gold material properties",
+        "gold_white": "featuring cool pristine silver highlights, bright white gold material, and sharp metallic reflections",
+        "gold_rose": "featuring soft pinkish-gold reflections, elegant rose gold material, and warm metallic luster",
+        "gemstone": "focusing on brilliant gemstone refractions, internal light scattering, and sharp diamond-like caustics"
+    },
     fundo: {
         "Preto Veludo": "on a seamless pitch-black velvet backdrop, absorbing light for maximum dramatic contrast",
         "Branco Neve": "on a pure snow-white seamless studio background, bright clinical soft-box lighting",
@@ -65,6 +71,10 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const productCat = selections.category || '';
     const productText = dict.produto[productCat] || "a luxury jewelry piece";
 
+    // NOVO: Lê o material escolhido
+    const materialSelection = selections.material || '';
+    const materialText = dict.material[materialSelection] ? `, ${dict.material[materialSelection]}` : "";
+
     const bgSelection = selections.background || '';
     const backgroundText = dict.fundo[bgSelection] || "on a neutral studio background";
 
@@ -82,7 +92,8 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText} and is ${positionText}.`;
     }
 
-    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, 8k resolution, octane render, sharp focus.`;
+    // INJEÇÃO SEGURA NA STRING (Mantido o resto intacto)
+    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}. ${textPrompt} Shot with 100mm macro lens, 8k resolution, octane render, sharp focus.`;
 
     return finalEnglishPrompt;
 }
