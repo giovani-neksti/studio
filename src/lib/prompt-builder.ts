@@ -8,20 +8,28 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Broche": "an exquisite designer brooch",
         "Pingente": "a beautiful delicate pendant"
     },
+    // AS 20 CORES PREMIUM TRADUZIDAS PARA PROMPTS DE ALTA QUALIDADE
     fundo: {
         "Preto Veludo": "on a seamless pitch-black velvet backdrop, absorbing light for maximum dramatic contrast",
-        "Champagne": "on a seamless solid champagne-colored background, warm elegant aesthetic",
+        "Branco Neve": "on a pure snow-white seamless studio background, bright clinical soft-box lighting",
         "Cinza Platina": "on a seamless platinum-grey studio backdrop, neutral and highly sophisticated",
+        "Champagne": "on a seamless solid champagne-colored background, warm elegant aesthetic",
         "Caoba Profundo": "on a rich, deep mahogany wood surface, warm luxurious tones",
-        "Branco Neve": "on a pure snow-white seamless background, bright clinical studio lighting",
-        "Estúdio Dark": "in a dark luxury studio setting with dramatic moody spotlighting",
-        "Cofre de Grife": "inside a high-end designer vault, metallic textures, luxury safe box aesthetic",
-        "Bandeja de Veludo": "resting on a plush, premium jeweler's display tray",
-        "Pedestal de Mármore": "elevated on a luxurious veined white marble pedestal",
-        "Folhas de Ouro": "surrounded by scattered abstract gold leaf flakes, opulent and wealthy atmosphere",
-        "Seda Fluida": "resting on flowing, undulating silk fabric with soft elegant folds",
-        "Espelho d'Água": "placed on a shallow, still water mirror reflecting the jewelry perfectly, gentle ripples",
-        "Geometria Flutuante": "surrounded by abstract floating geometric shapes in a modern minimalist space"
+        "Verde Musgo": "on a seamless deep moss green suede backdrop, earthy and organic luxury",
+        "Vermelho Bordô": "on a seamless rich burgundy red velvet background, opulent and royal aesthetic",
+        "Azul Petróleo": "on a seamless dark petrol blue matte backdrop, moody and elegant sophisticated lighting",
+        "Verde Esmeralda": "on a seamless emerald green satin background, rich jewel-toned aesthetic",
+        "Azul Safira": "on a seamless deep sapphire blue velvet backdrop, regal and luxurious",
+        "Rosa Pó": "on a seamless dusty rose pink matte background, soft feminine and delicate lighting",
+        "Terracota": "on a seamless warm terracotta clay-colored backdrop, earthy and modern aesthetic",
+        "Roxo Berinjela": "on a seamless deep eggplant purple velvet background, mysterious and premium",
+        "Cinza Chumbo": "on a seamless dark charcoal grey matte backdrop, industrial yet elegant",
+        "Nude Areia": "on a seamless warm sand nude backdrop, minimalist and clean aesthetic",
+        "Marrom Chocolate": "on a seamless rich chocolate brown suede background, warm and inviting",
+        "Azul Gelo": "on a seamless pale ice blue matte backdrop, crisp and frosty elegant lighting",
+        "Ouro Velho": "on a seamless antique gold textured backdrop, vintage luxury and warmth",
+        "Lavanda Escuro": "on a seamless muted dark lavender backdrop, soft and poetic luxury",
+        "Verde Oliva": "on a seamless olive green matte background, sophisticated and muted organic tones"
     },
     exibicao: {
         "Busto de Veludo (Colar)": "displayed elegantly on a premium black velvet jewelry bust",
@@ -63,13 +71,11 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const displaySelection = selections.display || '';
     const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
 
-    // Instrução combinada para Texto e Posição
     let textPrompt = "";
     if (selections.text) {
         const typoSelection = selections.typography || '';
         const typoText = dict.tipografia[typoSelection] || "written in a clean font";
 
-        // Pega a posição escolhida ou usa 'bottom' como padrão de segurança
         const posSelection = selections.textPosition || 'bottom';
         const positionText = dict.posicaoTexto[posSelection] || dict.posicaoTexto['bottom'];
 

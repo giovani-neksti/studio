@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { NicheConfig } from '@/lib/niche-config';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,10 +11,8 @@ import {
   Image as ImageIcon,
   Maximize2,
   Type,
-  UploadCloud,
   CheckCircle2,
   BoxSelect,
-  Shirt,
   AlignVerticalSpaceAround
 } from 'lucide-react';
 
@@ -49,7 +46,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const activeCategory = selections.category;
   const activeUploadKey = activeCategory ? `upload_${activeCategory}` : null;
 
-  // Garante um valor padrão (Inferior) para a posição do texto quando o utilizador escreve algo
   useEffect(() => {
     if (selections.text && !selections.textPosition) {
       onSelect('textPosition', 'bottom');
@@ -62,6 +58,8 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
     }
   };
 
+  const hasScenarios = config.scenarios && config.scenarios.length > 0;
+
   return (
     <aside className="h-full flex flex-col bg-[var(--card)] border-r border-[var(--border)]">
       <div className="px-5 py-5 border-b border-[var(--border)] shrink-0">
@@ -73,7 +71,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
       <ScrollArea className="flex-1 min-h-0">
         <div className="py-3">
-          {/* PASSO 1: UPLOAD E CATEGORIA */}
+          {/* PASSO 1 */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
             <div className="grid grid-cols-1 gap-2">
               {config.categories.map((cat) => {
@@ -104,21 +102,30 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 2: AMBIENTAÇÃO */}
-          <SectionWrapper title="2. Ambientação" icon={<ImageIcon className="w-4 h-4" />}>
-            <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
-              <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cor Sólida</button>
-              <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'scenario' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cenário IA</button>
-            </div>
-            {bgTab === 'solid' ? (
+          {/* PASSO 2: AMBIENTAÇÃO (LIMPO SÓ PARA CORES SE NÃO HOUVER CENÁRIOS) */}
+          <SectionWrapper title="2. Fundo (Cor Sólida)" icon={<ImageIcon className="w-4 h-4" />}>
+            {hasScenarios && (
+              <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
+                <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cor Sólida</button>
+                <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-xs py-1.5 rounded-md ${bgTab === 'scenario' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Cenário IA</button>
+              </div>
+            )}
+
+            {(!hasScenarios || bgTab === 'solid') ? (
               <div className="grid grid-cols-5 gap-2">
                 {config.solidColors.map((color) => (
-                  <button key={color.name} onClick={() => { onSelect('background', color.name); onSelect('backgroundHex', color.hex); }} className={`aspect-square rounded-full border ${selections.background === color.name ? 'ring-2 ring-[var(--primary)]' : 'border-white/10'}`} style={{ backgroundColor: color.hex }} />
+                  <button
+                    key={color.name}
+                    title={color.name}
+                    onClick={() => { onSelect('background', color.name); onSelect('backgroundHex', color.hex); }}
+                    className={`aspect-square rounded-full border shadow-sm transition-transform hover:scale-110 ${selections.background === color.name ? 'ring-2 ring-offset-2 ring-[var(--primary)] scale-110' : 'border-white/10'}`}
+                    style={{ backgroundColor: color.hex }}
+                  />
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                {config.scenarios.map((scenario) => (
+                {config.scenarios?.map((scenario) => (
                   <button key={scenario.title} onClick={() => onSelect('background', scenario.title)} className={`text-left p-2 rounded-lg border text-xs ${selections.background === scenario.title ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)]'}`}>{scenario.title}</button>
                 ))}
               </div>
@@ -127,7 +134,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 3: TIPO DE EXIBIÇÃO */}
+          {/* PASSO 3 */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect className="w-4 h-4" />}>
             <div className="flex p-1 bg-[var(--accent)] rounded-lg mb-4">
               <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm' : ''}`}>Expositor</button>
@@ -148,17 +155,16 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 4: ASSINATURA VISUAL COM POSICIONAMENTO */}
+          {/* PASSO 4 */}
           <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
             <div className="space-y-3">
-              <Input placeholder="Ex: Lançamento" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[#eef2ff] text-black h-9 border-none" />
+              <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[#eef2ff] text-black h-9 border-none" />
 
               <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-9 px-3 rounded-md text-sm border bg-[var(--background)] text-[var(--foreground)]">
                 <option value="" disabled>Escolha a Fonte</option>
                 {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
               </select>
 
-              {/* OPÇÕES DE POSIÇÃO DO TEXTO (SÓ APARECEM SE HOUVER TEXTO) */}
               {selections.text && (
                 <div className="pt-2">
                   <p className="text-xs text-[var(--muted-foreground)] mb-2 font-medium flex items-center gap-1.5">
@@ -174,7 +180,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                             ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
                             : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
                       >
-                        {/* Indicador visual da posição (Quadrado com a linha no lugar certo) */}
                         <div className={`w-full aspect-square mb-1.5 border border-dashed rounded flex p-1 ${pos.gridClass} ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--border)]'}`}>
                           <div className={`h-1.5 w-6 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
                         </div>
@@ -189,7 +194,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 5: FORMATO DE SAÍDA */}
+          {/* PASSO 5 */}
           <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-4 h-4" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.formats.map((fmt) => (

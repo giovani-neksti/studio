@@ -39,7 +39,7 @@ export interface NicheConfig {
   displayOptions: DisplayOption[];
   humanDisplayOptions: HumanModelOption[];
   typographyOptions: { label: string; class: string }[];
-  textPositionOptions: TextPositionOption[]; // NOVO
+  textPositionOptions: TextPositionOption[];
   formats: FormatOption[];
 }
 
@@ -59,7 +59,6 @@ const sharedTypography = [
   { label: 'Impact (Display)', class: 'font-sans font-black' }
 ];
 
-// NOVA OPÇÃO COMPARTILHADA DE POSIÇÃO DO TEXTO
 const sharedTextPosition: TextPositionOption[] = [
   { id: 'top', label: 'Superior', gridClass: 'items-start justify-center' },
   { id: 'center', label: 'Centro', gridClass: 'items-center justify-center' },
@@ -73,28 +72,32 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     icon: '💎',
     tagline: 'Componha cenários de luxo ao redor das suas joias',
     categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Relógio', 'Broche', 'Pingente'],
+
+    // 20 CORES PREMIUM DE MOSTRUÁRIO
     solidColors: [
       { name: 'Preto Veludo', hex: '#111111' },
-      { name: 'Champagne', hex: '#EBE1D5' },
-      { name: 'Cinza Platina', hex: '#D2D2D2' },
-      { name: 'Caoba Profundo', hex: '#4A2A22' },
       { name: 'Branco Neve', hex: '#FFFFFF' },
+      { name: 'Cinza Platina', hex: '#D2D2D2' },
+      { name: 'Champagne', hex: '#EBE1D5' },
+      { name: 'Caoba Profundo', hex: '#4A2A22' },
+      { name: 'Verde Musgo', hex: '#2A3B2A' },
+      { name: 'Vermelho Bordô', hex: '#4A0E17' },
+      { name: 'Azul Petróleo', hex: '#1D3F49' },
+      { name: 'Verde Esmeralda', hex: '#0B3B24' },
+      { name: 'Azul Safira', hex: '#0A1C40' },
+      { name: 'Rosa Pó', hex: '#F2D8D8' },
+      { name: 'Terracota', hex: '#A44C3A' },
+      { name: 'Roxo Berinjela', hex: '#3B1A3A' },
+      { name: 'Cinza Chumbo', hex: '#2C3033' },
+      { name: 'Nude Areia', hex: '#D4C4B7' },
+      { name: 'Marrom Chocolate', hex: '#3D2314' },
+      { name: 'Azul Gelo', hex: '#D4E4E6' },
+      { name: 'Ouro Velho', hex: '#C8B582' },
+      { name: 'Lavanda Escuro', hex: '#5C4D5C' },
+      { name: 'Verde Oliva', hex: '#555D3B' },
     ],
-    // NOVOS 12 CENÁRIOS EDITORIAIS PARA MODELOS E JOIAS
-    scenarios: [
-      { title: 'Estúdio Minimalista', desc: 'Fundo off-white suave, iluminação difusa de estúdio focada na modelo' },
-      { title: 'Fundo Infinito Escuro', desc: 'Estúdio com fundo preto profundo e holofote dramático (spotlight)' },
-      { title: 'Seda ao Vento', desc: 'Drapeados de seda pérola voando suavemente atrás da modelo' },
-      { title: 'Noite Urbana (Bokeh)', desc: 'Rua à noite com luzes de néon vibrantes e faróis desfocados' },
-      { title: 'Varanda Parisiense', desc: 'Pôr do sol numa varanda com arquitetura europeia desfocada ao fundo' },
-      { title: 'Loft Industrial', desc: 'Ambiente interno com cimento queimado e luz natural lateral' },
-      { title: 'Praia ao Entardecer', desc: 'Fundo desfocado de mar com luz quente e dourada do golden hour' },
-      { title: 'Jardim Botânico', desc: 'Folhagens ricas e luz do sol filtrada criando sombras orgânicas' },
-      { title: 'Resort Mediterrânico', desc: 'Parede branca texturizada com sombras de palmeiras, vibe de verão' },
-      { title: 'Salão de Baile Clássico', desc: 'Interior luxuoso desfocado, lustres de cristal e detalhes dourados' },
-      { title: 'Galeria de Arte', desc: 'Fundo clean de museu com obras de arte abstratas distantes' },
-      { title: 'Sunset no Iate', desc: 'Céu em tons pêssego sobre o oceano, com elementos em madeira de teca' },
-    ],
+    scenarios: [], // Removido como pedido
+
     displayOptions: [
       { id: 'bust', label: 'Busto de Veludo (Colar)' },
       { id: 'box', label: 'Caixa de Joia Premium' },
@@ -135,10 +138,6 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { title: 'Rua de Paris', desc: 'Background europeu desfocado' },
       { title: 'Praia ao Entardecer', desc: 'Golden hour em dunas' },
       { title: 'Loft Industrial', desc: 'Ambiente urbano com tijolos' },
-      { title: 'Vibe Natureza', desc: 'Luz solar através de folhas' },
-      { title: 'Concreto Minimalista', desc: 'Paredes de cimento queimado' },
-      { title: 'Luzes Neon', desc: 'Estética cyberpunk suave' },
-      { title: 'Passarela', desc: 'Luzes focais de desfile de moda' },
     ],
     displayOptions: [
       { id: 'ghost_mannequin', label: 'Manequim Invisível' },
@@ -151,10 +150,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     humanDisplayOptions: [
       { id: 'model_lara', name: 'Lara', type: 'Loira / Casual', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80' },
       { id: 'model_sofia', name: 'Sofia', type: 'Morena / Fashion', imageUrl: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?w=400&q=80' },
-      { id: 'model_yuri', name: 'Yuri', type: 'Oriental / Street', imageUrl: 'https://images.unsplash.com/photo-1514315384763-ba401779410f?w=400&q=80' },
-      { id: 'model_kofi', name: 'Kofi', type: 'Negro / Urbano', imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80' },
-      { id: 'model_gabriel', name: 'Gabriel', type: 'Caucasiano / Terno', imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80' },
-      { id: 'model_faceless', name: 'Sem Rosto', type: 'Apenas Tronco', imageUrl: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80' }
+      { id: 'model_yuri', name: 'Yuri', type: 'Oriental / Street', imageUrl: 'https://images.unsplash.com/photo-1514315384763-ba401779410f?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,
     textPositionOptions: sharedTextPosition,
@@ -177,12 +173,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     scenarios: [
       { title: 'Rua Noturna Neon', desc: 'Asfalto molhado com reflexos' },
       { title: 'Quadra de Basquete', desc: 'Piso de madeira e luz natural' },
-      { title: 'Estúdio Dramático', desc: 'Fundo escuro com uma única luz forte' },
       { title: 'Concreto Minimalista', desc: 'Design industrial' },
-      { title: 'Poça Urbana', desc: 'Asfalto molhado com reflexos urbanos' },
-      { title: 'Chão de Academia', desc: 'Superfície emborrachada e iluminação forte' },
-      { title: 'Blocos Suspensos', desc: 'Estética futurista 3D' },
-      { title: 'Skate Park', desc: 'Concreto grafitado e textura áspera' },
     ],
     displayOptions: [
       { id: 'floating', label: 'Levitando' },
@@ -193,11 +184,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     ],
     humanDisplayOptions: [
       { id: 'model_street_m', name: 'Kai', type: 'Urbano / Sneakerhead', imageUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=400&q=80' },
-      { id: 'model_sport_f', name: 'Bia', type: 'Esportiva / Running', imageUrl: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=400&q=80' },
-      { id: 'model_skate_m', name: 'Leo', type: 'Skater / Grunge', imageUrl: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=400&q=80' },
-      { id: 'model_casual_f', name: 'Ana', type: 'Casual / Dia a Dia', imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80' },
-      { id: 'feet_only', name: 'Foco no Tênis', type: 'Sem Corpo', imageUrl: 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400&q=80' },
-      { id: 'jumping', name: 'Salto', type: 'Ação Áerea', imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80' }
+      { id: 'model_sport_f', name: 'Bia', type: 'Esportiva / Running', imageUrl: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,
     textPositionOptions: sharedTextPosition,
