@@ -18,12 +18,12 @@ export async function POST(req: Request) {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const base64Image = fileBuffer.toString('base64');
 
-    // 1. Upload original
+    // 1. Upload original para o Supabase
     const fileName = `${Date.now()}_original_${file.name.replace(/\s/g, '_')}`;
     await supabaseAdmin.storage.from('uploads').upload(fileName, fileBuffer, { contentType: file.type });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
-    // 2. Prompt (Lógica do prompt-builder)
+    // 2. Prompt (Lógica do seu prompt-builder oficial)
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
     // 3. Autenticação e Configuração do Endpoint
@@ -39,9 +39,13 @@ export async function POST(req: Request) {
     const accessToken = await auth.getAccessToken();
     const projectId = process.env.GOOGLE_PROJECT_ID;
 
-    // MODELO ESTÁVEL (Nano Banana 1) - Garantido em us-central1
+    /**
+     * UPGRADE: Alterado de 'flash' para 'pro'
+     * Modelo: Gemini 2.5 Pro Image (Nano Banana Pro Estável)
+     * Foco: Máxima qualidade, detalhes de texturas e anatomia humana.
+     */
     const location = 'us-central1';
-    const modelId = 'gemini-2.5-flash-image';
+    const modelId = 'gemini-2.5-pro-image';
     const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
 
     // 4. Chamada Multimodal
@@ -67,7 +71,7 @@ export async function POST(req: Request) {
           }
         ],
         generationConfig: {
-          responseModalities: ["IMAGE"], // Fundamental para o Gemini Image
+          responseModalities: ["IMAGE"], // Comando para o motor Gemini Image
           candidateCount: 1,
           temperature: 0.7
         }
@@ -81,7 +85,7 @@ export async function POST(req: Request) {
 
     const aiData = await response.json();
 
-    // Extração da imagem
+    // Extração da imagem do array de candidatos
     const generatedPart = aiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     const generatedBase64 = generatedPart?.inlineData?.data;
 
@@ -93,6 +97,7 @@ export async function POST(req: Request) {
     await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, { contentType: 'image/png' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
+    // Registro no banco de dados
     await supabaseAdmin.from('generations').insert({
       niche,
       original_image_url: originalUrl,
@@ -104,7 +109,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error: any) {
-    console.error("Falha Nano Banana:", error);
+    console.error("Falha Nano Banana Pro:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
