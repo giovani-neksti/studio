@@ -29,12 +29,12 @@ function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
     <div className="mb-1">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--accent)] rounded-lg transition-colors duration-150">
+      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--accent)] rounded-lg transition-colors">
         <div className="flex items-center gap-2.5">
           <span className="text-[var(--primary)] opacity-70">{icon}</span>
-          <span className="text-sm font-semibold text-[var(--foreground)] opacity-90 tracking-wide">{title}</span>
+          <span className="text-sm font-semibold text-[var(--foreground)] opacity-90">{title}</span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-[var(--muted-foreground)] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && <div className="px-4 pb-4 pt-1">{children}</div>}
     </div>
@@ -57,12 +57,9 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   return (
     <aside className="h-full flex flex-col bg-[var(--card)] border-r border-[var(--border)]">
       <div className="px-5 py-5 border-b border-[var(--border)] shrink-0">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3">
           <span className="text-2xl">{config.icon}</span>
-          <div>
-            <h2 className="text-[var(--foreground)] font-bold text-base leading-tight">Composição — {config.label}</h2>
-            <p className="text-[var(--muted-foreground)] text-xs mt-0.5">Construa a cena passo a passo</p>
-          </div>
+          <h2 className="text-[var(--foreground)] font-bold text-base">Composição — {config.label}</h2>
         </div>
       </div>
 
@@ -71,23 +68,23 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
           {/* PASSO 1 */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-4 h-4" />}>
             <div className="grid grid-cols-1 gap-2">
-              {config.categories.slice(0, 4).map((cat) => {
+              {config.categories.map((cat) => {
                 const uploadKey = `upload_${cat}`;
                 const hasUpload = !!selections[uploadKey];
                 const isActive = selections.category === cat;
                 return (
-                  <div key={cat} className={`flex flex-col border rounded-xl overflow-hidden ${isActive ? 'border-[var(--primary)] ring-1 ring-[var(--primary)]/20' : 'border-[var(--border)]'}`}>
-                    <button onClick={() => onSelect('category', cat)} className={`flex items-center justify-between px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'bg-[var(--card)] hover:bg-[var(--accent)]'}`}>
+                  <div key={cat} className={`flex flex-col border rounded-xl overflow-hidden ${isActive ? 'border-[var(--primary)]' : 'border-[var(--border)]'}`}>
+                    <button onClick={() => onSelect('category', cat)} className={`px-3 py-2.5 text-sm flex items-center justify-between ${isActive ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : ''}`}>
                       <div className="flex items-center gap-2">
-                        {hasUpload ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <div className="w-4 h-4 rounded-full border border-dashed border-current opacity-40" />}
+                        {hasUpload ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <div className="w-4 h-4 rounded-full border border-dashed opacity-40" />}
                         {cat}
                       </div>
                     </button>
                     {isActive && (
                       <div className="p-3 bg-[var(--background)]">
-                        <div onClick={() => fileInputRef.current?.click()} className={`relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer ${hasUpload ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)]'}`}>
+                        <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer">
                           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                          <span className="text-xs">{hasUpload ? selections[uploadKey]?.name : 'Fazer Upload'}</span>
+                          <span className="text-xs truncate block">{hasUpload ? selections[uploadKey]?.name : 'Carregar Imagem'}</span>
                         </div>
                       </div>
                     )}
@@ -130,7 +127,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             </div>
             <div className="space-y-2">
               {(displayTab === 'expositor' ? config.displayOptions : config.humanDisplayOptions).map((opt: any) => (
-                <button key={opt.id} onClick={() => onSelect('display', opt.label || opt.name)} className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${selections.display === (opt.label || opt.name) ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--border)]'}`}>
+                <button key={opt.id} onClick={() => onSelect('display', opt.label || opt.name)} className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${selections.display === (opt.label || opt.name) ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold' : 'border-[var(--border)]'}`}>
                   <div className="flex justify-between items-center">
                     <span>{opt.label || opt.name}</span>
                     {selections.display === (opt.label || opt.name) && <CheckCircle2 className="w-4 h-4 text-[var(--primary)]" />}
@@ -143,7 +140,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 4: ASSINATURA VISUAL */}
+          {/* PASSO 4 */}
           <SectionWrapper title="4. Assinatura Visual" icon={<Type className="w-4 h-4" />}>
             <Input
               placeholder="Ex: Lançamento"
@@ -159,7 +156,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <Separator className="mx-4 my-2 opacity-50" />
 
-          {/* PASSO 5: RESTAURADO (FORMATO) */}
+          {/* PASSO 5 RESTAURADO */}
           <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-4 h-4" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.formats.map((fmt) => (
@@ -178,7 +175,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               ))}
             </div>
           </SectionWrapper>
-
           <div className="h-8" />
         </div>
       </ScrollArea>

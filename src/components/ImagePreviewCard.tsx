@@ -26,15 +26,15 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
   const aspectClass = format.includes('9:16') ? 'aspect-[9/16]' : format.includes('4:5') ? 'aspect-[4/5]' : 'aspect-square';
 
   return (
-    <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-6 px-8 py-6 overflow-y-auto">
+    <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-6 px-8 py-6 overflow-y-auto min-h-0">
       <div className={`relative group ${aspectClass} max-h-[55vh] shrink-0 w-auto overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-2xl transition-all duration-500`}>
         {isGenerating ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[var(--card)]">
             <div className="w-16 h-16 rounded-full border-2 border-[var(--primary)]/20 border-t-[var(--primary)] animate-spin" />
-            <p className="text-sm">Gerando...</p>
+            <p className="text-sm">Gerando composição{dots}</p>
           </div>
         ) : imageUrl ? (
-          <img src={imageUrl} alt="Resultado" className="w-full h-full object-cover" />
+          <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center opacity-40">
             <Sparkles className="w-10 h-10 text-[var(--primary)]" />
@@ -43,7 +43,7 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         )}
       </div>
 
-      {/* PAINEL DE PROMPT EM TEMPO REAL */}
+      {/* PAINEL DE PROMPT RESTAURADO */}
       {livePrompt && Object.keys(selections).length > 0 && (
         <div className="w-full max-w-[480px] bg-black/40 border border-[var(--border)] rounded-xl p-4 text-left shrink-0">
           <div className="flex items-center gap-2 mb-2">
