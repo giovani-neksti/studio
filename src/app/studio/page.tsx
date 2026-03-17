@@ -123,8 +123,8 @@ function StudioContent() {
   const currentPrompt = buildEnglishPrompt(niche, liveSelections);
 
   return (
-    // NOVO: h-[100dvh] em vez de h-screen para resolver bug do mobile
-    <div className={`${config.themeClass} h-[100dvh] w-full flex flex-col overflow-hidden`}>
+    // FIX PRINCIPAL: fixed inset-0 tranca o layout exatamente no tamanho visível do telemóvel
+    <div className={`${config.themeClass} fixed inset-0 w-full flex flex-col overflow-hidden bg-[var(--background)]`}>
       <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative">
         <div className="flex items-center gap-2 md:gap-4 h-full">
           <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
@@ -176,13 +176,15 @@ function StudioContent() {
       </header>
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+
+        {/* FIX 2: Adicionado flex-col e min-h-0 para forçar o scroll interno a funcionar no mobile */}
         <div
-          className={`flex-shrink-0 flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out
+          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out
             ${isSidebarOpen
-              ? `w-full ${hasPreviewContent ? 'h-[55%]' : 'flex-1'} md:flex-none md:h-full md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
+              ? `w-full ${hasPreviewContent ? 'h-[55%] shrink-0' : 'flex-1 min-h-0'} md:shrink-0 md:flex-none md:h-full md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
               : 'w-full h-0 md:h-full md:w-0 opacity-0 overflow-hidden border-r-0'}`}
         >
-          <div className="w-full h-full min-w-[280px]">
+          <div className="w-full h-full flex flex-col min-h-0">
             <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
           </div>
         </div>
@@ -208,12 +210,13 @@ function StudioContent() {
           )}
         </div>
 
+        {/* FIX 3: Shrink-0 quando não há preview garante que o Main não empurra a Sidebar para fora do ecrã */}
         <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
             ${isSidebarOpen
-            ? `${hasPreviewContent ? 'h-[45%] flex-1' : 'h-auto flex-shrink-0'} md:flex-1 md:h-full`
+            ? `${hasPreviewContent ? 'h-[45%] shrink-0' : 'h-auto shrink-0 border-b border-[var(--border)]'} md:flex-1 md:h-full md:shrink md:border-b-0`
             : 'h-full flex-1'}`}
         >
-          <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-2' : 'pb-4 md:pb-2'} z-10 bg-gradient-to-b from-[var(--background)] to-transparent`}>
+          <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-2' : 'pb-4 md:pb-2'} z-10 bg-[var(--background)]`}>
             <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
               {isGenerating ? (
                 <><div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-[var(--background)]/30 border-t-[var(--background)] animate-spin" /><span>Criando Magia...</span></>
