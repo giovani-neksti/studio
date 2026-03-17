@@ -9,12 +9,12 @@ import {
   Layers,
   Image as ImageIcon,
   Maximize2,
-  Type,
   CheckCircle2,
   BoxSelect,
   AlignVerticalSpaceAround,
   UploadCloud,
-  Type as TypeIcon
+  Type as TypeIcon,
+  Camera // IMPORT NOVO
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -89,6 +89,8 @@ function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
 
 export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null); // REF DA CÂMERA
+
   const bgTab = selections.bgTab || 'solid';
   const displayTab = selections.displayTab || 'expositor';
   const activeCategory = selections.category;
@@ -119,7 +121,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
         <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
       </div>
 
-      {/* NOVO: Scroll Nativo ultra-fluido para mobile com padding extra no final */}
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y scroll-smooth">
         <div className="py-2 md:py-3 pb-24 md:pb-12">
 
@@ -153,18 +154,47 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               })}
             </div>
 
+            {/* SEÇÃO DE UPLOAD MELHORADA: CÂMERA E GALERIA */}
             {activeCategory && (
               <div className="mt-2.5 md:mt-3">
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-3 md:p-4 border-2 border-dashed border-[var(--primary)]/40 bg-[var(--primary)]/5 rounded-lg md:rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors"
-                >
-                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                  <UploadCloud className="w-4 h-4 md:w-5 md:h-5 mx-auto mb-1.5 text-[var(--primary)] opacity-80" />
-                  <span className="text-[11px] md:text-xs font-medium text-[var(--primary)] block truncate">
-                    {selections[activeUploadKey!] ? selections[activeUploadKey!].name : `Fazer Upload de ${activeCategory}`}
-                  </span>
-                </div>
+                {selections[activeUploadKey!] ? (
+                  <div className="p-3 border border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      <span className="text-xs font-medium text-[var(--foreground)] truncate">
+                        {selections[activeUploadKey!].name}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => onSelect(activeUploadKey!, null)}
+                      className="text-[10px] text-red-400 hover:text-red-300 font-medium ml-2 px-2 py-1 bg-red-500/10 rounded shrink-0 transition-colors"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Botão de Câmera Direta */}
+                    <div
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="p-3 border-2 border-dashed border-[var(--primary)]/40 bg-[var(--primary)]/5 rounded-lg text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors flex flex-col items-center justify-center"
+                    >
+                      <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileUpload} />
+                      <Camera className="w-5 h-5 md:w-6 md:h-6 mb-1.5 text-[var(--primary)] opacity-80" />
+                      <span className="text-[10px] md:text-[11px] font-medium text-[var(--primary)]">Tirar Foto</span>
+                    </div>
+
+                    {/* Botão de Arquivo/Galeria */}
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-3 border-2 border-dashed border-[var(--primary)]/40 bg-[var(--primary)]/5 rounded-lg text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors flex flex-col items-center justify-center"
+                    >
+                      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                      <UploadCloud className="w-5 h-5 md:w-6 md:h-6 mb-1.5 text-[var(--primary)] opacity-80" />
+                      <span className="text-[10px] md:text-[11px] font-medium text-[var(--primary)]">Galeria</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
