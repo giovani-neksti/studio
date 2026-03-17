@@ -62,19 +62,16 @@ function StudioContent() {
     setImageUrl(null);
 
     try {
-      // NOVO: Agrupa TODAS as imagens carregadas para conjuntos de peças
       const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
       if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
 
       const formData = new FormData();
       formData.append('niche', niche);
 
-      // Anexa os múltiplos ficheiros à mesma requisição!
       uploadKeys.forEach(key => {
         formData.append('files', selections[key] as File);
       });
 
-      // Limpa os objetos File do JSON e grava as categorias reais enviadas (para o backend ler o prompt)
       const cleanSelections = { ...selections };
       uploadKeys.forEach(k => delete cleanSelections[k]);
       cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
@@ -102,7 +99,8 @@ function StudioContent() {
     }
   };
 
-  const switchNiche = (n: string) => {
+  const switchNiche = (n: NicheKey) => {
+    if (n !== 'jewelry') return; // Bloqueio de segurança
     router.push(`/studio?niche=${n}`);
     setNicheMenuOpen(false);
     setSelections({ bgTab: 'solid', displayTab: 'expositor' });
@@ -111,7 +109,6 @@ function StudioContent() {
 
   const canGenerate = !isGenerating && credits > 0 && hasUpload;
 
-  // Para mostrar em tempo real no PC, adaptamos o objeto antes de passá-lo ao PromptBuilder
   const liveSelections = { ...selections };
   const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
   if (uploadKeys.length > 0) {
@@ -122,12 +119,15 @@ function StudioContent() {
   return (
     <div className={`${config.themeClass} h-screen flex flex-col overflow-hidden`}>
       <header className="h-14 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative">
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="flex items-center gap-1.5 md:gap-2 cursor-pointer" onClick={() => router.push('/')}>
-            <div className="w-6 h-6 md:w-7 md:h-7 rounded-lg bg-[var(--primary)] flex items-center justify-center">
-              <span className="text-[var(--primary-foreground)] font-bold text-xs md:text-sm">S</span>
-            </div>
-            <span className="hidden sm:inline text-[var(--foreground)] font-bold text-sm">Studio AI</span>
+        <div className="flex items-center gap-2 md:gap-4 h-full">
+
+          {/* AQUI ESTÁ A SUA LOGO */}
+          <div className="flex items-center h-full cursor-pointer py-2" onClick={() => router.push('/')}>
+            <img
+              src="/logo.jpg"
+              alt="Logo joIAs"
+              className="h-8 md:h-10 w-auto object-contain rounded-sm"
+            />
           </div>
 
           <div className="hidden sm:block h-5 w-px bg-[var(--border)]" />
@@ -139,12 +139,28 @@ function StudioContent() {
               <ChevronDown className={`w-3 h-3 md:w-3.5 md:h-3.5 text-[var(--muted-foreground)] transition-transform ${nicheMenuOpen ? 'rotate-180' : ''}`} />
             </button>
             {nicheMenuOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-48 md:w-52 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
-                {Object.entries(nicheConfigs).map(([key, cfg]) => (
-                  <button key={key} onClick={() => switchNiche(key)} className={`w-full flex items-center gap-3 px-3 py-2.5 md:py-3 text-xs md:text-sm transition-colors hover:bg-[var(--accent)] text-left ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}>
-                    <span className="text-base">{cfg.icon}</span><span>{cfg.label}</span>{key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
-                  </button>
-                ))}
+              <div className="absolute top-full left-0 mt-1.5 w-48 md:w-56 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
+                {Object.entries(nicheConfigs).map(([key, cfg]) => {
+                  const isEnabled = key === 'jewelry';
+
+                  return (
+                    <button
+                      key={key}
+                      onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
+                      disabled={!isEnabled}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 md:py-3 text-xs md:text-sm transition-colors text-left 
+                            ${isEnabled ? 'hover:bg-[var(--accent)]' : 'grayscale opacity-50 cursor-not-allowed'}
+                            ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
+                    >
+                      <span className="text-lg">{cfg.icon}</span>
+                      <div className="flex flex-col">
+                        <span className={`${key !== niche && isEnabled ? 'text-[var(--foreground)]' : ''}`}>{cfg.label}</span>
+                        {!isEnabled && <span className="text-[10px] text-[var(--muted-foreground)] mt-0.5 font-medium">Lançamento em breve</span>}
+                      </div>
+                      {key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
