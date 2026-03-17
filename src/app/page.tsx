@@ -10,7 +10,8 @@ const portals = [
   {
     niche: 'jewelry',
     label: 'Joalheria',
-    icon: '💎',
+    // A LOGO ENTRA AQUI SUBSTITUINDO O DIAMANTE
+    icon: <img src="/logo.png" alt="Logo joIAs" className="h-16 w-auto object-contain rounded-md" />,
     description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
     gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
     border: 'hover:border-yellow-500/60',
@@ -24,7 +25,7 @@ const portals = [
   {
     niche: 'clothing',
     label: 'Moda & Roupas',
-    icon: '👗',
+    icon: <span className="text-5xl">👗</span>,
     description: 'Produza editoriais limpos e modernos para sua coleção',
     gradient: 'from-gray-100/80 via-gray-200/40 to-transparent',
     border: 'border-white/5',
@@ -38,7 +39,7 @@ const portals = [
   {
     niche: 'shoes',
     label: 'Calçados',
-    icon: '👟',
+    icon: <span className="text-5xl">👟</span>,
     description: 'Imagens urbanas de alto impacto para tênis, botas e mais',
     gradient: 'from-gray-900/30 via-gray-800/20 to-transparent',
     border: 'border-white/5',
@@ -128,18 +129,16 @@ export default function LoginPage() {
         className={`relative z-10 w-full max-w-5xl mx-auto px-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
       >
+        {/* HEADER ORIGINAL DE VOLTA */}
         <div className="text-center mb-12">
-
-          {/* LOGO INSERIDA AQUI NO LOGIN */}
-          <div className="flex justify-center mb-8">
-            <img
-              src="/logo.png"
-              alt="Logo joIAs"
-              className="h-16 md:h-20 w-auto object-contain rounded-md"
-            />
+          <div className="inline-flex items-center gap-2 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/10">
+              <span className="text-white font-bold text-lg">S</span>
+            </div>
+            <span className="text-white/30 text-sm font-mono tracking-widest uppercase">neksti.com.br</span>
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight mb-4">
+          <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight mb-4">
             Studio{' '}
             <span className="relative">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">AI</span>
@@ -182,7 +181,7 @@ export default function LoginPage() {
                     {portal.badge}
                   </div>
 
-                  <div className={`text-5xl mb-5 block transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`}>
+                  <div className={`mb-5 block transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`}>
                     {portal.icon}
                   </div>
 
