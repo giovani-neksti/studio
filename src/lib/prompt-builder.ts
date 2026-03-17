@@ -93,11 +93,29 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
 export function buildEnglishPrompt(niche: string, selections: any) {
     const dict = jewelryDictionary;
 
-    const productCat = selections.category || '';
-    const productText = dict.produto[productCat] || "a luxury jewelry piece";
+    // LÓGICA INTELIGENTE DE MÚLTIPLAS PEÇAS
+    let productText = "a luxury jewelry piece";
+    let isMultiple = false;
+
+    // Se houver mais de uma categoria, juntamos os textos (Ex: Colar E Brinco)
+    if (selections.uploadedCategories && selections.uploadedCategories.length > 1) {
+        isMultiple = true;
+        const items = selections.uploadedCategories.map((cat: string) => dict.produto[cat] || cat);
+
+        if (items.length === 2) {
+            productText = `a matching set featuring ${items[0]} AND ${items[1]}`;
+        } else {
+            const lastItem = items.pop();
+            productText = `a matching jewelry set featuring ${items.join(', ')}, AND ${lastItem}`;
+        }
+    } else {
+        // Fallback: Apenas 1 peça normal
+        const productCat = selections.category || (selections.uploadedCategories?.[0]) || '';
+        productText = dict.produto[productCat] || "a luxury jewelry piece";
+    }
 
     const materialSelection = selections.material || '';
-    const materialText = dict.material[materialSelection] ? `, ${dict.material[materialSelection]}` : "";
+    const materialText = dict.material[materialSelection] ? ` ${dict.material[materialSelection]}` : "";
 
     const bgSelection = selections.background || '';
     const backgroundText = dict.fundo[bgSelection] || "on a neutral studio background";
@@ -125,7 +143,12 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText}, ${colorText}, ${sizeText}, and is ${positionText}.`;
     }
 
-    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of the exact uploaded jewelry piece, maintaining its original design, shape, and details perfectly${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
+    // A FRASE FINAL: Exige explicitamente "ALL the exact uploaded jewelry pieces together" quando no plural
+    const pieceDescription = isMultiple
+        ? `ALL the exact uploaded jewelry pieces together in the same composition (${productText})`
+        : `the exact uploaded jewelry piece (${productText})`;
+
+    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of ${pieceDescription}, maintaining original designs, shapes, and details perfectly,${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
 
     return finalEnglishPrompt;
 }
