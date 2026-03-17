@@ -51,6 +51,9 @@ function StudioContent() {
 
   const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_'));
 
+  // NOVO: Verifica se há conteúdo de imagem (ou loading) para controlo de UI no Mobile
+  const hasPreviewContent = isGenerating || !!imageUrl;
+
   const handleGenerate = async () => {
     if (credits <= 0) return;
     if (!hasUpload) {
@@ -60,6 +63,11 @@ function StudioContent() {
 
     setIsGenerating(true);
     setImageUrl(null);
+
+    // NOVO: Recolhe as opções no mobile imediatamente após clicar em Gerar (Foco no loading)
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
 
     try {
       const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
@@ -88,12 +96,13 @@ function StudioContent() {
       setImageIndex((i) => i + 1);
       setCredits((c) => c - 1);
 
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(false);
-      }
     } catch (e: any) {
       console.error(e);
       alert("Houve um erro ao gerar a imagem: " + e.message);
+      // NOVO: Reabre o painel lateral no telemóvel se der erro para o utilizador corrigir
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(true);
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -118,21 +127,12 @@ function StudioContent() {
 
   return (
     <div className={`${config.themeClass} h-screen flex flex-col overflow-hidden`}>
-      {/* AUMENTAMOS A ALTURA DO HEADER (h-16 md:h-20) PARA A LOGO CABER SEM TRANSBORDAR */}
       <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative">
         <div className="flex items-center gap-2 md:gap-4 h-full">
-
-          {/* LOGO INSERIDA E ALINHADA */}
           <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
-            <img
-              src="/logo.png"
-              alt="Logo joIAs"
-              className="h-12 md:h-14 lg:h-16 w-auto object-contain"
-            />
+            <img src="/logo.png" alt="Logo joIAs" className="h-12 md:h-14 lg:h-16 w-auto object-contain" />
           </div>
-
           <div className="hidden sm:block h-6 w-px bg-[var(--border)]" />
-
           <div className="relative">
             <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 md:gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--muted)] border border-[var(--border)] text-[var(--foreground)] text-xs md:text-sm transition-colors duration-150">
               <span className="text-sm md:text-base">{config.icon}</span>
@@ -143,15 +143,12 @@ function StudioContent() {
               <div className="absolute top-full left-0 mt-1.5 w-48 md:w-56 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
                 {Object.entries(nicheConfigs).map(([key, cfg]) => {
                   const isEnabled = key === 'jewelry';
-
                   return (
                     <button
                       key={key}
                       onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
                       disabled={!isEnabled}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 md:py-3 text-xs md:text-sm transition-colors text-left 
-                            ${isEnabled ? 'hover:bg-[var(--accent)]' : 'grayscale opacity-50 cursor-not-allowed'}
-                            ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 md:py-3 text-xs md:text-sm transition-colors text-left ${isEnabled ? 'hover:bg-[var(--accent)]' : 'grayscale opacity-50 cursor-not-allowed'} ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
                     >
                       <span className="text-lg">{cfg.icon}</span>
                       <div className="flex flex-col">
@@ -181,10 +178,11 @@ function StudioContent() {
       </header>
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+        {/* SIDEBAR INTELIGENTE (Oculta espaço no mobile se não houver preview) */}
         <div
           className={`flex-shrink-0 flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out
             ${isSidebarOpen
-              ? 'w-full h-[55%] md:h-full md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100'
+              ? `w-full ${hasPreviewContent ? 'h-[55%]' : 'flex-1'} md:flex-none md:h-full md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
               : 'w-full h-0 md:h-full md:w-0 opacity-0 overflow-hidden border-r-0'}`}
         >
           <div className="w-full h-full min-w-[280px]">
@@ -213,9 +211,13 @@ function StudioContent() {
           )}
         </div>
 
-        <main className={`flex-1 flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-[45%] md:h-full' : 'h-full'}`}>
-
-          <div className="flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 pb-2 z-10 bg-gradient-to-b from-[var(--background)] to-transparent">
+        {/* ÁREA PRINCIPAL INTELIGENTE (No mobile encolhe ao tamanho do botão se estiver vazia) */}
+        <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
+            ${isSidebarOpen
+            ? `${hasPreviewContent ? 'h-[45%] flex-1' : 'h-auto flex-shrink-0'} md:flex-1 md:h-full`
+            : 'h-full flex-1'}`}
+        >
+          <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-2' : 'pb-4 md:pb-2'} z-10 bg-gradient-to-b from-[var(--background)] to-transparent`}>
             <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
               {isGenerating ? (
                 <><div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-[var(--background)]/30 border-t-[var(--background)] animate-spin" /><span>Criando Magia...</span></>
@@ -225,7 +227,8 @@ function StudioContent() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+          {/* NOVO: Só exibe o card de Preview no Mobile se houver geração ou imagem carregada */}
+          <div className={`overflow-hidden flex flex-col min-h-0 ${hasPreviewContent ? 'flex-1' : 'hidden md:flex md:flex-1'}`}>
             <ImagePreviewCard
               isGenerating={isGenerating}
               imageUrl={imageUrl}
