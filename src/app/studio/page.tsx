@@ -51,7 +51,6 @@ function StudioContent() {
 
   const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_'));
 
-  // NOVO: Verifica se há conteúdo de imagem (ou loading) para controlo de UI no Mobile
   const hasPreviewContent = isGenerating || !!imageUrl;
 
   const handleGenerate = async () => {
@@ -64,7 +63,6 @@ function StudioContent() {
     setIsGenerating(true);
     setImageUrl(null);
 
-    // NOVO: Recolhe as opções no mobile imediatamente após clicar em Gerar (Foco no loading)
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
     }
@@ -99,7 +97,6 @@ function StudioContent() {
     } catch (e: any) {
       console.error(e);
       alert("Houve um erro ao gerar a imagem: " + e.message);
-      // NOVO: Reabre o painel lateral no telemóvel se der erro para o utilizador corrigir
       if (window.innerWidth < 768) {
         setIsSidebarOpen(true);
       }
@@ -126,7 +123,8 @@ function StudioContent() {
   const currentPrompt = buildEnglishPrompt(niche, liveSelections);
 
   return (
-    <div className={`${config.themeClass} h-screen flex flex-col overflow-hidden`}>
+    // NOVO: h-[100dvh] em vez de h-screen para resolver bug do mobile
+    <div className={`${config.themeClass} h-[100dvh] w-full flex flex-col overflow-hidden`}>
       <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative">
         <div className="flex items-center gap-2 md:gap-4 h-full">
           <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
@@ -178,7 +176,6 @@ function StudioContent() {
       </header>
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-        {/* SIDEBAR INTELIGENTE (Oculta espaço no mobile se não houver preview) */}
         <div
           className={`flex-shrink-0 flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out
             ${isSidebarOpen
@@ -211,7 +208,6 @@ function StudioContent() {
           )}
         </div>
 
-        {/* ÁREA PRINCIPAL INTELIGENTE (No mobile encolhe ao tamanho do botão se estiver vazia) */}
         <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
             ${isSidebarOpen
             ? `${hasPreviewContent ? 'h-[45%] flex-1' : 'h-auto flex-shrink-0'} md:flex-1 md:h-full`
@@ -227,7 +223,6 @@ function StudioContent() {
             </button>
           </div>
 
-          {/* NOVO: Só exibe o card de Preview no Mobile se houver geração ou imagem carregada */}
           <div className={`overflow-hidden flex flex-col min-h-0 ${hasPreviewContent ? 'flex-1' : 'hidden md:flex md:flex-1'}`}>
             <ImagePreviewCard
               isGenerating={isGenerating}

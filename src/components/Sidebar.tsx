@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { NicheConfig } from '@/lib/niche-config';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import {
@@ -55,7 +54,7 @@ const getDisplayIcon = (id: string) => {
     case 'box': return '🎁';
     case 'pedestal': return '🏛️';
     case 'cone': return '🔺';
-    case 'velvet_hand': return '🖐️'; // NOVO Ícone
+    case 'velvet_hand': return '🖐️';
     case 'cushion': return '🛋️';
     case 'surface': return '🪞';
     case 'floating': return '✨';
@@ -120,8 +119,10 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
         <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
       </div>
 
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="py-2 md:py-3">
+      {/* NOVO: Scroll Nativo ultra-fluido para mobile com padding extra no final */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y scroll-smooth">
+        <div className="py-2 md:py-3 pb-24 md:pb-12">
+
           {/* PASSO 1: CATEGORIA */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers />}>
             <div className="grid grid-cols-2 gap-1.5 md:gap-2">
@@ -382,9 +383,9 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               ))}
             </div>
           </SectionWrapper>
-          <div className="h-6 md:h-8" />
+
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
