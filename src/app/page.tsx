@@ -10,7 +10,7 @@ const portals = [
   {
     niche: 'jewelry',
     label: 'Joalheria',
-    // ÍCONE GIGANTE NO QUADRANTE
+    // A LOGO MANTÉM-SE AQUI DENTRO DO QUADRANTE
     icon: <img src="/logo.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
     description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
     gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
@@ -131,13 +131,12 @@ export default function LoginPage() {
       >
         <div className="text-center mb-12">
 
-          {/* LOGO DO TOPO AINDA MAIOR */}
-          <div className="flex justify-center mb-8">
-            <img
-              src="/logo.png"
-              alt="Logo joIAs"
-              className="h-24 md:h-32 w-auto object-contain"
-            />
+          {/* HEADER DO TOPO RESTAURADO PARA O DESIGN ORIGINAL SEM LOGO */}
+          <div className="inline-flex items-center gap-2 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/10">
+              <span className="text-white font-bold text-lg">S</span>
+            </div>
+            <span className="text-white/30 text-sm font-mono tracking-widest uppercase">neksti.com.br</span>
           </div>
 
           <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight mb-4">
