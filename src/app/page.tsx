@@ -10,7 +10,6 @@ const portals = [
   {
     niche: 'jewelry',
     label: 'Joalheria',
-    // A LOGO ENTRA AQUI SUBSTITUINDO O DIAMANTE
     icon: <img src="/logo.png" alt="Logo joIAs" className="h-16 w-auto object-contain rounded-md" />,
     description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
     gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
@@ -111,7 +110,7 @@ export default function LoginPage() {
   const selectedPortalDef = portals.find(p => p.niche === selectedNiche);
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center relative overflow-hidden py-12">
+    <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center relative overflow-hidden py-12">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-white/[0.02] blur-3xl" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-white/[0.02] blur-3xl" />
@@ -164,7 +163,8 @@ export default function LoginPage() {
                 onMouseEnter={() => portal.enabled && setHoveredIndex(index)}
                 onMouseLeave={() => portal.enabled && setHoveredIndex(null)}
                 disabled={!portal.enabled}
-                className={`group relative text-left rounded-2xl border bg-white/[0.03] backdrop-blur-sm p-8 
+                // AQUI TROCAMOS O bg-white/[0.03] POR bg-black PARA O QUADRANTE FICAR PRETO
+                className={`group relative text-left rounded-2xl border bg-black backdrop-blur-sm p-8 
                   transition-all duration-300 overflow-hidden
                   ${isSelected ? portal.activeBorder : portal.border} 
                   ${isDimmed ? 'opacity-40 scale-[0.98]' : portal.enabled ? 'hover:shadow-2xl hover:-translate-y-1' : ''}
@@ -219,7 +219,8 @@ export default function LoginPage() {
             }`}
         >
           {selectedPortalDef && (
-            <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+            // AQUI TAMBÉM TROCAMOS PARA bg-black
+            <div className="bg-black border border-white/10 rounded-2xl p-6 backdrop-blur-md">
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold text-white mb-1">Acesso — {selectedPortalDef.label}</h3>
                 <p className="text-white/40 text-sm">Insira suas credenciais corporativas</p>
@@ -238,7 +239,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-black/50 border-white/10 text-white placeholder:text-white/20 pl-11 h-12 rounded-xl focus-visible:ring-1"
+                      className="bg-black border-white/10 text-white placeholder:text-white/20 pl-11 h-12 rounded-xl focus-visible:ring-1"
                       style={{ '--ring': selectedPortalDef.accent } as React.CSSProperties}
                     />
                   </div>
@@ -250,7 +251,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="bg-black/50 border-white/10 text-white placeholder:text-white/20 pl-11 h-12 rounded-xl focus-visible:ring-1"
+                      className="bg-black border-white/10 text-white placeholder:text-white/20 pl-11 h-12 rounded-xl focus-visible:ring-1"
                       style={{ '--ring': selectedPortalDef.accent } as React.CSSProperties}
                     />
                   </div>
