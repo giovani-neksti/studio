@@ -10,7 +10,8 @@ const portals = [
   {
     niche: 'jewelry',
     label: 'Joalheria',
-    icon: <img src="/logo.png" alt="Logo joIAs" className="h-16 w-auto object-contain rounded-md" />,
+    // ÍCONE GIGANTE NO QUADRANTE
+    icon: <img src="/logo.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
     description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
     gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
     border: 'hover:border-yellow-500/60',
@@ -128,13 +129,15 @@ export default function LoginPage() {
         className={`relative z-10 w-full max-w-5xl mx-auto px-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
       >
-        {/* HEADER ORIGINAL DE VOLTA */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/10">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <span className="text-white/30 text-sm font-mono tracking-widest uppercase">neksti.com.br</span>
+
+          {/* LOGO DO TOPO AINDA MAIOR */}
+          <div className="flex justify-center mb-8">
+            <img
+              src="/logo.png"
+              alt="Logo joIAs"
+              className="h-24 md:h-32 w-auto object-contain"
+            />
           </div>
 
           <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight mb-4">
@@ -163,7 +166,6 @@ export default function LoginPage() {
                 onMouseEnter={() => portal.enabled && setHoveredIndex(index)}
                 onMouseLeave={() => portal.enabled && setHoveredIndex(null)}
                 disabled={!portal.enabled}
-                // AQUI TROCAMOS O bg-white/[0.03] POR bg-black PARA O QUADRANTE FICAR PRETO
                 className={`group relative text-left rounded-2xl border bg-black backdrop-blur-sm p-8 
                   transition-all duration-300 overflow-hidden
                   ${isSelected ? portal.activeBorder : portal.border} 
@@ -219,7 +221,6 @@ export default function LoginPage() {
             }`}
         >
           {selectedPortalDef && (
-            // AQUI TAMBÉM TROCAMOS PARA bg-black
             <div className="bg-black border border-white/10 rounded-2xl p-6 backdrop-blur-md">
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold text-white mb-1">Acesso — {selectedPortalDef.label}</h3>

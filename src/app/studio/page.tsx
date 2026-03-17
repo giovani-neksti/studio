@@ -118,19 +118,20 @@ function StudioContent() {
 
   return (
     <div className={`${config.themeClass} h-screen flex flex-col overflow-hidden`}>
-      <header className="h-14 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative">
+      {/* AUMENTAMOS A ALTURA DO HEADER (h-16 md:h-20) PARA A LOGO CABER SEM TRANSBORDAR */}
+      <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative">
         <div className="flex items-center gap-2 md:gap-4 h-full">
 
-          {/* LOGO INSERIDA NO TOPO BEM MAIOR */}
-          <div className="flex items-center h-full cursor-pointer py-0.5" onClick={() => router.push('/')}>
+          {/* LOGO INSERIDA E ALINHADA */}
+          <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
             <img
               src="/logo.png"
               alt="Logo joIAs"
-              className="h-11 md:h-14 lg:h-16 w-auto object-contain rounded-sm"
+              className="h-12 md:h-14 lg:h-16 w-auto object-contain"
             />
           </div>
 
-          <div className="hidden sm:block h-5 w-px bg-[var(--border)]" />
+          <div className="hidden sm:block h-6 w-px bg-[var(--border)]" />
 
           <div className="relative">
             <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 md:gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--muted)] border border-[var(--border)] text-[var(--foreground)] text-xs md:text-sm transition-colors duration-150">
