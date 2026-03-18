@@ -50,8 +50,6 @@ function StudioContent() {
   };
 
   const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_'));
-
-  // VERIFICA SE HÁ CONTEÚDO DE PREVIEW (Imagem ou Loading)
   const hasPreviewContent = isGenerating || !!imageUrl;
 
   const handleGenerate = async () => {
@@ -64,7 +62,6 @@ function StudioContent() {
     setIsGenerating(true);
     setImageUrl(null);
 
-    // NO MOBILE, RECOLHE SIDEBAR APÓS CLICAR
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
     }
@@ -122,7 +119,6 @@ function StudioContent() {
   const currentPrompt = buildEnglishPrompt(niche, liveSelections);
 
   return (
-    // fixed inset-0 tranca o layout exatamente no tamanho visível do telemóvel
     <div className={`${config.themeClass} fixed inset-0 w-full flex flex-col overflow-hidden bg-[var(--background)]`}>
       <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative shrink-0">
         <div className="flex items-center gap-2 md:gap-4 h-full">
@@ -175,8 +171,6 @@ function StudioContent() {
       </header>
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-
-        {/* SIDEBAR BOX (Scroll Nativo ultra-fluido) */}
         <div
           className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out shrink-0
             ${isSidebarOpen
@@ -209,7 +203,6 @@ function StudioContent() {
           )}
         </div>
 
-        {/* ÁREA CENTRAL INTELIGENTE */}
         <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
             ${isSidebarOpen
             ? `${hasPreviewContent ? 'h-[45%] md:flex-1 md:h-full md:shrink' : 'h-auto shrink-0 border-b border-[var(--border)] md:border-b-0'} `
@@ -227,25 +220,23 @@ function StudioContent() {
 
           <div className={`overflow-hidden flex flex-col min-h-0 flex-1 ${hasPreviewContent ? '' : 'justify-center items-center'}`}>
             {hasPreviewContent ? (
-              {/* O preview original continua a aparecer quando há conteúdo */ }
-              < ImagePreviewCard
+              <ImagePreviewCard
                 isGenerating={isGenerating}
-            imageUrl={imageUrl}
-            selections={selections}
-            niche={niche}
-            onGenerate={handleGenerate}
-            livePrompt={currentPrompt}
+                imageUrl={imageUrl}
+                selections={selections}
+                niche={niche}
+                onGenerate={handleGenerate}
+                livePrompt={currentPrompt}
               />
             ) : (
-            {/* NOVO: Quando vazio, mostra a logo Neksti centralizada */}
-            <div className="flex-1 flex flex-col justify-center items-center p-8 text-center opacity-30 select-none">
-              <img
-                src="/logoNekstiFull (2).png"
-                alt="Neksti Logo"
-                className="w-48 md:w-64 lg:w-80 h-auto object-contain mb-5"
-              />
-              <p className="text-[11px] font-mono tracking-widest uppercase text-[var(--muted-foreground)]">Seu Studio AI está pronto.</p>
-            </div>
+              <div className="flex-1 flex flex-col justify-center items-center p-8 text-center opacity-30 select-none">
+                <img
+                  src="/logoNekstiFull (2).png"
+                  alt="Neksti Logo"
+                  className="w-48 md:w-64 lg:w-80 h-auto object-contain mb-5"
+                />
+                <p className="text-[11px] font-mono tracking-widest uppercase text-[var(--muted-foreground)]">Seu Studio AI está pronto.</p>
+              </div>
             )}
           </div>
 
