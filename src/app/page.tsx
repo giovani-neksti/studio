@@ -10,7 +10,7 @@ const portals = [
   {
     niche: 'jewelry',
     label: 'Joalheria',
-    icon: <img src="/logo.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
+    icon: <img src="/logoNekstiFull.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
     description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
     gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
     border: 'hover:border-yellow-500/60',
