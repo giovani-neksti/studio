@@ -10,7 +10,6 @@ const portals = [
   {
     niche: 'jewelry',
     label: 'Joalheria',
-    // A LOGO MANTÉM-SE AQUI DENTRO DO QUADRANTE
     icon: <img src="/logo.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
     description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
     gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
@@ -131,20 +130,14 @@ export default function LoginPage() {
       >
         <div className="text-center mb-12">
 
-          {/* HEADER DO TOPO RESTAURADO PARA O DESIGN ORIGINAL SEM LOGO */}
-          <div className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/10">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <span className="text-white/30 text-sm font-mono tracking-widest uppercase">neksti.com.br</span>
+          {/* LOGO GIGANTE DA NEKSTI COMO CABEÇALHO */}
+          <div className="flex justify-center mb-6">
+            <img
+              src="/logoNeksti.jpg"
+              alt="Neksti Logo"
+              className="h-32 md:h-48 w-auto object-contain mix-blend-screen"
+            />
           </div>
-
-          <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight mb-4">
-            Studio{' '}
-            <span className="relative">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">AI</span>
-            </span>
-          </h1>
 
           <p className="text-white/40 text-lg max-w-md mx-auto leading-relaxed">
             Selecione seu portal para acessar a plataforma de fotografia assistida por IA
