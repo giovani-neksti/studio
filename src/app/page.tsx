@@ -10,7 +10,7 @@ const portals = [
   {
     niche: 'jewelry',
     label: 'Joalheria',
-    icon: <img src="/logoNekstiFull.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
+    icon: <img src="/logo.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
     description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
     gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
     border: 'hover:border-yellow-500/60',
@@ -133,7 +133,7 @@ export default function LoginPage() {
           {/* CORRIGIDO PARA LOGO.PNG PARA NÃO QUEBRAR */}
           <div className="flex justify-center mb-6">
             <img
-              src="/logo.png"
+              src="/logoNekstiFull.png"
               alt="Neksti Logo"
               className="h-32 md:h-48 w-auto object-contain mix-blend-screen"
             />
