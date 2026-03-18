@@ -216,9 +216,9 @@ function StudioContent() {
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
         <div
-          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out shrink-0
+          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out
             ${isSidebarOpen
-              ? `w-full ${hasPreviewContent ? 'h-[55%] md:h-full' : 'flex-1'} md:shrink-0 md:flex-none md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
+              ? `w-full ${hasPreviewContent ? 'h-[55%] shrink-0' : 'flex-1 min-h-0'} md:shrink-0 md:flex-none md:h-full md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
               : 'w-full h-0 md:h-full md:w-0 opacity-0 overflow-hidden border-r-0'}`}
         >
           <div className="w-full h-full flex flex-col min-h-0">
@@ -249,7 +249,7 @@ function StudioContent() {
 
         <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
             ${isSidebarOpen
-            ? `${hasPreviewContent ? 'h-[45%] md:flex-1 md:h-full md:shrink' : 'h-auto shrink-0 border-b border-[var(--border)] md:border-b-0'} `
+            ? `${hasPreviewContent ? 'h-[45%] shrink-0' : 'h-auto shrink-0 border-b border-[var(--border)]'} md:flex-1 md:h-full md:shrink md:border-b-0`
             : 'h-full flex-1 md:shrink'}`}
         >
           <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-2' : 'pb-4 md:pb-2'} z-10 bg-[var(--background)]`}>
