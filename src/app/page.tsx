@@ -130,10 +130,10 @@ export default function LoginPage() {
       >
         <div className="text-center mb-12">
 
-          {/* LOGO GIGANTE DA NEKSTI COMO CABEÇALHO */}
+          {/* CORRIGIDO PARA LOGO.PNG PARA NÃO QUEBRAR */}
           <div className="flex justify-center mb-6">
             <img
-              src="/logoNeksti.jpg"
+              src="/logo.png"
               alt="Neksti Logo"
               className="h-32 md:h-48 w-auto object-contain mix-blend-screen"
             />
