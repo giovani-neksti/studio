@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertCircle, Lock, Mail, ArrowRight, UserPlus } from 'lucide-react';
@@ -56,7 +55,6 @@ const mockUsers = {
 };
 
 export default function LoginPage() {
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [selectedNiche, setSelectedNiche] = useState<string | null>(null);
@@ -83,28 +81,36 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    await new Promise((r) => setTimeout(r, 800));
+    try {
+      // Simula um delay rápido para o efeito visual de carregamento
+      await new Promise((r) => setTimeout(r, 600));
 
-    const user = mockUsers[email as keyof typeof mockUsers];
+      const user = mockUsers[email as keyof typeof mockUsers];
 
-    if (!user || user.password !== password) {
-      setError('E-mail ou senha incorretos.');
+      if (!user || user.password !== password) {
+        setError('E-mail ou senha incorretos.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (user.niche !== selectedNiche) {
+        const portalNames: Record<string, string> = {
+          jewelry: 'Joalheria',
+          clothing: 'Moda',
+          shoes: 'Calçados',
+        };
+        setError(`Credenciais inválidas para este portal. Sua conta pertence ao portal ${portalNames[user.niche]}.`);
+        setIsLoading(false);
+        return;
+      }
+
+      // FIX: Navegação forçada à prova de falhas em vez de router.push
+      window.location.href = `/studio?niche=${selectedNiche}`;
+
+    } catch (err) {
+      setError('Ocorreu um erro ao iniciar sessão. Tente novamente.');
       setIsLoading(false);
-      return;
     }
-
-    if (user.niche !== selectedNiche) {
-      const portalNames: Record<string, string> = {
-        jewelry: 'Joalheria',
-        clothing: 'Moda',
-        shoes: 'Calçados',
-      };
-      setError(`Credenciais inválidas para este portal. Sua conta pertence ao portal ${portalNames[user.niche]}.`);
-      setIsLoading(false);
-      return;
-    }
-
-    router.push(`/studio?niche=${selectedNiche}`);
   };
 
   const selectedPortalDef = portals.find(p => p.niche === selectedNiche);
@@ -130,10 +136,9 @@ export default function LoginPage() {
       >
         <div className="text-center mb-12">
 
-          {/* NOME DO ARQUIVO EXATO DA LOGO NEKSTI */}
           <div className="flex justify-center mb-6">
             <img
-              src="/logoNekstiFull.png"
+              src="/logonekstifull.png"
               alt="Neksti Logo"
               className="h-20 md:h-28 w-auto object-contain"
             />
