@@ -51,6 +51,7 @@ function StudioContent() {
 
   const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_'));
 
+  // VERIFICA SE HÁ CONTEÚDO DE PREVIEW (Imagem ou Loading)
   const hasPreviewContent = isGenerating || !!imageUrl;
 
   const handleGenerate = async () => {
@@ -63,25 +64,23 @@ function StudioContent() {
     setIsGenerating(true);
     setImageUrl(null);
 
+    // NO MOBILE, RECOLHE SIDEBAR APÓS CLICAR
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
     }
 
     try {
-      const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
-      if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
+      const uploadKey = Object.keys(selections).find(k => k.startsWith('upload_') && selections[k]);
+      if (!uploadKey) throw new Error("Nenhuma imagem encontrada");
+
+      const originalFile = selections[uploadKey] as File;
 
       const formData = new FormData();
+      formData.append('file', originalFile);
       formData.append('niche', niche);
 
-      uploadKeys.forEach(key => {
-        formData.append('files', selections[key] as File);
-      });
-
       const cleanSelections = { ...selections };
-      uploadKeys.forEach(k => delete cleanSelections[k]);
-      cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
-
+      delete cleanSelections[uploadKey];
       formData.append('selections', JSON.stringify(cleanSelections));
 
       const res = await fetch('/api/generate', { method: 'POST', body: formData });
@@ -123,9 +122,9 @@ function StudioContent() {
   const currentPrompt = buildEnglishPrompt(niche, liveSelections);
 
   return (
-    // FIX PRINCIPAL: fixed inset-0 tranca o layout exatamente no tamanho visível do telemóvel
+    // fixed inset-0 tranca o layout exatamente no tamanho visível do telemóvel
     <div className={`${config.themeClass} fixed inset-0 w-full flex flex-col overflow-hidden bg-[var(--background)]`}>
-      <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative">
+      <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative shrink-0">
         <div className="flex items-center gap-2 md:gap-4 h-full">
           <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
             <img src="/logo.png" alt="Logo joIAs" className="h-12 md:h-14 lg:h-16 w-auto object-contain" />
@@ -177,11 +176,11 @@ function StudioContent() {
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
 
-        {/* FIX 2: Adicionado flex-col e min-h-0 para forçar o scroll interno a funcionar no mobile */}
+        {/* SIDEBAR BOX (Scroll Nativo ultra-fluido) */}
         <div
-          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out
+          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out shrink-0
             ${isSidebarOpen
-              ? `w-full ${hasPreviewContent ? 'h-[55%] shrink-0' : 'flex-1 min-h-0'} md:shrink-0 md:flex-none md:h-full md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
+              ? `w-full ${hasPreviewContent ? 'h-[55%] md:h-full' : 'flex-1'} md:shrink-0 md:flex-none md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
               : 'w-full h-0 md:h-full md:w-0 opacity-0 overflow-hidden border-r-0'}`}
         >
           <div className="w-full h-full flex flex-col min-h-0">
@@ -210,11 +209,11 @@ function StudioContent() {
           )}
         </div>
 
-        {/* FIX 3: Shrink-0 quando não há preview garante que o Main não empurra a Sidebar para fora do ecrã */}
+        {/* ÁREA CENTRAL INTELIGENTE */}
         <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
             ${isSidebarOpen
-            ? `${hasPreviewContent ? 'h-[45%] shrink-0' : 'h-auto shrink-0 border-b border-[var(--border)]'} md:flex-1 md:h-full md:shrink md:border-b-0`
-            : 'h-full flex-1'}`}
+            ? `${hasPreviewContent ? 'h-[45%] md:flex-1 md:h-full md:shrink' : 'h-auto shrink-0 border-b border-[var(--border)] md:border-b-0'} `
+            : 'h-full flex-1 md:shrink'}`}
         >
           <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-2' : 'pb-4 md:pb-2'} z-10 bg-[var(--background)]`}>
             <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
@@ -226,19 +225,32 @@ function StudioContent() {
             </button>
           </div>
 
-          <div className={`overflow-hidden flex flex-col min-h-0 ${hasPreviewContent ? 'flex-1' : 'hidden md:flex md:flex-1'}`}>
-            <ImagePreviewCard
-              isGenerating={isGenerating}
-              imageUrl={imageUrl}
-              selections={selections}
-              niche={niche}
-              onGenerate={handleGenerate}
-              livePrompt={currentPrompt}
-            />
+          <div className={`overflow-hidden flex flex-col min-h-0 flex-1 ${hasPreviewContent ? '' : 'justify-center items-center'}`}>
+            {hasPreviewContent ? (
+              {/* O preview original continua a aparecer quando há conteúdo */ }
+              < ImagePreviewCard
+                isGenerating={isGenerating}
+            imageUrl={imageUrl}
+            selections={selections}
+            niche={niche}
+            onGenerate={handleGenerate}
+            livePrompt={currentPrompt}
+              />
+            ) : (
+            {/* NOVO: Quando vazio, mostra a logo Neksti centralizada */}
+            <div className="flex-1 flex flex-col justify-center items-center p-8 text-center opacity-30 select-none">
+              <img
+                src="/logoNekstiFull (2).png"
+                alt="Neksti Logo"
+                className="w-48 md:w-64 lg:w-80 h-auto object-contain mb-5"
+              />
+              <p className="text-[11px] font-mono tracking-widest uppercase text-[var(--muted-foreground)]">Seu Studio AI está pronto.</p>
+            </div>
+            )}
           </div>
 
           {recentImages.length > 0 && (
-            <div className="hidden md:flex flex-shrink-0 h-[96px] border-t border-[var(--border)] bg-[var(--card)] px-6 py-3 items-center justify-between transition-all duration-300">
+            <div className="hidden md:flex flex-shrink-0 h-[96px] border-t border-[var(--border)] bg-[var(--card)] px-6 py-3 items-center justify-between transition-all duration-300 shrink-0">
               <div className="flex flex-col h-full justify-center">
                 <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-2">
                   <span className="text-xs font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors uppercase tracking-wider">Galeria de Criações</span><Images className="w-3.5 h-3.5 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
