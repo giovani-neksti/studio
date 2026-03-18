@@ -1,308 +1,298 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
-import { getNicheConfig, nicheConfigs, NicheKey } from '@/lib/niche-config';
-import { buildEnglishPrompt } from '@/lib/prompt-builder';
-import { Sidebar } from '@/components/Sidebar';
-import { ImagePreviewCard } from '@/components/ImagePreviewCard';
-import { GalleryModal } from '@/components/GalleryModal';
-import { PricingModal } from '@/components/PricingModal';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { AlertCircle, Lock, Mail, ArrowRight, UserPlus } from 'lucide-react';
 
-function StudioContent() {
-  const searchParams = useSearchParams();
+const portals = [
+  {
+    niche: 'jewelry',
+    label: 'Joalheria',
+    icon: <img src="/logo.png" alt="Logo joIAs" className="h-20 md:h-24 w-auto object-contain" />,
+    description: 'Crie imagens de luxo para joias, colares, anéis e pulseiras',
+    gradient: 'from-yellow-900/30 via-amber-900/20 to-transparent',
+    border: 'hover:border-yellow-500/60',
+    activeBorder: 'border-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.2)]',
+    accent: '#D4AF37',
+    accentHover: 'hover:shadow-yellow-500/20',
+    badge: 'LUXO',
+    badgeBg: 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30',
+    enabled: true, // Portal Ativo
+  },
+  {
+    niche: 'clothing',
+    label: 'Moda & Roupas',
+    icon: <span className="text-5xl">👗</span>,
+    description: 'Produza editoriais limpos e modernos para sua coleção',
+    gradient: 'from-gray-100/80 via-gray-200/40 to-transparent',
+    border: 'border-white/5',
+    activeBorder: '',
+    accent: '#ffffff',
+    accentHover: '',
+    badge: 'EM BREVE',
+    badgeBg: 'bg-gray-500/10 text-gray-400 border border-gray-500/30',
+    enabled: false, // Portal Inativo
+  },
+  {
+    niche: 'shoes',
+    label: 'Calçados',
+    icon: <span className="text-5xl">👟</span>,
+    description: 'Imagens urbanas de alto impacto para tênis, botas e mais',
+    gradient: 'from-gray-900/30 via-gray-800/20 to-transparent',
+    border: 'border-white/5',
+    activeBorder: '',
+    accent: '#888888',
+    accentHover: '',
+    badge: 'EM BREVE',
+    badgeBg: 'bg-gray-500/10 text-gray-400 border border-gray-500/30',
+    enabled: false, // Portal Inativo
+  },
+];
+
+const mockUsers = {
+  'joias@studio.ai': { password: '123', niche: 'jewelry' }
+};
+
+export default function LoginPage() {
   const router = useRouter();
-  const nicheParam = searchParams.get('niche') as NicheKey | null;
-  const config = getNicheConfig(nicheParam);
-  const niche = nicheParam && nicheParam in nicheConfigs ? nicheParam : 'jewelry';
+  const [mounted, setMounted] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [selectedNiche, setSelectedNiche] = useState<string | null>(null);
 
-  const [selections, setSelections] = useState<Record<string, any>>({});
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  const [credits, setCredits] = useState(5);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [recentImages, setRecentImages] = useState<string[]>([]);
-
-  const [nicheMenuOpen, setNicheMenuOpen] = useState(false);
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [isPricingOpen, setIsPricingOpen] = useState(false);
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!selections.bgTab) {
-      setSelections(prev => ({ ...prev, bgTab: 'solid', displayTab: 'expositor' }));
-    }
+    setMounted(true);
   }, []);
 
-  const handleSelect = (key: string, value: string) => {
-    setSelections((prev) => {
-      if (prev[key] === value && key !== 'bgTab' && key !== 'displayTab') {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      }
-      return { ...prev, [key]: value };
-    });
+  const handleNicheSelect = (niche: string, isEnabled: boolean) => {
+    if (!isEnabled) return;
+    setSelectedNiche(niche);
+    setError('');
+    setEmail('');
+    setPassword('');
   };
 
-  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_'));
-  const hasPreviewContent = isGenerating || !!imageUrl;
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-  const processImageForAI = async (file: File): Promise<File> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_SIZE = 1024;
-        let width = img.width;
-        let height = img.height;
+    await new Promise((r) => setTimeout(r, 800));
 
-        if (width > height && width > MAX_SIZE) {
-          height *= MAX_SIZE / width;
-          width = MAX_SIZE;
-        } else if (height > MAX_SIZE) {
-          width *= MAX_SIZE / height;
-          height = MAX_SIZE;
-        }
+    const user = mockUsers[email as keyof typeof mockUsers];
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return resolve(file);
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const newFile = new File([blob], "imagem_processada.jpg", {
-              type: 'image/jpeg',
-              lastModified: Date.now(),
-            });
-            resolve(newFile);
-          } else {
-            resolve(file);
-          }
-        }, 'image/jpeg', 0.85);
-      };
-      img.onerror = () => resolve(file);
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
-  const handleGenerate = async () => {
-    if (credits <= 0) return;
-    if (!hasUpload) {
-      alert("Por favor, selecione uma categoria e faça o upload de pelo menos uma imagem do produto.");
+    if (!user || user.password !== password) {
+      setError('E-mail ou senha incorretos.');
+      setIsLoading(false);
       return;
     }
 
-    setIsGenerating(true);
-    setImageUrl(null);
-
-    if (window.innerWidth < 768) {
-      setIsSidebarOpen(false);
+    if (user.niche !== selectedNiche) {
+      const portalNames: Record<string, string> = {
+        jewelry: 'Joalheria',
+        clothing: 'Moda',
+        shoes: 'Calçados',
+      };
+      setError(`Credenciais inválidas para este portal. Sua conta pertence ao portal ${portalNames[user.niche]}.`);
+      setIsLoading(false);
+      return;
     }
 
-    try {
-      const uploadKey = Object.keys(selections).find(k => k.startsWith('upload_') && selections[k]);
-      if (!uploadKey) throw new Error("Nenhuma imagem encontrada");
-
-      const originalFile = selections[uploadKey] as File;
-      const processedFile = await processImageForAI(originalFile);
-
-      const formData = new FormData();
-      formData.append('file', processedFile);
-      formData.append('niche', niche);
-
-      const cleanSelections = { ...selections };
-      delete cleanSelections[uploadKey];
-      formData.append('selections', JSON.stringify(cleanSelections));
-
-      const res = await fetch('/api/generate', { method: 'POST', body: formData });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');
-
-      setImageUrl(data.url);
-      setRecentImages(prev => [data.url, ...prev].slice(0, 12));
-      setImageIndex((i) => i + 1);
-      setCredits((c) => c - 1);
-
-    } catch (e: any) {
-      console.error(e);
-      alert("Houve um erro ao gerar a imagem: " + e.message);
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(true);
-      }
-    } finally {
-      setIsGenerating(false);
-    }
+    router.push(`/studio?niche=${selectedNiche}`);
   };
 
-  const switchNiche = (n: NicheKey) => {
-    if (n !== 'jewelry') return;
-    router.push(`/studio?niche=${n}`);
-    setNicheMenuOpen(false);
-    setSelections({ bgTab: 'solid', displayTab: 'expositor' });
-    setImageUrl(null);
-  };
-
-  const canGenerate = !isGenerating && credits > 0 && hasUpload;
-
-  const liveSelections = { ...selections };
-  const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
-  if (uploadKeys.length > 0) {
-    liveSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
-  }
-  const currentPrompt = buildEnglishPrompt(niche, liveSelections);
+  const selectedPortalDef = portals.find(p => p.niche === selectedNiche);
 
   return (
-    <div className={`${config.themeClass} fixed inset-0 w-full flex flex-col overflow-hidden bg-[var(--background)]`}>
-      <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative shrink-0">
-        <div className="flex items-center gap-2 md:gap-4 h-full">
-          <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
-            <img src="/logo.png" alt="Logo joIAs" className="h-12 md:h-14 lg:h-16 w-auto object-contain" />
-          </div>
-          <div className="hidden sm:block h-6 w-px bg-[var(--border)]" />
-          <div className="relative">
-            <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 md:gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--muted)] border border-[var(--border)] text-[var(--foreground)] text-xs md:text-sm transition-colors duration-150">
-              <span className="text-sm md:text-base">{config.icon}</span>
-              <span className="font-medium hidden xs:inline">{config.label}</span>
-              <ChevronDown className={`w-3 h-3 md:w-3.5 md:h-3.5 text-[var(--muted-foreground)] transition-transform ${nicheMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {nicheMenuOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-48 md:w-56 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
-                {Object.entries(nicheConfigs).map(([key, cfg]) => {
-                  const isEnabled = key === 'jewelry';
-                  return (
-                    <button
-                      key={key}
-                      onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
-                      disabled={!isEnabled}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 md:py-3 text-xs md:text-sm transition-colors text-left ${isEnabled ? 'hover:bg-[var(--accent)]' : 'grayscale opacity-50 cursor-not-allowed'} ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
-                    >
-                      <span className="text-lg">{cfg.icon}</span>
-                      <div className="flex flex-col">
-                        <span className={`${key !== niche && isEnabled ? 'text-[var(--foreground)]' : ''}`}>{cfg.label}</span>
-                        {!isEnabled && <span className="text-[10px] text-[var(--muted-foreground)] mt-0.5 font-medium">Lançamento em breve</span>}
-                      </div>
-                      {key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="flex items-center gap-1.5 px-2 py-1 md:px-3 md:py-1.5 rounded-full border text-xs md:text-sm font-semibold whitespace-nowrap" style={{ borderColor: credits > 2 ? 'var(--primary)' : '#ef4444', color: credits > 2 ? 'var(--primary)' : '#ef4444', backgroundColor: credits > 2 ? 'var(--niche-glow, rgba(255,255,255,0.05))' : 'rgba(239,68,68,0.08)' }}>
-            <Gem className="w-3 h-3 md:w-3.5 md:h-3.5" />{credits} <span className="hidden sm:inline">Créditos</span>
-          </div>
-          <Button variant="default" size="sm" onClick={() => setIsPricingOpen(true)} className="gap-2 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 text-xs md:text-sm hidden lg:flex h-8">
-            <CreditCard className="w-3.5 h-3.5" />Adquirir Assinatura
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-1.5 md:gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--accent)] text-xs md:text-sm h-8 px-2 md:px-3">
-            <LogOut className="w-3 h-3 md:w-3.5 md:h-3.5" /><span className="hidden sm:inline">Sair</span>
-          </Button>
-        </div>
-      </header>
-
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+    <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center relative overflow-hidden py-12">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-white/[0.02] blur-3xl" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-white/[0.02] blur-3xl" />
         <div
-          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out shrink-0
-            ${isSidebarOpen
-              ? `w-full ${hasPreviewContent ? 'h-[55%] md:h-full' : 'flex-1'} md:shrink-0 md:flex-none md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
-              : 'w-full h-0 md:h-full md:w-0 opacity-0 overflow-hidden border-r-0'}`}
-        >
-          <div className="w-full h-full flex flex-col min-h-0">
-            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
-          </div>
-        </div>
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: '60px 60px',
+          }}
+        />
+      </div>
 
-        <div className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 transition-all duration-300 ease-in-out" style={{ transform: `translate(${isSidebarOpen ? 'min(calc(30vw), 380px)' : '0px'}, -50%)` }}>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center justify-center w-5 h-12 bg-[var(--card)] border border-[var(--border)] rounded-r-lg shadow-md hover:bg-[var(--accent)] hover:text-[var(--primary)] transition-colors focus:outline-none -ml-[1px]"
-            title={isSidebarOpen ? "Recolher Menu" : "Expandir Menu"}
-          >
-            {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </button>
-        </div>
+      <div
+        className={`relative z-10 w-full max-w-5xl mx-auto px-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+      >
+        <div className="text-center mb-12">
 
-        <div className="md:hidden absolute bottom-4 right-4 z-40 transition-opacity">
-          {!isSidebarOpen && (
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-full shadow-2xl font-bold text-sm"
-            >
-              <Layers className="w-4 h-4" /> Configurar Imagem
-            </button>
-          )}
-        </div>
-
-        <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
-            ${isSidebarOpen
-            ? `${hasPreviewContent ? 'h-[45%] md:flex-1 md:h-full md:shrink' : 'h-auto shrink-0 border-b border-[var(--border)] md:border-b-0'} `
-            : 'h-full flex-1 md:shrink'}`}
-        >
-          <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-2' : 'pb-4 md:pb-2'} z-10 bg-[var(--background)]`}>
-            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
-              {isGenerating ? (
-                <><div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-[var(--background)]/30 border-t-[var(--background)] animate-spin" /><span>Criando Magia...</span></>
-              ) : (
-                <><Sparkles className="w-4 h-4 md:w-5 md:h-5" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span>{credits > 0 && hasUpload && <span className="ml-1 opacity-80 text-xs md:text-sm font-normal hidden xs:inline">(−1 crédito)</span>}</>
-              )}
-            </button>
-          </div>
-
-          <div className={`overflow-hidden flex flex-col min-h-0 flex-1 ${hasPreviewContent ? '' : 'hidden md:flex md:flex-1'}`}>
-            <ImagePreviewCard
-              isGenerating={isGenerating}
-              imageUrl={imageUrl}
-              selections={selections}
-              niche={niche}
-              onGenerate={handleGenerate}
-              livePrompt={currentPrompt}
+          {/* NOME EXATO DO ARQUIVO: .png */}
+          <div className="flex justify-center mb-6">
+            <img
+              src="/logonekstifull.png"
+              alt="Neksti Logo"
+              className="h-20 md:h-28 w-auto object-contain"
             />
           </div>
 
-          {recentImages.length > 0 && (
-            <div className="hidden md:flex flex-shrink-0 h-[96px] border-t border-[var(--border)] bg-[var(--card)] px-6 py-3 items-center justify-between transition-all duration-300 shrink-0">
-              <div className="flex flex-col h-full justify-center">
-                <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-2">
-                  <span className="text-xs font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors uppercase tracking-wider">Galeria de Criações</span><Images className="w-3.5 h-3.5 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
-                </button>
-                <div className="flex items-center gap-2">
-                  {recentImages.slice(0, 8).map((img, idx) => (
-                    <div key={idx} className="w-10 h-10 rounded-md overflow-hidden border border-[var(--border)] cursor-pointer hover:border-[var(--primary)] transition-colors shadow-sm" onClick={() => setImageUrl(img)}>
-                      <img src={img} alt={`Recente ${idx}`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
+          <p className="text-white/40 text-lg max-w-md mx-auto leading-relaxed">
+            Selecione seu portal para acessar a plataforma de fotografia assistida por IA
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+          {portals.map((portal, index) => {
+            const isSelected = selectedNiche === portal.niche;
+            const isDimmed = selectedNiche && !isSelected;
+
+            const blockedClass = !portal.enabled ? 'grayscale opacity-50 cursor-not-allowed' : '';
+
+            return (
+              <button
+                key={portal.niche}
+                onClick={() => handleNicheSelect(portal.niche, portal.enabled)}
+                onMouseEnter={() => portal.enabled && setHoveredIndex(index)}
+                onMouseLeave={() => portal.enabled && setHoveredIndex(null)}
+                disabled={!portal.enabled}
+                className={`group relative text-left rounded-2xl border bg-black backdrop-blur-sm p-8 
+                  transition-all duration-300 overflow-hidden
+                  ${isSelected ? portal.activeBorder : portal.border} 
+                  ${isDimmed ? 'opacity-40 scale-[0.98]' : portal.enabled ? 'hover:shadow-2xl hover:-translate-y-1' : ''}
+                  ${blockedClass}
+                `}
+              >
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${portal.gradient} transition-opacity duration-300
+                    ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                />
+
+                <div className="relative z-10">
+                  <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold tracking-wider mb-6 ${portal.badgeBg}`}>
+                    {portal.badge}
+                  </div>
+
+                  <div className={`mb-5 block transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110'}`}>
+                    {portal.icon}
+                  </div>
+
+                  <h2 className="text-white text-xl font-bold mb-2 transition-colors">
+                    {portal.label}
+                  </h2>
+                  <p className="text-white/40 text-sm leading-relaxed mb-6">{portal.description}</p>
+
+                  <div
+                    className="flex items-center gap-2 text-sm font-semibold transition-all duration-200"
+                    style={{ color: isSelected || hoveredIndex === index ? portal.accent : 'rgba(255,255,255,0.4)' }}
+                  >
+                    <span>
+                      {!portal.enabled ? 'Lançamento em Breve' : isSelected ? 'Portal Selecionado' : 'Selecionar Portal'}
+                    </span>
+                    {portal.enabled && (
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-200 ${isSelected ? 'translate-x-2' : 'group-hover:translate-x-1'}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          className={`max-w-md mx-auto transition-all duration-500 overflow-hidden ${selectedNiche ? 'opacity-100 translate-y-0 h-auto mb-12' : 'opacity-0 translate-y-8 h-0 mb-0'
+            }`}
+        >
+          {selectedPortalDef && (
+            <div className="bg-black border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-white mb-1">Acesso — {selectedPortalDef.label}</h3>
+                <p className="text-white/40 text-sm">Insira suas credenciais corporativas</p>
+                <div className="mt-3 text-xs text-white/30 font-mono">
+                  Mock: joias@studio.ai (senha: 123)
                 </div>
               </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                    <Input
+                      type="email"
+                      placeholder="E-mail"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="bg-black border-white/10 text-white placeholder:text-white/20 pl-11 h-12 rounded-xl focus-visible:ring-1"
+                      style={{ '--ring': selectedPortalDef.accent } as React.CSSProperties}
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                    <Input
+                      type="password"
+                      placeholder="Senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="bg-black border-white/10 text-white placeholder:text-white/20 pl-11 h-12 rounded-xl focus-visible:ring-1"
+                      style={{ '--ring': selectedPortalDef.accent } as React.CSSProperties}
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="flex items-start gap-2 text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <span className="leading-snug">{error}</span>
+                  </div>
+                )}
+
+                <div className="pt-2 flex flex-col gap-3">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-12 text-base font-semibold rounded-xl text-black transition-all hover:opacity-90"
+                    style={{ backgroundColor: selectedPortalDef.accent }}
+                  >
+                    {isLoading ? (
+                      <div className="w-5 h-5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        Entrar no Portal <ArrowRight className="w-4 h-4" />
+                      </div>
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full h-12 text-white/50 hover:text-white hover:bg-white/5 rounded-xl"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Criar Conta Comercial
+                  </Button>
+                </div>
+              </form>
             </div>
           )}
-        </main>
+        </div>
+
+        <div className="text-center">
+          <p className="text-white/20 text-xs tracking-widest font-mono uppercase">
+            Powered by Neksti · studio.neksti.com.br
+          </p>
+        </div>
       </div>
-
-      {nicheMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setNicheMenuOpen(false)} />}
-      <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} />
-      <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} />
     </div>
-  );
-}
-
-export default function StudioPage() {
-  return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-[#09090b]"><div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" /></div>}>
-      <StudioContent />
-    </Suspense>
   );
 }
