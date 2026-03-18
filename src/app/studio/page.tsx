@@ -167,7 +167,7 @@ function StudioContent() {
       <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative shrink-0">
         <div className="flex items-center gap-2 md:gap-4 h-full">
           <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
-            <img src="/logo.png" alt="Logo joIAs" className="h-12 md:h-14 lg:h-16 w-auto object-contain" />
+            <img src="/logoNekstiFull.png" alt="Logo joIAs" className="h-12 md:h-14 lg:h-16 w-auto object-contain" />
           </div>
           <div className="hidden sm:block h-6 w-px bg-[var(--border)]" />
           <div className="relative">
