@@ -274,10 +274,11 @@ function StudioContent() {
               />
             ) : (
               <div className="flex-1 flex flex-col justify-center items-center p-8 text-center opacity-30 select-none">
+                {/* ALTERADO: Usa o logoNeksti.jpg garantido e funde com o fundo */}
                 <img
-                  src="/logoNekstiFull.png"
+                  src="/logoNeksti.jpg"
                   alt="Neksti Logo"
-                  className="w-48 md:w-64 lg:w-80 h-auto object-contain mb-5"
+                  className="w-48 md:w-64 lg:w-80 h-auto object-contain mb-5 mix-blend-screen"
                 />
                 <p className="text-[11px] font-mono tracking-widest uppercase text-[var(--muted-foreground)]">Seu Studio AI está pronto.</p>
               </div>
