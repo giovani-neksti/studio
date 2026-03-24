@@ -219,7 +219,7 @@ function StudioContent() {
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
         <div
-          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-30 transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]
+          className={`flex flex-col min-h-0 border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-30 transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]
             ${isSidebarOpen
               ? `w-full ${hasPreviewContent ? 'h-[60%] rounded-t-[2rem] shadow-[0_-15px_40px_rgba(0,0,0,0.15)] md:h-full md:rounded-none md:shadow-none translate-y-0 shrink-0' : 'flex-1 min-h-0'} md:shrink-0 md:flex-none md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
               : 'w-full h-0 md:h-full md:w-0 opacity-0 md:opacity-0 translate-y-full md:translate-y-0 overflow-hidden border-none'}`}
