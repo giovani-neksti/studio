@@ -42,14 +42,14 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
   ];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10" onClick={() => onOpenChange(false)}>
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/70 backdrop-blur-md p-0 md:p-10" onClick={() => onOpenChange(false)}>
       <div 
-        className="bg-[var(--background)] border border-[var(--border)] rounded-2xl w-full max-w-5xl shadow-2xl relative flex flex-col overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200" 
+        className="bg-[var(--background)] border border-white/[0.06] rounded-t-[2rem] md:rounded-2xl w-full max-w-5xl shadow-2xl relative flex flex-col overflow-y-auto max-h-[92dvh] md:max-h-[90vh]" 
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] bg-[var(--accent)] rounded-full p-2"
+          className="absolute top-4 right-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] bg-white/[0.06] rounded-full p-2 active:scale-[0.9] transition-all z-10"
         >
           <X className="w-5 h-5" />
         </button>
@@ -66,7 +66,7 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
             {plans.map((plan) => (
               <div 
                 key={plan.name} 
-                className={`relative flex flex-col rounded-2xl border ${plan.popular ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/20 bg-[var(--primary)]/5 scale-105 shadow-xl' : 'border-[var(--border)] bg-[var(--card)]'} p-8 rounded-2xl transition-all`}
+                className={`relative flex flex-col rounded-2xl border ${plan.popular ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/15 bg-[var(--primary)]/5 md:scale-105 shadow-xl' : 'border-white/[0.06] bg-[var(--card)]'} p-6 md:p-8 transition-all active:scale-[0.98]`}
               >
                 {plan.popular && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full flex items-center gap-1">
@@ -101,7 +101,7 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
 
                 <Button 
                   onClick={() => alert(`Redirecionando para Stripe - Assinatura ${plan.name}`)}
-                  className={`w-full font-bold h-12 ${plan.popular ? 'bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90' : 'bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90'}`}
+                  className={`w-full font-bold h-12 rounded-xl active:scale-[0.97] transition-all ${plan.popular ? 'bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90' : 'bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90'}`}
                 >
                   Assinar {plan.name}
                 </Button>

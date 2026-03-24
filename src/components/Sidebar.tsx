@@ -75,7 +75,7 @@ function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
     <div className="mb-1 md:mb-2">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-3 py-3.5 md:px-4 md:py-4 text-left hover:bg-[var(--accent)] rounded-xl transition-colors active:scale-[0.98]">
+      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-4 py-3.5 md:px-5 md:py-4 text-left hover:bg-white/[0.04] rounded-2xl transition-all duration-200 active:scale-[0.97]">
         <div className="flex items-center gap-2.5 md:gap-3">
           <span className="text-[var(--primary)] w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">{icon}</span>
           <span className="text-[13px] md:text-sm font-bold text-[var(--foreground)] tracking-wide">{title}</span>
@@ -121,7 +121,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
         <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth w-full">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth w-full no-scrollbar">
         <div className="py-2 md:py-3 pb-32 md:pb-16">
 
           {/* PASSO 1: CATEGORIA */}
@@ -137,10 +137,10 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   <button
                     key={cat}
                     onClick={() => onSelect('category', cat)}
-                    className={`relative flex flex-col items-center justify-center p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all active:scale-95 min-h-[72px]
+                    className={`relative flex flex-col items-center justify-center p-3 md:p-4 rounded-2xl border transition-all duration-200 active:scale-[0.95] min-h-[72px]
                       ${isActive
-                        ? 'border-[var(--primary)] bg-[var(--primary)]/10 ring-1 ring-[var(--primary)]/30 shadow-sm'
-                        : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50 hover:bg-[var(--accent)]/50'}`}
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/10 ring-1 ring-[var(--primary)]/20 shadow-[0_0_20px_rgba(var(--primary-rgb,212,175,55),0.08)]'
+                        : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
                   >
                     {hasUpload && (
                       <CheckCircle2 className="absolute top-2 right-2 w-3.5 h-3.5 md:w-4 md:h-4 text-green-500 bg-white rounded-full" />
@@ -167,7 +167,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     </div>
                     <button
                       onClick={() => onSelect(activeUploadKey!, null)}
-                      className="text-[11px] md:text-xs text-red-500 hover:text-red-400 font-bold ml-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-md shrink-0 transition-colors active:scale-95"
+                      className="text-[11px] md:text-xs text-red-500 hover:text-red-400 font-bold ml-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl shrink-0 transition-all active:scale-[0.93]"
                     >
                       Remover
                     </button>
@@ -177,7 +177,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     {/* Botão de Câmera Direta */}
                     <div
                       onClick={() => cameraInputRef.current?.click()}
-                      className="p-4 md:p-5 border-2 border-dashed border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/60 transition-all active:scale-95 flex flex-col items-center justify-center min-h-[80px]"
+                      className="p-4 md:p-5 border-2 border-dashed border-[var(--primary)]/20 bg-[var(--primary)]/5 rounded-2xl text-center cursor-pointer hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/40 transition-all duration-200 active:scale-[0.95] flex flex-col items-center justify-center min-h-[80px]"
                     >
                       <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileUpload} />
                       <Camera className="w-6 h-6 md:w-7 md:h-7 mb-2 text-[var(--primary)] opacity-90" />
@@ -220,9 +220,9 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
           {/* PASSO 2: AMBIENTAÇÃO & ADEREÇOS */}
           <SectionWrapper title="2. Ambientação & Adereços" icon={<ImageIcon />}>
             {hasScenarios && (
-              <div className="flex p-0.5 md:p-1 bg-[var(--accent)] rounded-lg mb-3">
-                <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Cor Sólida</button>
-                <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${bgTab === 'scenario' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Cenário IA</button>
+              <div className="flex p-1 bg-white/[0.04] rounded-xl mb-3 border border-white/[0.04]">
+                <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Cor Sólida</button>
+                <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${bgTab === 'scenario' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Cenário IA</button>
               </div>
             )}
 
@@ -233,7 +233,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     key={color.name}
                     title={color.name}
                     onClick={() => { onSelect('background', color.name); onSelect('backgroundHex', color.hex); }}
-                    className={`aspect-square rounded-full border shadow-sm transition-transform hover:scale-110 ${selections.background === color.name ? 'ring-2 ring-offset-2 ring-[var(--primary)] scale-110' : 'border-white/10'}`}
+                    className={`aspect-square rounded-full border shadow-sm transition-all duration-200 hover:scale-110 active:scale-90 ${selections.background === color.name ? 'ring-2 ring-offset-2 ring-[var(--primary)] scale-110' : 'border-white/10'}`}
                     style={{ backgroundColor: color.hex }}
                   />
                 ))}
@@ -266,9 +266,9 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           {/* PASSO 3: EXIBIÇÃO */}
           <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect />}>
-            <div className="flex p-0.5 md:p-1 bg-[var(--accent)] rounded-lg mb-3">
-              <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Expositor</button>
-              <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-[10px] md:text-xs py-1.5 rounded-md ${displayTab === 'human' ? 'bg-[var(--card)] shadow-sm font-medium' : ''}`}>Modelo</button>
+            <div className="flex p-1 bg-white/[0.04] rounded-xl mb-3 border border-white/[0.04]">
+              <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Expositor</button>
+              <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${displayTab === 'human' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Modelo</button>
             </div>
 
             {displayTab === 'expositor' ? (
@@ -280,7 +280,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     <button
                       key={opt.id}
                       onClick={() => onSelect('display', opt.label)}
-                      className={`relative flex flex-col items-center justify-center p-2.5 md:p-3 rounded-lg md:rounded-xl border transition-all ${isActive ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30' : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
+                      className={`relative flex flex-col items-center justify-center p-3 md:p-3.5 rounded-2xl border transition-all duration-200 active:scale-[0.95] ${isActive ? 'border-[var(--primary)] bg-[var(--primary)]/8 ring-1 ring-[var(--primary)]/20' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
                     >
                       {isActive && <CheckCircle2 className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" />}
                       <span className="text-xl md:text-2xl mb-1">{icon}</span>
@@ -299,10 +299,10 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     <button
                       key={opt.id}
                       onClick={() => onSelect('display', opt.name)}
-                      className={`relative flex flex-col items-center justify-center p-2 md:p-2.5 rounded-lg border transition-all text-center h-16 md:h-20
+                      className={`relative flex flex-col items-center justify-center p-2.5 md:p-3 rounded-xl border transition-all duration-200 active:scale-[0.95] text-center h-16 md:h-20
                         ${isActive
-                          ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
-                          : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
+                          ? 'border-[var(--primary)] bg-[var(--primary)]/8 ring-1 ring-[var(--primary)]/20'
+                          : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
                     >
                       {isActive && <CheckCircle2 className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--primary)]" />}
                       <span className={`text-[10px] md:text-[11px] font-bold leading-tight mb-0.5 ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
@@ -325,9 +325,9 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
           {/* PASSO 4: ASSINATURA VISUAL */}
           <SectionWrapper title="4. Assinatura Visual" icon={<TypeIcon />}>
             <div className="space-y-2.5 md:space-y-3">
-              <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-[var(--accent)] text-[var(--foreground)] h-8 md:h-9 border-none text-xs md:text-sm" />
+              <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-white/[0.04] text-[var(--foreground)] h-11 md:h-12 border border-white/[0.06] rounded-xl text-[13px] md:text-sm focus:ring-2 focus:ring-[var(--primary)]/30 transition-all" />
 
-              <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-8 md:h-9 px-2 md:px-3 rounded-md text-xs md:text-sm border bg-[var(--background)] text-[var(--foreground)]">
+              <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-11 md:h-12 px-3 md:px-4 rounded-xl text-[13px] md:text-sm border border-white/[0.06] bg-white/[0.04] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/30 transition-all outline-none">
                 <option value="" disabled>Escolha a Fonte</option>
                 {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
               </select>
@@ -401,10 +401,10 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 <button
                   key={fmt.id}
                   onClick={() => onSelect('format', fmt.ratio)}
-                  className={`flex flex-col items-center justify-center p-2 md:p-3 rounded-lg md:rounded-xl border transition-all text-center
+                  className={`flex flex-col items-center justify-center p-2.5 md:p-3 rounded-2xl border transition-all duration-200 active:scale-[0.95] text-center
                     ${selections.format === fmt.ratio
-                      ? 'border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)] shadow-sm'
-                      : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50'}`}
+                      ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)] shadow-[0_0_15px_rgba(var(--primary-rgb,212,175,55),0.06)]'
+                      : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
                 >
                   <span className="font-bold text-xs md:text-[13px] mb-0.5 text-[var(--foreground)]">{fmt.ratio}</span>
                   <span className="text-[10px] md:text-[11px] font-medium mb-1">{fmt.label}</span>

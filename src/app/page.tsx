@@ -168,21 +168,23 @@ function StudioContent() {
   const currentPrompt = buildEnglishPrompt(niche, liveSelections);
 
   return (
-    <div className={`${config.themeClass} fixed inset-0 w-full flex flex-col overflow-hidden bg-[var(--background)]`}>
-      <header className="h-16 md:h-20 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-sm z-30 relative shrink-0">
+    <div className={`${config.themeClass} flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--background)]`}>
+
+      {/* ═══════════════════════════════════════ HEADER — Glassmorphic ═══════════════════════════════════════ */}
+      <header className="h-14 md:h-16 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-white/[0.06] bg-[var(--card)]/80 backdrop-blur-xl backdrop-saturate-150 z-40 relative">
         <div className="flex items-center gap-2 md:gap-4 h-full">
-          <div className="flex items-center h-full cursor-pointer py-2 md:py-3" onClick={() => router.push('/')}>
-            <img src="/logo.png" alt="Logo joIAs" className="h-12 md:h-14 lg:h-16 w-auto object-contain" />
+          <div className="flex items-center h-full cursor-pointer py-2 active:scale-[0.97] transition-transform" onClick={() => router.push('/')}>
+            <img src="/logo.png" alt="Logo joIAs" className="h-9 md:h-12 lg:h-14 w-auto object-contain" />
           </div>
-          <div className="hidden sm:block h-6 w-px bg-[var(--border)]" />
+          <div className="hidden sm:block h-5 w-px bg-white/[0.08]" />
           <div className="relative">
-            <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 md:gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--muted)] border border-[var(--border)] text-[var(--foreground)] text-xs md:text-sm transition-colors duration-150">
-              <span className="text-sm md:text-base">{config.icon}</span>
+            <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-[var(--foreground)] text-xs md:text-sm transition-all duration-200 active:scale-[0.97]">
+              <span className="text-sm">{config.icon}</span>
               <span className="font-medium hidden xs:inline">{config.label}</span>
-              <ChevronDown className={`w-3 h-3 md:w-3.5 md:h-3.5 text-[var(--muted-foreground)] transition-transform ${nicheMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3 h-3 text-[var(--muted-foreground)] transition-transform duration-300 ${nicheMenuOpen ? 'rotate-180' : ''}`} />
             </button>
             {nicheMenuOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-48 md:w-56 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
+              <div className="absolute top-full left-0 mt-2 w-52 bg-[var(--card)]/95 backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50">
                 {Object.entries(nicheConfigs).map(([key, cfg]) => {
                   const isEnabled = key === 'jewelry';
                   return (
@@ -190,12 +192,12 @@ function StudioContent() {
                       key={key}
                       onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
                       disabled={!isEnabled}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 md:py-3 text-xs md:text-sm transition-colors text-left ${isEnabled ? 'hover:bg-[var(--accent)]' : 'grayscale opacity-50 cursor-not-allowed'} ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] transition-all text-left active:scale-[0.98] ${isEnabled ? 'hover:bg-white/[0.06]' : 'grayscale opacity-40 cursor-not-allowed'} ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
                     >
                       <span className="text-lg">{cfg.icon}</span>
                       <div className="flex flex-col">
-                        <span className={`${key !== niche && isEnabled ? 'text-[var(--foreground)]' : ''}`}>{cfg.label}</span>
-                        {!isEnabled && <span className="text-[10px] text-[var(--muted-foreground)] mt-0.5 font-medium">Lançamento em breve</span>}
+                        <span>{cfg.label}</span>
+                        {!isEnabled && <span className="text-[10px] text-[var(--muted-foreground)] mt-0.5 font-medium">Em breve</span>}
                       </div>
                       {key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
                     </button>
@@ -206,79 +208,79 @@ function StudioContent() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="flex items-center gap-1.5 px-2 py-1 md:px-3 md:py-1.5 rounded-full border text-xs md:text-sm font-semibold whitespace-nowrap" style={{ borderColor: credits > 2 ? 'var(--primary)' : '#ef4444', color: credits > 2 ? 'var(--primary)' : '#ef4444', backgroundColor: credits > 2 ? 'var(--niche-glow, rgba(255,255,255,0.05))' : 'rgba(239,68,68,0.08)' }}>
-            <Gem className="w-3 h-3 md:w-3.5 md:h-3.5" />{credits} <span className="hidden sm:inline">Créditos</span>
+        <div className="flex items-center gap-1.5 md:gap-2.5">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/[0.08] text-xs font-semibold whitespace-nowrap bg-white/[0.03]" style={{ color: credits > 2 ? 'var(--primary)' : '#ef4444' }}>
+            <Gem className="w-3 h-3" />{credits} <span className="hidden sm:inline">Créditos</span>
           </div>
-          <Button variant="default" size="sm" onClick={() => setIsPricingOpen(true)} className="gap-2 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 text-xs md:text-sm hidden lg:flex h-8">
-            <CreditCard className="w-3.5 h-3.5" />Adquirir Assinatura
+          <Button variant="default" size="sm" onClick={() => setIsPricingOpen(true)} className="gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 text-xs hidden lg:flex h-7 rounded-lg active:scale-[0.97] transition-transform">
+            <CreditCard className="w-3.5 h-3.5" />Assinatura
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-1.5 md:gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--accent)] text-xs md:text-sm h-8 px-2 md:px-3">
-            <LogOut className="w-3 h-3 md:w-3.5 md:h-3.5" /><span className="hidden sm:inline">Sair</span>
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/[0.04] text-xs h-7 px-2 rounded-lg active:scale-[0.97] transition-transform">
+            <LogOut className="w-3 h-3" /><span className="hidden sm:inline">Sair</span>
           </Button>
         </div>
       </header>
 
+      {/* ═══════════════════════════════════════ BODY ═══════════════════════════════════════ */}
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-        <div
-          className={`flex flex-col min-h-0 border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-30 transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]
-            ${isSidebarOpen
-              ? `w-full ${hasPreviewContent ? 'h-[60%] rounded-t-[2rem] shadow-[0_-15px_40px_rgba(0,0,0,0.15)] md:h-full md:rounded-none md:shadow-none translate-y-0' : 'flex-1'} md:shrink-0 md:flex-none md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
-              : 'w-full h-0 md:h-full md:w-0 opacity-0 md:opacity-0 translate-y-full md:translate-y-0 overflow-hidden border-none'}`}
+
+        {/* ─── Desktop Sidebar ─── */}
+        <div className={`hidden md:flex flex-col min-h-0 border-r border-white/[0.06] bg-[var(--card)] transition-all duration-300 ease-in-out shrink-0
+          ${isSidebarOpen ? 'w-[30%] lg:w-[320px] xl:w-[380px]' : 'w-0 overflow-hidden border-r-0'}`}
         >
-          <div className="w-full h-full flex flex-col min-h-0 relative">
-            {/* Handle for bottom sheet on mobile */}
-            {hasPreviewContent && (
-              <div 
-                className="md:hidden w-full flex justify-center pt-3 pb-2 cursor-pointer absolute top-0 left-0 right-0 z-50 rounded-t-[2rem]"
-                onClick={() => setIsSidebarOpen(false)}
-              >
-                <div className="w-12 h-1.5 bg-[var(--border)] rounded-full hover:bg-[var(--primary)]/50 transition-colors" />
-              </div>
-            )}
-            <div className={`flex flex-col h-full w-full min-h-0 ${hasPreviewContent ? 'pt-6 md:pt-0' : ''}`}>
-              <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
-            </div>
-          </div>
+          <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
         </div>
 
-        <div className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 transition-all duration-300 ease-in-out" style={{ transform: `translate(${isSidebarOpen ? 'min(calc(30vw), 380px)' : '0px'}, -50%)` }}>
+        {/* ─── Desktop Sidebar Toggle ─── */}
+        <div className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 transition-all duration-300" style={{ transform: `translate(${isSidebarOpen ? 'min(calc(30vw), 380px)' : '0px'}, -50%)` }}>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center justify-center w-5 h-12 bg-[var(--card)] border border-[var(--border)] rounded-r-lg shadow-md hover:bg-[var(--accent)] hover:text-[var(--primary)] transition-colors focus:outline-none -ml-[1px]"
+            className="flex items-center justify-center w-5 h-12 bg-[var(--card)]/90 backdrop-blur-xl border border-white/[0.08] rounded-r-lg shadow-lg hover:bg-white/[0.06] transition-all active:scale-[0.95] focus:outline-none -ml-[1px]"
             title={isSidebarOpen ? "Recolher Menu" : "Expandir Menu"}
           >
-            {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            {isSidebarOpen ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
         </div>
 
-        <div className="md:hidden absolute bottom-4 right-4 z-40 transition-opacity">
-          {!isSidebarOpen && (
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-gradient-to-r from-[var(--primary)] to-purple-600 text-white rounded-full shadow-[0_8px_30px_rgba(var(--primary-rgb),0.4)] font-bold text-[15px] active:scale-95 transition-all"
-            >
-              <Layers className="w-5 h-5" /> Configurar Imagem
-            </button>
-          )}
+        {/* ─── Mobile Bottom Sheet Backdrop ─── */}
+        {isSidebarOpen && (
+          <div
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* ─── Mobile Bottom Sheet Sidebar ─── */}
+        <div className={`md:hidden fixed inset-x-0 bottom-0 z-50 flex flex-col bg-[var(--card)] rounded-t-[1.75rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+          ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
+          style={{ height: '85dvh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+          {/* Drag Handle */}
+          <div className="w-full flex justify-center pt-3 pb-1 shrink-0 cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
+            <div className="w-10 h-[5px] bg-white/20 rounded-full" />
+          </div>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
+          </div>
         </div>
 
-        <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
-            ${isSidebarOpen
-            ? `${hasPreviewContent ? 'h-[40%] md:flex-1 md:h-full md:shrink' : 'h-auto shrink-0 border-b border-[var(--border)] md:border-b-0'} `
-            : 'h-full flex-1 md:shrink'}`}
-        >
-          <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-1' : 'pb-4 md:pb-2'} z-10 bg-[var(--background)]`}>
-            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3.5 md:py-4 px-4 md:px-6 rounded-[1.25rem] md:rounded-2xl font-bold text-[15px] md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-95 hover:shadow-2xl shadow-lg bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white border border-white/10 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-100 before:transition-opacity">
+        {/* ─── Main Content Area ─── */}
+        <main className="flex-1 flex flex-col bg-[var(--background)] relative min-h-0 overflow-hidden">
+
+          {/* Desktop Generate Button */}
+          <div className="hidden md:block flex-shrink-0 px-8 pt-6 pb-2 z-10">
+            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-base transition-all duration-300 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.98] shadow-lg hover:shadow-2xl bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white border border-white/10">
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               {isGenerating ? (
-                <><div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span>Criando Magia...</span></>
+                <><div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span>Criando Magia...</span></>
               ) : (
-                <><Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span>{credits > 0 && hasUpload && <span className="ml-1 opacity-80 text-xs md:text-sm font-normal hidden xs:inline tracking-wide font-mono bg-white/20 px-1.5 py-0.5 rounded-md">−1 crd</span>}</>
+                <><Sparkles className="w-5 h-5 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span></>
               )}
             </button>
           </div>
 
-          <div className={`overflow-hidden flex flex-col min-h-0 flex-1 ${hasPreviewContent ? '' : 'hidden md:flex md:flex-1'}`}>
+          {/* Preview Area */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <ImagePreviewCard
               isGenerating={isGenerating}
               imageUrl={imageUrl}
@@ -289,15 +291,17 @@ function StudioContent() {
             />
           </div>
 
+          {/* Desktop Gallery Strip */}
           {recentImages.length > 0 && (
-            <div className="hidden md:flex flex-shrink-0 h-[96px] border-t border-[var(--border)] bg-[var(--card)] px-6 py-3 items-center justify-between transition-all duration-300 shrink-0">
+            <div className="hidden md:flex flex-shrink-0 h-[88px] border-t border-white/[0.06] bg-[var(--card)]/60 backdrop-blur-lg px-6 py-3 items-center transition-all">
               <div className="flex flex-col h-full justify-center">
-                <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-2">
-                  <span className="text-xs font-bold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors uppercase tracking-wider">Galeria de Criações</span><Images className="w-3.5 h-3.5 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
+                <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-2 active:scale-[0.97] transition-transform">
+                  <span className="text-[11px] font-bold text-[var(--foreground)]/70 group-hover:text-[var(--primary)] transition-colors uppercase tracking-widest">Galeria</span>
+                  <Images className="w-3 h-3 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
                 </button>
                 <div className="flex items-center gap-2">
                   {recentImages.slice(0, 8).map((img, idx) => (
-                    <div key={idx} className="w-10 h-10 rounded-md overflow-hidden border border-[var(--border)] cursor-pointer hover:border-[var(--primary)] transition-colors shadow-sm" onClick={() => setImageUrl(img)}>
+                    <div key={idx} className="w-10 h-10 rounded-lg overflow-hidden border border-white/[0.08] cursor-pointer hover:border-[var(--primary)] transition-all hover:scale-110 active:scale-95 shadow-sm" onClick={() => setImageUrl(img)}>
                       <img src={img} alt={`Recente ${idx}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -308,7 +312,32 @@ function StudioContent() {
         </main>
       </div>
 
-      {nicheMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setNicheMenuOpen(false)} />}
+      {/* ═══════════════════════════════════════ MOBILE STICKY BOTTOM BAR ═══════════════════════════════════════ */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--card)]/80 backdrop-blur-2xl border-t border-white/[0.06]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="flex items-center gap-2 px-3 py-2.5">
+          {/* Config Button */}
+          <button onClick={() => setIsSidebarOpen(true)} className="flex items-center justify-center w-11 h-11 rounded-xl bg-white/[0.06] border border-white/[0.08] active:scale-[0.93] transition-all shrink-0">
+            <Layers className="w-5 h-5 text-[var(--foreground)]" />
+          </button>
+
+          {/* Generate Button */}
+          <button onClick={handleGenerate} disabled={!canGenerate} className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-bold text-[14px] transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white shadow-lg border border-white/10">
+            {isGenerating ? (
+              <><div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span className="text-[13px]">Gerando...</span></>
+            ) : (
+              <><Sparkles className="w-4 h-4 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem' : 'Upload primeiro'}</span></>
+            )}
+          </button>
+
+          {/* Credits Pill */}
+          <div className="flex items-center gap-1 px-2.5 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs font-bold shrink-0" style={{ color: credits > 2 ? 'var(--primary)' : '#ef4444' }}>
+            <Gem className="w-3.5 h-3.5" />{credits}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════ OVERLAYS ═══════════════════════════════════════ */}
+      {nicheMenuOpen && <div className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
       <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} />
       <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} />
     </div>
@@ -317,7 +346,7 @@ function StudioContent() {
 
 export default function StudioPage() {
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-[#09090b]"><div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" /></div>}>
+    <Suspense fallback={<div className="h-[100dvh] flex items-center justify-center bg-[#09090b]"><div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" /></div>}>
       <StudioContent />
     </Suspense>
   );
