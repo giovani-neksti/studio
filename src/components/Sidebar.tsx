@@ -121,7 +121,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
         <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y scroll-smooth overscroll-contain">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth w-full">
         <div className="py-2 md:py-3 pb-32 md:pb-16">
 
           {/* PASSO 1: CATEGORIA */}

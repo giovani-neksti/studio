@@ -230,7 +230,7 @@ function StudioContent() {
             {/* Handle for bottom sheet on mobile */}
             {hasPreviewContent && (
               <div 
-                className="md:hidden w-full flex justify-center pt-3 pb-2 cursor-pointer touch-none absolute top-0 left-0 right-0 z-50 rounded-t-[2rem]"
+                className="md:hidden w-full flex justify-center pt-3 pb-2 cursor-pointer absolute top-0 left-0 right-0 z-50 rounded-t-[2rem]"
                 onClick={() => setIsSidebarOpen(false)}
               >
                 <div className="w-12 h-1.5 bg-[var(--border)] rounded-full hover:bg-[var(--primary)]/50 transition-colors" />
