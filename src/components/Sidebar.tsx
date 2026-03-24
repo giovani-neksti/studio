@@ -74,15 +74,15 @@ const getDisplayIcon = (id: string) => {
 function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <div className="mb-0.5 md:mb-1">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-3 py-2.5 md:px-4 md:py-3 text-left hover:bg-[var(--accent)] rounded-lg transition-colors">
-        <div className="flex items-center gap-2 md:gap-2.5">
-          <span className="text-[var(--primary)] opacity-70 w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center">{icon}</span>
-          <span className="text-xs md:text-sm font-semibold text-[var(--foreground)] opacity-90 tracking-wide">{title}</span>
+    <div className="mb-1 md:mb-2">
+      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-3 py-3.5 md:px-4 md:py-4 text-left hover:bg-[var(--accent)] rounded-xl transition-colors active:scale-[0.98]">
+        <div className="flex items-center gap-2.5 md:gap-3">
+          <span className="text-[var(--primary)] w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">{icon}</span>
+          <span className="text-[13px] md:text-sm font-bold text-[var(--foreground)] tracking-wide">{title}</span>
         </div>
-        <ChevronDown className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 md:w-4 md:h-4 text-[var(--muted-foreground)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="px-3 pb-3 pt-1 md:px-4 md:pb-4">{children}</div>}
+      {isOpen && <div className="px-3 pb-4 pt-1 md:px-4 md:pb-5">{children}</div>}
     </div>
   );
 }
@@ -121,12 +121,12 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
         <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y scroll-smooth">
-        <div className="py-2 md:py-3 pb-24 md:pb-12">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y scroll-smooth overscroll-contain">
+        <div className="py-2 md:py-3 pb-32 md:pb-16">
 
           {/* PASSO 1: CATEGORIA */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers />}>
-            <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
               {config.categories.map((cat) => {
                 const uploadKey = `upload_${cat}`;
                 const hasUpload = !!selections[uploadKey];
@@ -137,16 +137,16 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   <button
                     key={cat}
                     onClick={() => onSelect('category', cat)}
-                    className={`relative flex flex-col items-center justify-center p-2.5 md:p-3 rounded-lg md:rounded-xl border transition-all
+                    className={`relative flex flex-col items-center justify-center p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all active:scale-95 min-h-[72px]
                       ${isActive
-                        ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30'
-                        : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/10 ring-1 ring-[var(--primary)]/30 shadow-sm'
+                        : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/50 hover:bg-[var(--accent)]/50'}`}
                   >
                     {hasUpload && (
-                      <CheckCircle2 className="absolute top-1.5 right-1.5 w-3 h-3 text-green-500" />
+                      <CheckCircle2 className="absolute top-2 right-2 w-3.5 h-3.5 md:w-4 md:h-4 text-green-500 bg-white rounded-full" />
                     )}
-                    <span className="text-xl md:text-2xl mb-1">{icon}</span>
-                    <span className={`text-[10px] md:text-[11px] font-medium leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                    <span className="text-2xl md:text-3xl mb-1.5 transition-transform group-hover:scale-110">{icon}</span>
+                    <span className={`text-[11px] md:text-xs font-bold leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
                       {cat}
                     </span>
                   </button>
@@ -158,40 +158,40 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             {activeCategory && (
               <div className="mt-2.5 md:mt-3">
                 {selections[activeUploadKey!] ? (
-                  <div className="p-3 border border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span className="text-xs font-medium text-[var(--foreground)] truncate">
+                  <div className="p-3.5 md:p-4 border border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-xl flex items-center justify-between shadow-sm min-h-[56px]">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-[13px] md:text-sm font-semibold text-[var(--foreground)] truncate">
                         {selections[activeUploadKey!].name}
                       </span>
                     </div>
                     <button
                       onClick={() => onSelect(activeUploadKey!, null)}
-                      className="text-[10px] text-red-400 hover:text-red-300 font-medium ml-2 px-2 py-1 bg-red-500/10 rounded shrink-0 transition-colors"
+                      className="text-[11px] md:text-xs text-red-500 hover:text-red-400 font-bold ml-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-md shrink-0 transition-colors active:scale-95"
                     >
                       Remover
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 md:gap-3">
                     {/* Botão de Câmera Direta */}
                     <div
                       onClick={() => cameraInputRef.current?.click()}
-                      className="p-3 border-2 border-dashed border-[var(--primary)]/40 bg-[var(--primary)]/5 rounded-lg text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors flex flex-col items-center justify-center"
+                      className="p-4 md:p-5 border-2 border-dashed border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/60 transition-all active:scale-95 flex flex-col items-center justify-center min-h-[80px]"
                     >
                       <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileUpload} />
-                      <Camera className="w-5 h-5 md:w-6 md:h-6 mb-1.5 text-[var(--primary)] opacity-80" />
-                      <span className="text-[10px] md:text-[11px] font-medium text-[var(--primary)]">Tirar Foto</span>
+                      <Camera className="w-6 h-6 md:w-7 md:h-7 mb-2 text-[var(--primary)] opacity-90" />
+                      <span className="text-[11px] md:text-xs font-bold text-[var(--primary)]">Tirar Foto</span>
                     </div>
 
                     {/* Botão de Arquivo/Galeria */}
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-3 border-2 border-dashed border-[var(--primary)]/40 bg-[var(--primary)]/5 rounded-lg text-center cursor-pointer hover:bg-[var(--primary)]/10 transition-colors flex flex-col items-center justify-center"
+                      className="p-4 md:p-5 border-2 border-dashed border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/60 transition-all active:scale-95 flex flex-col items-center justify-center min-h-[80px]"
                     >
                       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                      <UploadCloud className="w-5 h-5 md:w-6 md:h-6 mb-1.5 text-[var(--primary)] opacity-80" />
-                      <span className="text-[10px] md:text-[11px] font-medium text-[var(--primary)]">Galeria</span>
+                      <UploadCloud className="w-6 h-6 md:w-7 md:h-7 mb-2 text-[var(--primary)] opacity-90" />
+                      <span className="text-[11px] md:text-xs font-bold text-[var(--primary)]">Galeria</span>
                     </div>
                   </div>
                 )}
@@ -204,7 +204,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 <select
                   value={selections.material || ''}
                   onChange={(e) => onSelect('material', e.target.value)}
-                  className="w-full h-8 md:h-9 px-2 md:px-3 rounded-md text-xs md:text-sm border bg-[var(--background)] text-[var(--foreground)]"
+                  className="w-full h-11 md:h-12 px-3 md:px-4 rounded-xl text-[13px] md:text-sm border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)] transition-all outline-none"
                 >
                   <option value="" disabled>Selecione o Material</option>
                   {config.materialOptions?.map((mat) => (
@@ -252,7 +252,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 <select
                   value={selections.prop || 'none'}
                   onChange={(e) => onSelect('prop', e.target.value)}
-                  className="w-full h-8 md:h-9 px-2 md:px-3 rounded-md text-xs md:text-sm border bg-[var(--background)] text-[var(--foreground)]"
+                  className="w-full h-11 md:h-12 px-3 md:px-4 rounded-xl text-[13px] md:text-sm border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)] transition-all outline-none"
                 >
                   {config.propOptions?.map((prop) => (
                     <option key={prop.id} value={prop.id}>{prop.label}</option>

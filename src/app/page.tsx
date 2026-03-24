@@ -221,13 +221,24 @@ function StudioContent() {
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
         <div
-          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-20 transition-all duration-300 ease-in-out shrink-0
+          className={`flex flex-col border-t md:border-t-0 md:border-r border-[var(--border)] order-2 md:order-1 bg-[var(--card)] z-30 transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]
             ${isSidebarOpen
-              ? `w-full ${hasPreviewContent ? 'h-[55%] md:h-full' : 'flex-1'} md:shrink-0 md:flex-none md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
-              : 'w-full h-0 md:h-full md:w-0 opacity-0 overflow-hidden border-r-0'}`}
+              ? `w-full ${hasPreviewContent ? 'h-[60%] rounded-t-[2rem] shadow-[0_-15px_40px_rgba(0,0,0,0.15)] md:h-full md:rounded-none md:shadow-none translate-y-0' : 'flex-1'} md:shrink-0 md:flex-none md:w-[30%] lg:w-[320px] xl:w-[380px] opacity-100`
+              : 'w-full h-0 md:h-full md:w-0 opacity-0 md:opacity-0 translate-y-full md:translate-y-0 overflow-hidden border-none'}`}
         >
-          <div className="w-full h-full flex flex-col min-h-0">
-            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
+          <div className="w-full h-full flex flex-col min-h-0 relative">
+            {/* Handle for bottom sheet on mobile */}
+            {hasPreviewContent && (
+              <div 
+                className="md:hidden w-full flex justify-center pt-3 pb-2 cursor-pointer touch-none absolute top-0 left-0 right-0 z-50 rounded-t-[2rem]"
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <div className="w-12 h-1.5 bg-[var(--border)] rounded-full hover:bg-[var(--primary)]/50 transition-colors" />
+              </div>
+            )}
+            <div className={`flex flex-col h-full w-full min-h-0 ${hasPreviewContent ? 'pt-6 md:pt-0' : ''}`}>
+              <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
+            </div>
           </div>
         </div>
 
@@ -245,24 +256,24 @@ function StudioContent() {
           {!isSidebarOpen && (
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-full shadow-2xl font-bold text-sm"
+              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-gradient-to-r from-[var(--primary)] to-purple-600 text-white rounded-full shadow-[0_8px_30px_rgba(var(--primary-rgb),0.4)] font-bold text-[15px] active:scale-95 transition-all"
             >
-              <Layers className="w-4 h-4" /> Configurar Imagem
+              <Layers className="w-5 h-5" /> Configurar Imagem
             </button>
           )}
         </div>
 
         <main className={`flex flex-col bg-[var(--background)] order-1 md:order-2 relative min-h-0 overflow-hidden transition-all duration-300
             ${isSidebarOpen
-            ? `${hasPreviewContent ? 'h-[45%] md:flex-1 md:h-full md:shrink' : 'h-auto shrink-0 border-b border-[var(--border)] md:border-b-0'} `
+            ? `${hasPreviewContent ? 'h-[40%] md:flex-1 md:h-full md:shrink' : 'h-auto shrink-0 border-b border-[var(--border)] md:border-b-0'} `
             : 'h-full flex-1 md:shrink'}`}
         >
-          <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-2' : 'pb-4 md:pb-2'} z-10 bg-[var(--background)]`}>
-            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] shadow-lg hover:shadow-xl" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+          <div className={`flex-shrink-0 px-4 pt-4 md:px-8 md:pt-6 ${hasPreviewContent ? 'pb-1' : 'pb-4 md:pb-2'} z-10 bg-[var(--background)]`}>
+            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-2 md:gap-3 py-3.5 md:py-4 px-4 md:px-6 rounded-[1.25rem] md:rounded-2xl font-bold text-[15px] md:text-base transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-95 hover:shadow-2xl shadow-lg bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white border border-white/10 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-100 before:transition-opacity">
               {isGenerating ? (
-                <><div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-[var(--background)]/30 border-t-[var(--background)] animate-spin" /><span>Criando Magia...</span></>
+                <><div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span>Criando Magia...</span></>
               ) : (
-                <><Sparkles className="w-4 h-4 md:w-5 md:h-5" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span>{credits > 0 && hasUpload && <span className="ml-1 opacity-80 text-xs md:text-sm font-normal hidden xs:inline">(−1 crédito)</span>}</>
+                <><Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span>{credits > 0 && hasUpload && <span className="ml-1 opacity-80 text-xs md:text-sm font-normal hidden xs:inline tracking-wide font-mono bg-white/20 px-1.5 py-0.5 rounded-md">−1 crd</span>}</>
               )}
             </button>
           </div>
