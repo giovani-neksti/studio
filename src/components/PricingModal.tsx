@@ -13,30 +13,33 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
   const plans = [
     {
       name: 'Essentials',
-      price: '200',
-      credits: '200',
-      perCredit: 'R$ 1,00',
+      price: '400',
+      credits: '133',
+      perCredit: 'R$ 3,00',
       description: 'Ideal para validar produtos com imagens profissionais.',
-      features: ['200 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'R$ 1,00 por foto'],
+      features: ['~133 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'R$ 3,00 por foto'],
       popular: false,
+      stripeUrl: '',
     },
     {
       name: 'Professional',
-      price: '300',
+      price: '600',
       credits: '400',
-      perCredit: 'R$ 0,75',
+      perCredit: 'R$ 1,50',
       description: 'O dobro de fotos por uma fração do preço. O favorito.',
-      features: ['400 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'Prioridade na fila de geração', 'R$ 0,75 por foto'],
+      features: ['400 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'Prioridade na fila de geração', 'R$ 1,50 por foto'],
       popular: true,
+      stripeUrl: '',
     },
     {
       name: 'Premium',
-      price: '500',
+      price: '1.000',
       credits: '1.000',
-      perCredit: 'R$ 0,50',
+      perCredit: 'R$ 1,00',
       description: 'Para alto volume de postagens e franqueados.',
-      features: ['1.000 fotos mensais', 'Suporte dedicado via WhatsApp', 'Acesso a todos os nichos', 'Acesso Antecipado a Modelos', 'R$ 0,50 por foto'],
+      features: ['1.000 fotos mensais', 'Suporte dedicado via WhatsApp', 'Acesso a todos os nichos', 'Acesso Antecipado a Modelos', 'R$ 1,00 por foto'],
       popular: false,
+      stripeUrl: '',
     }
   ];
 
@@ -114,7 +117,7 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
 
                 {/* M3 Filled / Outlined Button */}
                 <button
-                  onClick={() => alert(`Redirecionando para Stripe - Assinatura ${plan.name}`)}
+                  onClick={() => plan.stripeUrl ? window.open(plan.stripeUrl, '_blank') : alert(`Link do Stripe ainda não configurado para ${plan.name}`)}
                   className={`w-full md3-label-large h-11 rounded-[var(--shape-full)] transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] state-layer
                     ${plan.popular
                       ? 'bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1'
@@ -134,7 +137,7 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="md3-title-small text-[var(--foreground)]">R$ 1,50</div>
+                <div className="md3-title-small text-[var(--foreground)]">R$ 3,00</div>
                 <div className="md3-label-small text-[var(--outline)]">por foto</div>
               </div>
               {/* M3 Outlined Button */}

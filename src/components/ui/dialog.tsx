@@ -4,7 +4,6 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
@@ -31,7 +30,7 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 bg-[var(--on-surface)]/32 duration-[var(--duration-medium2)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -53,7 +52,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-background p-4 text-sm ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-[var(--shape-extra-large)] bg-[var(--surface-container-high)] p-6 text-[var(--foreground)] elevation-3 duration-[var(--duration-medium2)] ease-[var(--easing-emphasized)] outline-none sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
@@ -63,16 +62,11 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             render={
-              <Button
-                variant="ghost"
-                className="absolute top-2 right-2"
-                size="icon-sm"
-              />
+              <button className="absolute top-4 right-4 w-10 h-10 rounded-[var(--shape-full)] flex items-center justify-center text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 transition-colors duration-[var(--duration-short4)]" />
             }
           >
-            <XIcon
-            />
-            <span className="sr-only">Close</span>
+            <XIcon className="w-5 h-5" />
+            <span className="sr-only">Fechar</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
@@ -102,15 +96,19 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 p-4 sm:flex-row sm:justify-end",
+        "flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end",
         className
       )}
       {...props}
     >
       {children}
       {showCloseButton && (
-        <DialogPrimitive.Close render={<Button variant="outline" />}>
-          Close
+        <DialogPrimitive.Close
+          render={
+            <button className="h-10 px-6 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-large hover:bg-[var(--on-surface-variant)]/8 transition-colors duration-[var(--duration-short4)]" />
+          }
+        >
+          Fechar
         </DialogPrimitive.Close>
       )}
     </div>
@@ -121,7 +119,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-base leading-none font-medium", className)}
+      className={cn("md3-headline-small font-semibold text-[var(--foreground)]", className)}
       {...props}
     />
   )
@@ -135,7 +133,7 @@ function DialogDescription({
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        "md3-body-medium text-[var(--on-surface-variant)]",
         className
       )}
       {...props}

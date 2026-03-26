@@ -97,16 +97,19 @@
   --error-container: #8C1D18;
   --on-error-container: #F9DEDC;
 
-  /* ── Legacy aliases ── */
+  /* ── Legacy aliases (shadcn → M3 mapping) ── */
   --card: var(--surface-container-low);
   --card-foreground: var(--foreground);
   --popover: var(--surface-container-high);
   --popover-foreground: var(--foreground);
+  --primary-foreground: var(--on-primary);
+  --secondary-foreground: var(--on-secondary);
   --muted: var(--surface-container);
   --muted-foreground: var(--on-surface-variant);
   --accent: var(--secondary-container);
   --accent-foreground: var(--on-secondary-container);
   --destructive: #F2B8B5;
+  --destructive-foreground: var(--on-error);
   --border: var(--outline-variant);
   --input: var(--outline-variant);
   --ring: var(--primary);
