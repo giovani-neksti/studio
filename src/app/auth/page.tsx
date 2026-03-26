@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2 } from 'lucide-react';
 
+const OTP_LENGTH = 6;
+
 type Step = 'email' | 'otp' | 'check-email';
 
 export default function AuthPage() {
@@ -14,7 +16,7 @@ export default function AuthPage() {
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(0);
@@ -74,8 +76,8 @@ export default function AuthPage() {
 
   const handleVerifyOtp = async (code?: string) => {
     const token = code || otp.join('');
-    if (token.length !== 6) {
-      setError('Digite o código completo de 6 dígitos.');
+    if (token.length < OTP_LENGTH) {
+      setError(`Digite o código completo de ${OTP_LENGTH} dígitos.`);
       return;
     }
 
@@ -92,7 +94,7 @@ export default function AuthPage() {
       router.replace('/studio');
     } catch (err: any) {
       setError(err.message || 'Código inválido ou expirado.');
-      setOtp(['', '', '', '', '', '']);
+      setOtp(Array(OTP_LENGTH).fill(''));
       otpRefs.current[0]?.focus();
     } finally {
       setLoading(false);
@@ -102,13 +104,13 @@ export default function AuthPage() {
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
       // Handle paste of full code
-      const digits = value.replace(/\D/g, '').slice(0, 6).split('');
+      const digits = value.replace(/\D/g, '').slice(0, OTP_LENGTH).split('');
       const newOtp = [...otp];
       digits.forEach((d, i) => {
-        if (index + i < 6) newOtp[index + i] = d;
+        if (index + i < OTP_LENGTH) newOtp[index + i] = d;
       });
       setOtp(newOtp);
-      const nextIndex = Math.min(index + digits.length, 5);
+      const nextIndex = Math.min(index + digits.length, OTP_LENGTH - 1);
       otpRefs.current[nextIndex]?.focus();
       if (newOtp.every(d => d !== '')) {
         handleVerifyOtp(newOtp.join(''));
@@ -121,7 +123,7 @@ export default function AuthPage() {
     newOtp[index] = digit;
     setOtp(newOtp);
 
-    if (digit && index < 5) {
+    if (digit && index < OTP_LENGTH - 1) {
       otpRefs.current[index + 1]?.focus();
     }
 
@@ -148,7 +150,7 @@ export default function AuthPage() {
       });
       if (error) throw error;
       setCountdown(60);
-      setOtp(['', '', '', '', '', '']);
+      setOtp(Array(OTP_LENGTH).fill(''));
     } catch (err: any) {
       setError(err.message || 'Erro ao reenviar.');
     } finally {
@@ -192,16 +194,16 @@ export default function AuthPage() {
               <Sparkles className="w-8 h-8 text-[var(--on-primary-container)]" />
             </div>
             <h1 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-center">
-              {step === 'email' ? 'Entrar no Studio AI' : 'Verifique seu E-mail'}
+              {step === 'email' ? 'Entrar no Studio AI' : 'Código de Verificação'}
             </h1>
             <p className="mt-2 text-[var(--on-surface-variant)] md3-body-medium text-center max-w-xs">
               {step === 'email'
                 ? 'Digite seu e-mail para entrar ou criar uma conta automaticamente.'
                 : (
                   <>
-                    Enviamos um link de acesso para{' '}
+                    Enviamos um código de {OTP_LENGTH} dígitos para{' '}
                     <span className="text-[var(--primary)] font-medium">{email}</span>.
-                    {' '}Clique no link no e-mail ou digite o código abaixo.
+                    {' '}Digite o código abaixo para entrar.
                   </>
                 )
               }
@@ -246,7 +248,7 @@ export default function AuthPage() {
                   {loading ? (
                     <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
                   ) : (
-                    'Continuar com E-mail'
+                    'Enviar Código de Acesso'
                   )}
                 </button>
 
@@ -259,37 +261,26 @@ export default function AuthPage() {
               /* ── STEP 2: Check Email / OTP ── */
               <div className="space-y-6">
 
-                {/* Email sent confirmation */}
-                <div className="flex flex-col items-center gap-3 py-2">
-                  <div className="w-14 h-14 rounded-[var(--shape-full)] bg-[var(--primary-container)] flex items-center justify-center animate-scale-in">
-                    <Mail className="w-7 h-7 text-[var(--on-primary-container)]" />
-                  </div>
-                  <p className="md3-body-medium text-[var(--on-surface-variant)] text-center">
-                    Abra seu e-mail e clique no link de verificação para entrar.
-                  </p>
-                </div>
-
-                {/* Divider with "ou" */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-[var(--outline-variant)]/30" />
-                  <span className="md3-label-small text-[var(--outline)]">ou digite o código</span>
-                  <div className="flex-1 h-px bg-[var(--outline-variant)]/30" />
+                {/* OTP Label */}
+                <div className="text-center">
+                  <label className="md3-label-medium text-[var(--on-surface-variant)]">Código de verificação</label>
                 </div>
 
                 {/* OTP Inputs */}
                 <div>
-                  <div className="flex justify-center gap-2.5">
+                  <div className="flex justify-center gap-2">
                     {otp.map((digit, i) => (
                       <input
                         key={i}
                         ref={(el) => { otpRefs.current[i] = el; }}
                         type="text"
                         inputMode="numeric"
-                        maxLength={6}
+                        maxLength={OTP_LENGTH}
                         value={digit}
                         onChange={(e) => handleOtpChange(i, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                        className={`w-12 h-14 md:w-14 md:h-16 text-center text-xl md:text-2xl font-bold rounded-[var(--shape-medium)] border bg-[var(--surface-container-low)] text-[var(--foreground)] transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none
+                        autoFocus={i === 0}
+                        className={`w-11 h-14 md:w-12 md:h-16 text-center text-xl md:text-2xl font-bold rounded-[var(--shape-medium)] border bg-[var(--surface-container-low)] text-[var(--foreground)] transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none
                           ${digit ? 'border-[var(--primary)] ring-1 ring-[var(--primary)]/30' : 'border-[var(--outline)]/40'}
                           focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30`}
                       />
@@ -317,10 +308,10 @@ export default function AuthPage() {
                     disabled={countdown > 0 || loading}
                     className="md3-label-medium text-[var(--primary)] hover:text-[var(--primary)]/80 disabled:text-[var(--on-surface-variant)]/40 disabled:cursor-not-allowed transition-colors duration-[var(--duration-short4)]"
                   >
-                    {countdown > 0 ? `Reenviar em ${countdown}s` : 'Reenviar e-mail'}
+                    {countdown > 0 ? `Reenviar código em ${countdown}s` : 'Reenviar código'}
                   </button>
                   <button
-                    onClick={() => { setStep('email'); setOtp(['', '', '', '', '', '']); setError(''); }}
+                    onClick={() => { setStep('email'); setOtp(Array(OTP_LENGTH).fill('')); setError(''); }}
                     className="md3-body-small text-[var(--on-surface-variant)] hover:text-[var(--foreground)] transition-colors duration-[var(--duration-short4)] flex items-center gap-1"
                   >
                     <ArrowLeft className="w-3 h-3" /> Usar outro e-mail
