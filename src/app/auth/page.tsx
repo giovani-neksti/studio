@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2 } from 'lucide-react';
 
-const OTP_LENGTH = 6;
+const OTP_LENGTH = 8;
 
 type Step = 'email' | 'otp' | 'check-email';
 
@@ -268,7 +268,7 @@ export default function AuthPage() {
 
                 {/* OTP Inputs */}
                 <div>
-                  <div className="flex justify-center gap-2">
+                  <div className="flex justify-center gap-1.5 md:gap-2">
                     {otp.map((digit, i) => (
                       <input
                         key={i}
@@ -280,7 +280,7 @@ export default function AuthPage() {
                         onChange={(e) => handleOtpChange(i, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(i, e)}
                         autoFocus={i === 0}
-                        className={`w-11 h-14 md:w-12 md:h-16 text-center text-xl md:text-2xl font-bold rounded-[var(--shape-medium)] border bg-[var(--surface-container-low)] text-[var(--foreground)] transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none
+                        className={`w-9 h-12 md:w-11 md:h-14 text-center text-lg md:text-xl font-bold rounded-[var(--shape-medium)] border bg-[var(--surface-container-low)] text-[var(--foreground)] transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none
                           ${digit ? 'border-[var(--primary)] ring-1 ring-[var(--primary)]/30' : 'border-[var(--outline)]/40'}
                           focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30`}
                       />
