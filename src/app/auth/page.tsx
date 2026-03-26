@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2 } from 'lucide-react';
 
-type Step = 'email' | 'otp';
+type Step = 'email' | 'otp' | 'check-email';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -20,6 +20,15 @@ export default function AuthPage() {
   const [countdown, setCountdown] = useState(0);
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Handle hash-based redirect (magic link: #access_token=...)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) router.replace('/studio');
+      });
+    }
+  }, [router]);
 
   // If already logged in, redirect to studio
   useEffect(() => {
@@ -45,11 +54,17 @@ export default function AuthPage() {
     setError('');
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: redirectTo,
+        },
+      });
       if (error) throw error;
-      setStep('otp');
+      setStep('check-email');
       setCountdown(60);
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } catch (err: any) {
       setError(err.message || 'Erro ao enviar código. Tente novamente.');
     } finally {
@@ -126,12 +141,16 @@ export default function AuthPage() {
     setLoading(true);
     setError('');
     try {
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: true, emailRedirectTo: redirectTo },
+      });
       if (error) throw error;
       setCountdown(60);
       setOtp(['', '', '', '', '', '']);
     } catch (err: any) {
-      setError(err.message || 'Erro ao reenviar código.');
+      setError(err.message || 'Erro ao reenviar.');
     } finally {
       setLoading(false);
     }
@@ -173,15 +192,16 @@ export default function AuthPage() {
               <Sparkles className="w-8 h-8 text-[var(--on-primary-container)]" />
             </div>
             <h1 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-center">
-              {step === 'email' ? 'Entrar no Studio AI' : 'Verificar E-mail'}
+              {step === 'email' ? 'Entrar no Studio AI' : 'Verifique seu E-mail'}
             </h1>
             <p className="mt-2 text-[var(--on-surface-variant)] md3-body-medium text-center max-w-xs">
               {step === 'email'
                 ? 'Digite seu e-mail para entrar ou criar uma conta automaticamente.'
                 : (
                   <>
-                    Enviamos um código de 6 dígitos para{' '}
-                    <span className="text-[var(--primary)] font-medium">{email}</span>
+                    Enviamos um link de acesso para{' '}
+                    <span className="text-[var(--primary)] font-medium">{email}</span>.
+                    {' '}Clique no link no e-mail ou digite o código abaixo.
                   </>
                 )
               }
@@ -226,7 +246,7 @@ export default function AuthPage() {
                   {loading ? (
                     <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
                   ) : (
-                    'Enviar Código de Acesso'
+                    'Continuar com E-mail'
                   )}
                 </button>
 
@@ -236,12 +256,28 @@ export default function AuthPage() {
               </div>
 
             ) : (
-              /* ── STEP 2: OTP Verification ── */
+              /* ── STEP 2: Check Email / OTP ── */
               <div className="space-y-6">
+
+                {/* Email sent confirmation */}
+                <div className="flex flex-col items-center gap-3 py-2">
+                  <div className="w-14 h-14 rounded-[var(--shape-full)] bg-[var(--primary-container)] flex items-center justify-center animate-scale-in">
+                    <Mail className="w-7 h-7 text-[var(--on-primary-container)]" />
+                  </div>
+                  <p className="md3-body-medium text-[var(--on-surface-variant)] text-center">
+                    Abra seu e-mail e clique no link de verificação para entrar.
+                  </p>
+                </div>
+
+                {/* Divider with "ou" */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-[var(--outline-variant)]/30" />
+                  <span className="md3-label-small text-[var(--outline)]">ou digite o código</span>
+                  <div className="flex-1 h-px bg-[var(--outline-variant)]/30" />
+                </div>
 
                 {/* OTP Inputs */}
                 <div>
-                  <label className="md3-label-medium text-[var(--on-surface-variant)] mb-3 block text-center">Código de verificação</label>
                   <div className="flex justify-center gap-2.5">
                     {otp.map((digit, i) => (
                       <input
@@ -281,7 +317,7 @@ export default function AuthPage() {
                     disabled={countdown > 0 || loading}
                     className="md3-label-medium text-[var(--primary)] hover:text-[var(--primary)]/80 disabled:text-[var(--on-surface-variant)]/40 disabled:cursor-not-allowed transition-colors duration-[var(--duration-short4)]"
                   >
-                    {countdown > 0 ? `Reenviar código em ${countdown}s` : 'Reenviar código'}
+                    {countdown > 0 ? `Reenviar em ${countdown}s` : 'Reenviar e-mail'}
                   </button>
                   <button
                     onClick={() => { setStep('email'); setOtp(['', '', '', '', '', '']); setError(''); }}
