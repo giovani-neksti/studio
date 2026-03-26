@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2 } from 'lucide-react';
+import { NeuralBackground } from '@/components/NeuralBackground';
 
 const OTP_LENGTH = 8;
 
@@ -198,14 +199,13 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/20">
+    <div className="theme-jewelry min-h-[100dvh] flex flex-col bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/20">
 
-      {/* Decorative blurs */}
-      <div className="fixed top-20 -right-40 w-[500px] h-[500px] bg-[var(--primary)] opacity-[0.04] blur-[160px] rounded-full pointer-events-none" />
-      <div className="fixed bottom-0 -left-40 w-[400px] h-[400px] bg-[var(--tertiary)] opacity-[0.04] blur-[140px] rounded-full pointer-events-none" />
+      {/* Neural network animated background */}
+      <NeuralBackground />
 
       {/* M3 Top App Bar */}
-      <nav className="h-16 flex items-center px-4 md:px-6 fixed top-0 w-full z-50 bg-[var(--surface-container-low)]/90 backdrop-blur-lg border-b border-[var(--outline-variant)]/20">
+      <nav className="h-16 flex items-center px-4 md:px-6 fixed top-0 w-full z-50 bg-transparent">
         <button
           onClick={() => router.push('/')}
           className="flex items-center gap-2 text-[var(--on-surface-variant)] hover:text-[var(--foreground)] transition-colors duration-[var(--duration-short4)]"
@@ -216,13 +216,13 @@ export default function AuthPage() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6 pt-16">
+      <main className="flex-1 flex items-center justify-center px-6 pt-16 relative z-10">
         <div className="w-full max-w-[420px] animate-fade-up">
 
           {/* Logo */}
           <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 rounded-[var(--shape-extra-large)] bg-[var(--primary-container)] flex items-center justify-center mb-5 elevation-2 animate-float">
-              <Sparkles className="w-8 h-8 text-[var(--on-primary-container)]" />
+            <div className="w-16 h-16 rounded-[var(--shape-extra-large)] bg-[var(--primary)]/15 border border-[var(--primary)]/30 flex items-center justify-center mb-5 elevation-2 animate-float backdrop-blur-sm">
+              <Sparkles className="w-8 h-8 text-[var(--primary)]" />
             </div>
             <h1 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-center">
               {step === 'email' ? 'Entrar no Studio AI' : 'Código de Verificação'}
@@ -242,7 +242,7 @@ export default function AuthPage() {
           </div>
 
           {/* M3 Card Container */}
-          <div className="bg-[var(--surface-container)] rounded-[var(--shape-extra-large)] p-6 md:p-8 elevation-1">
+          <div className="bg-[var(--surface-container)]/90 backdrop-blur-xl rounded-[var(--shape-extra-large)] p-6 md:p-8 elevation-2 border border-[var(--outline-variant)]/20">
 
             {/* Error */}
             {error && (
@@ -356,7 +356,7 @@ export default function AuthPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center">
+      <footer className="py-6 text-center relative z-10">
         <p className="md3-body-small text-[var(--outline)]">
           © 2026 Neksti. Todos os direitos reservados.
         </p>
