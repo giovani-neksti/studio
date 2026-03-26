@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Sparkles, Camera, Zap, ShieldCheck, ArrowRight, Star, Play, Gem, Shirt, Footprints } from 'lucide-react';
+import { NeuralBackground } from '@/components/NeuralBackground';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -9,13 +10,16 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/20 overflow-x-hidden">
 
+      {/* Neural network animated background */}
+      <NeuralBackground />
+
       {/* ── M3 Top App Bar — Small ── */}
-      <nav className="h-16 flex items-center justify-between px-4 md:px-6 fixed top-0 w-full z-50 bg-[var(--surface-container-low)]/90 backdrop-blur-lg border-b border-[var(--outline-variant)]/20">
+      <nav className="h-16 flex items-center justify-between px-4 md:px-6 fixed top-0 w-full z-50 bg-[var(--surface-container-low)]/80 backdrop-blur-lg border-b border-[var(--outline-variant)]/20">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push('/')}>
           <div className="w-9 h-9 rounded-[var(--shape-medium)] bg-[var(--primary)] flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-[var(--on-primary)]" />
           </div>
-          <span className="font-serif text-lg font-bold tracking-tight">Studio AI</span>
+          <span className="font-serif text-lg font-bold tracking-tight">Neksti Studio</span>
         </div>
         <button
           onClick={() => router.push('/auth')}
@@ -27,13 +31,9 @@ export default function LandingPage() {
 
       {/* ── Hero Section ── */}
       <section className="relative pt-28 pb-16 md:pt-44 md:pb-28 px-6 overflow-hidden">
-        {/* M3 decorative background — subtle primary tint */}
-        <div className="absolute top-20 -right-40 w-[500px] h-[500px] bg-[var(--primary)] opacity-[0.06] blur-[160px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 -left-40 w-[400px] h-[400px] bg-[var(--tertiary)] opacity-[0.06] blur-[140px] rounded-full pointer-events-none" />
-
         <div className="max-w-4xl mx-auto flex flex-col items-center text-center relative z-10">
           {/* M3 Assist Chip */}
-          <div className="animate-fade-up inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] md3-label-medium mb-8">
+          <div className="animate-fade-up inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] md3-label-medium mb-8">
             <Star className="w-3.5 h-3.5 text-[var(--primary)] fill-[var(--primary)]" />
             <span>Redefinindo a Fotografia Digital</span>
           </div>
@@ -56,7 +56,7 @@ export default function LandingPage() {
               Começar Agora <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-[var(--duration-short4)]" />
             </button>
             <button
-              className="h-14 px-8 rounded-[var(--shape-full)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-1 active:scale-[0.98] state-layer flex items-center justify-center gap-2"
+              className="h-14 px-8 rounded-[var(--shape-full)] bg-[var(--secondary-container)]/80 backdrop-blur-sm text-[var(--on-secondary-container)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-1 active:scale-[0.98] state-layer flex items-center justify-center gap-2"
             >
               <Play className="w-4 h-4" /> Ver Demonstração
             </button>
@@ -71,7 +71,7 @@ export default function LandingPage() {
             ].map((chip) => (
               <div
                 key={chip.label}
-                className="inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] border border-[var(--outline-variant)] text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--surface-container-high)]"
+                className="inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--surface-container-high)]/60 backdrop-blur-sm"
               >
                 {chip.icon}
                 <span>{chip.label}</span>
@@ -82,7 +82,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features Section — M3 Filled Cards ── */}
-      <section className="py-16 md:py-24 bg-[var(--surface-container-lowest)] relative px-6">
+      <section className="py-16 md:py-24 bg-[var(--surface-container-lowest)]/90 backdrop-blur-sm relative px-6 z-10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 animate-fade-up">Como funciona</h2>
@@ -114,7 +114,7 @@ export default function LandingPage() {
             ].map((feature, idx) => (
               <div
                 key={feature.step}
-                className={`animate-fade-up stagger-${idx + 1} group p-6 md:p-8 rounded-[var(--shape-extra-large)] bg-[var(--surface-container)] transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:bg-[var(--surface-container-high)] hover:elevation-1`}
+                className={`animate-fade-up stagger-${idx + 1} group p-6 md:p-8 rounded-[var(--shape-extra-large)] bg-[var(--surface-container)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/20 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:bg-[var(--surface-container-high)] hover:elevation-1`}
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="w-12 h-12 rounded-[var(--shape-large)] bg-[var(--primary-container)] flex items-center justify-center text-[var(--on-primary-container)] group-hover:scale-105 transition-transform duration-[var(--duration-medium2)]">
@@ -131,14 +131,14 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA Banner — M3 Filled Card ── */}
-      <section className="py-16 md:py-20 px-6">
+      <section className="py-16 md:py-20 px-6 relative z-10">
         <div className="max-w-4xl mx-auto rounded-[var(--shape-extra-large)] bg-[var(--primary-container)] p-10 md:p-16 text-center relative overflow-hidden elevation-2">
           <div className="absolute inset-0 bg-[var(--primary)]/[0.04] pointer-events-none" />
           <h2 className="font-serif text-3xl md:text-[2.75rem] font-bold mb-6 text-[var(--on-primary-container)] leading-tight relative z-10">
             Pronto para elevar sua marca?
           </h2>
           <p className="text-[var(--on-primary-container)]/80 md3-body-large mb-10 max-w-lg mx-auto relative z-10">
-            Junte-se a milhares de empreendedores que já economizam tempo e dinheiro com a Studio AI.
+            Junte-se a milhares de empreendedores que já economizam tempo e dinheiro com o Neksti Studio.
           </p>
           <button
             onClick={() => router.push('/auth')}
@@ -150,13 +150,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer — M3 Surface Container ── */}
-      <footer className="py-10 border-t border-[var(--outline-variant)]/20 px-6 bg-[var(--surface-container-lowest)]">
+      <footer className="py-10 border-t border-[var(--outline-variant)]/20 px-6 bg-[var(--surface-container-lowest)]/90 backdrop-blur-sm relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-[var(--shape-small)] bg-[var(--primary)] flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 text-[var(--on-primary)]" />
             </div>
-            <span className="font-serif text-base font-bold">Studio AI</span>
+            <span className="font-serif text-base font-bold">Neksti Studio</span>
           </div>
           <div className="flex gap-6 text-[var(--on-surface-variant)] md3-body-medium">
             <a href="#" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Termos</a>

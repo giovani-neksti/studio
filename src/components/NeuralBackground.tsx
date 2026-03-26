@@ -124,7 +124,7 @@ export function NeuralBackground() {
             const alpha = (1 - dist / CONNECTION_DISTANCE) * 0.15;
 
             // Gold gradient for connections
-            ctx.strokeStyle = `rgba(212, 175, 55, ${alpha})`;
+            ctx.strokeStyle = `rgba(45, 110, 69, ${alpha})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -141,7 +141,7 @@ export function NeuralBackground() {
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < MOUSE_RADIUS) {
           const alpha = (1 - dist / MOUSE_RADIUS) * 0.3;
-          ctx.strokeStyle = `rgba(255, 224, 138, ${alpha})`;
+          ctx.strokeStyle = `rgba(109, 191, 138, ${alpha})`;
           ctx.lineWidth = 0.8;
           ctx.beginPath();
           ctx.moveTo(mouse.x, mouse.y);
@@ -163,7 +163,7 @@ export function NeuralBackground() {
           const glowAlpha = (1 - distMouse / MOUSE_RADIUS) * 0.3;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.radius * 4, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(212, 175, 55, ${glowAlpha})`;
+          ctx.fillStyle = `rgba(45, 110, 69, ${glowAlpha})`;
           ctx.fill();
         }
 
@@ -173,7 +173,7 @@ export function NeuralBackground() {
         const coreOpacity = isNearMouse
           ? Math.min(p.opacity + 0.4, 0.9)
           : p.opacity;
-        ctx.fillStyle = `rgba(212, 175, 55, ${coreOpacity})`;
+        ctx.fillStyle = `rgba(45, 110, 69, ${coreOpacity})`;
         ctx.fill();
       }
 

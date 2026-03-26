@@ -199,7 +199,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="theme-jewelry min-h-[100dvh] flex flex-col bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/20">
+    <div className="min-h-[100dvh] flex flex-col bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/20">
 
       {/* Neural network animated background */}
       <NeuralBackground />

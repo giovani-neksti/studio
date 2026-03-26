@@ -55,41 +55,41 @@
    MATERIAL DESIGN 3 — Full Token System
    ============================================ */
 :root {
-  /* ── M3 Surface / Neutral ── */
-  --background: #121212;
-  --foreground: #E6E0E9;
-  --surface: #141218;
-  --surface-dim: #141218;
-  --surface-bright: #3B383E;
-  --surface-variant: #49454F;
-  --on-surface-variant: #CAC4D0;
-  --outline: #938F99;
-  --outline-variant: #49454F;
+  /* ── M3 Surface / Neutral — Neksti Navy base ── */
+  --background: #0A1320;
+  --foreground: #E4E8ED;
+  --surface: #0D1B2E;
+  --surface-dim: #0A1320;
+  --surface-bright: #2A3A4E;
+  --surface-variant: #1E3048;
+  --on-surface-variant: #B0BEC5;
+  --outline: #607D8B;
+  --outline-variant: #1E3048;
 
-  /* ── M3 Surface Container Hierarchy ── */
-  --surface-container-lowest: #0F0D13;
-  --surface-container-low: #1D1B20;
-  --surface-container: #211F26;
-  --surface-container-high: #2B2930;
-  --surface-container-highest: #36343B;
+  /* ── M3 Surface Container Hierarchy — Neksti Navy scale ── */
+  --surface-container-lowest: #060E18;
+  --surface-container-low: #0D1B2E;
+  --surface-container: #122240;
+  --surface-container-high: #1A2D4A;
+  --surface-container-highest: #233752;
 
-  /* ── Primary Tonal ── */
-  --primary: #D0BCFF;
-  --on-primary: #381E72;
-  --primary-container: #4F378B;
-  --on-primary-container: #EADDFF;
+  /* ── Primary Tonal — Neksti Green ── */
+  --primary: #6DBF8A;
+  --on-primary: #003920;
+  --primary-container: #2D6E45;
+  --on-primary-container: #C8F7D5;
 
-  /* ── Secondary Tonal ── */
-  --secondary: #CCC2DC;
-  --on-secondary: #332D41;
-  --secondary-container: #4A4458;
-  --on-secondary-container: #E8DEF8;
+  /* ── Secondary Tonal — Neksti Navy Lighter ── */
+  --secondary: #8FA8C4;
+  --on-secondary: #0D1B2E;
+  --secondary-container: #1A2D4A;
+  --on-secondary-container: #CDDAE8;
 
-  /* ── Tertiary Tonal ── */
-  --tertiary: #EFB8C8;
-  --on-tertiary: #492532;
-  --tertiary-container: #633B48;
-  --on-tertiary-container: #FFD8E4;
+  /* ── Tertiary Tonal — Neksti Mint ── */
+  --tertiary: #6DBF8A;
+  --on-tertiary: #003920;
+  --tertiary-container: #3D8A58;
+  --on-tertiary-container: #D4EABC;
 
   /* ── Error ── */
   --error: #F2B8B5;
@@ -151,32 +151,32 @@
    NICHE THEMES — M3 Color Mapping
    ============================================ */
 
-/* JEWELRY — Dark Gold */
+/* JEWELRY — Neksti Dark with Gold accent for jewelry niche */
 .theme-jewelry {
-  --background: #15130F;
-  --surface: #1A1710;
-  --surface-dim: #15130F;
-  --surface-bright: #3D3830;
-  --surface-container-lowest: #100E0A;
-  --surface-container-low: #1F1C16;
-  --surface-container: #24211A;
-  --surface-container-high: #2F2B22;
-  --surface-container-highest: #3A362D;
+  --background: #0A1320;
+  --surface: #0D1B2E;
+  --surface-dim: #0A1320;
+  --surface-bright: #2A3A4E;
+  --surface-container-lowest: #060E18;
+  --surface-container-low: #0D1B2E;
+  --surface-container: #122240;
+  --surface-container-high: #1A2D4A;
+  --surface-container-highest: #233752;
   --primary: #D4AF37;
   --on-primary: #1C1600;
   --primary-container: #503E00;
   --on-primary-container: #FFE08A;
-  --secondary: #D4C4B7;
-  --secondary-container: #3D332D;
-  --on-secondary-container: #F2E3D5;
-  --tertiary: #B8CEA1;
-  --tertiary-container: #3B4E2E;
+  --secondary: #8FA8C4;
+  --secondary-container: #1A2D4A;
+  --on-secondary-container: #CDDAE8;
+  --tertiary: #6DBF8A;
+  --tertiary-container: #3D8A58;
   --on-tertiary-container: #D4EABC;
-  --border: #504A3A;
-  --surface-variant: #4E4639;
-  --on-surface-variant: #D2C5B5;
-  --outline: #9C8F7E;
-  --outline-variant: #4E4639;
+  --border: #1E3048;
+  --surface-variant: #1E3048;
+  --on-surface-variant: #B0BEC5;
+  --outline: #607D8B;
+  --outline-variant: #1E3048;
 }
 
 /* CLOTHING — M3 Light Surface */
@@ -390,7 +390,7 @@
    M3 Utility Classes
    ============================================ */
 .text-gradient {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--tertiary) 100%);
+  background: linear-gradient(135deg, #6DBF8A 0%, #3D8A58 50%, #2D6E45 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
