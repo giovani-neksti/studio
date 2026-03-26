@@ -8,8 +8,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
-import { Button } from '@/components/ui/button';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
+import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check } from 'lucide-react';
 
 function StudioContent() {
   const searchParams = useSearchParams();
@@ -30,9 +29,10 @@ function StudioContent() {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    setIsSidebarOpen(window.innerWidth >= 768);
     if (!selections.bgTab) {
       setSelections(prev => ({ ...prev, bgTab: 'solid', displayTab: 'expositor' }));
     }
@@ -125,6 +125,7 @@ function StudioContent() {
       const cleanSelections = { ...selections };
       uploadKeys.forEach(k => delete cleanSelections[k]);
       cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
+
       formData.append('selections', JSON.stringify(cleanSelections));
 
       const res = await fetch('/api/generate', { method: 'POST', body: formData });
@@ -165,39 +166,51 @@ function StudioContent() {
   }
   const currentPrompt = buildEnglishPrompt(niche, liveSelections);
 
+  const activeNav = isSidebarOpen ? 'compose' : isGalleryOpen ? 'gallery' : isPricingOpen ? 'plans' : '';
+
   return (
     <div className={`${config.themeClass} flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--background)]`}>
 
-      {/* ═══════════════════════════════════════ HEADER — Glassmorphic ═══════════════════════════════════════ */}
-      <header className="h-14 md:h-16 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-white/[0.06] bg-[var(--card)]/80 backdrop-blur-xl backdrop-saturate-150 z-40 relative">
-        <div className="flex items-center gap-2 md:gap-4 h-full">
-          <div className="flex items-center h-full cursor-pointer py-2 active:scale-[0.97] transition-transform" onClick={() => router.push('/')}>
-            <img src="/logo.png" alt="Logo joIAs" className="h-9 md:h-12 lg:h-14 w-auto object-contain" />
+      {/* ── M3 Small Top App Bar ── */}
+      <header className="h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-[var(--surface-container)] z-40 relative border-b border-[var(--outline-variant)]/20">
+        {/* Left: Logo + Niche Selector */}
+        <div className="flex items-center gap-3 h-full">
+          <div className="flex items-center h-full cursor-pointer py-2" onClick={() => router.push('/')}>
+            <img src="/logo.png" alt="Logo" className="h-8 md:h-10 w-auto object-contain" />
           </div>
-          <div className="hidden sm:block h-5 w-px bg-white/[0.08]" />
+
+          {/* M3 Filled Tonal Button as niche selector */}
           <div className="relative">
-            <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-[var(--foreground)] text-xs md:text-sm transition-all duration-200 active:scale-[0.97]">
+            <button
+              onClick={() => setNicheMenuOpen(!nicheMenuOpen)}
+              className="flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] md3-label-medium transition-all duration-[var(--duration-short4)] hover:elevation-1 state-layer"
+            >
               <span className="text-sm">{config.icon}</span>
-              <span className="font-medium hidden xs:inline">{config.label}</span>
-              <ChevronDown className={`w-3 h-3 text-[var(--muted-foreground)] transition-transform duration-300 ${nicheMenuOpen ? 'rotate-180' : ''}`} />
+              <span className="font-semibold hidden sm:inline">{config.label}</span>
+              <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-[var(--duration-short4)] ${nicheMenuOpen ? 'rotate-180' : ''}`} />
             </button>
+
+            {/* M3 Menu */}
             {nicheMenuOpen && (
-              <div className="absolute top-full left-0 mt-2 w-52 bg-[var(--card)]/95 backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50">
+              <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/30 rounded-[var(--shape-extra-small)] overflow-hidden z-50 elevation-3 animate-scale-in origin-top-left">
                 {Object.entries(nicheConfigs).map(([key, cfg]) => {
                   const isEnabled = key === 'jewelry';
+                  const isSelected = key === niche;
                   return (
                     <button
                       key={key}
                       onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
                       disabled={!isEnabled}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] transition-all text-left active:scale-[0.98] ${isEnabled ? 'hover:bg-white/[0.06]' : 'grayscale opacity-40 cursor-not-allowed'} ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
+                      className={`w-full flex items-center gap-3 px-3 py-3 md3-body-medium transition-colors duration-[var(--duration-short4)] text-left
+                        ${isEnabled ? 'hover:bg-[var(--on-surface-variant)]/8' : 'opacity-38 cursor-not-allowed'}
+                        ${isSelected ? 'bg-[var(--secondary-container)]' : ''}`}
                     >
-                      <span className="text-lg">{cfg.icon}</span>
-                      <div className="flex flex-col">
-                        <span>{cfg.label}</span>
-                        {!isEnabled && <span className="text-[10px] text-[var(--muted-foreground)] mt-0.5 font-medium">Em breve</span>}
+                      <span className="text-lg w-7 text-center">{cfg.icon}</span>
+                      <div className="flex flex-col flex-1">
+                        <span className={isSelected ? 'font-semibold text-[var(--on-secondary-container)]' : ''}>{cfg.label}</span>
+                        {!isEnabled && <span className="md3-label-small text-[var(--outline)]">Em breve</span>}
                       </div>
-                      {key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
+                      {isSelected && <Check className="w-4 h-4 text-[var(--primary)]" />}
                     </button>
                   );
                 })}
@@ -206,73 +219,95 @@ function StudioContent() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 md:gap-2.5">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/[0.08] text-xs font-semibold whitespace-nowrap bg-white/[0.03]" style={{ color: credits > 2 ? 'var(--primary)' : '#ef4444' }}>
-            <Gem className="w-3 h-3" />{credits} <span className="hidden sm:inline">Créditos</span>
+        {/* Right: Credits Badge + Desktop Actions */}
+        <div className="flex items-center gap-2">
+          {/* M3 Badge-style credits */}
+          <div
+            className="flex items-center gap-1.5 h-8 px-3 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-medium"
+            style={{ color: credits > 2 ? 'var(--primary)' : 'var(--error)' }}
+          >
+            <Gem className="w-3.5 h-3.5" />{credits} <span className="hidden sm:inline">Créditos</span>
           </div>
-          <Button variant="default" size="sm" onClick={() => setIsPricingOpen(true)} className="gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 text-xs hidden lg:flex h-7 rounded-lg active:scale-[0.97] transition-transform">
+
+          {/* Desktop: Subscription — M3 Filled Tonal Button */}
+          <button
+            onClick={() => setIsPricingOpen(true)}
+            className="hidden md:flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-medium transition-all duration-[var(--duration-short4)] hover:elevation-1 state-layer"
+          >
             <CreditCard className="w-3.5 h-3.5" />Assinatura
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/[0.04] text-xs h-7 px-2 rounded-lg active:scale-[0.97] transition-transform">
-            <LogOut className="w-3 h-3" /><span className="hidden sm:inline">Sair</span>
-          </Button>
+          </button>
+
+          {/* Desktop: Logout — M3 Text Button */}
+          <button
+            onClick={() => router.push('/')}
+            className="hidden md:flex items-center gap-1.5 h-9 px-3 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
+          >
+            <LogOut className="w-3.5 h-3.5" /><span className="hidden sm:inline">Sair</span>
+          </button>
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════ BODY ═══════════════════════════════════════ */}
+      {/* ── Body ── */}
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
 
-        {/* ─── Desktop Sidebar ─── */}
-        <div className={`hidden md:flex flex-col min-h-0 border-r border-white/[0.06] bg-[var(--card)] transition-all duration-300 ease-in-out shrink-0
-          ${isSidebarOpen ? 'w-[30%] lg:w-[320px] xl:w-[380px]' : 'w-0 overflow-hidden border-r-0'}`}
+        {/* Desktop Sidebar — M3 Side Sheet */}
+        <div className={`hidden md:flex flex-col min-h-0 bg-[var(--surface-container-low)] transition-all duration-[var(--duration-medium4)] ease-[var(--easing-emphasized)] shrink-0
+          ${isSidebarOpen ? 'w-[320px] xl:w-[360px] border-r border-[var(--outline-variant)]/20' : 'w-0 overflow-hidden'}`}
         >
           <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
         </div>
 
-        {/* ─── Desktop Sidebar Toggle ─── */}
-        <div className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 transition-all duration-300" style={{ transform: `translate(${isSidebarOpen ? 'min(calc(30vw), 380px)' : '0px'}, -50%)` }}>
+        {/* Desktop Sidebar Toggle — M3 Icon Button */}
+        <div
+          className="hidden md:flex absolute top-1/2 -translate-y-1/2 z-30 transition-all duration-[var(--duration-medium4)] ease-[var(--easing-emphasized)]"
+          style={{ left: isSidebarOpen ? '320px' : '0px' }}
+        >
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center justify-center w-5 h-12 bg-[var(--card)]/90 backdrop-blur-xl border border-white/[0.08] rounded-r-lg shadow-lg hover:bg-white/[0.06] transition-all active:scale-[0.95] focus:outline-none -ml-[1px]"
+            className="flex items-center justify-center w-6 h-12 bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/30 border-l-0 rounded-r-[var(--shape-medium)] hover:bg-[var(--surface-container-highest)] transition-colors duration-[var(--duration-short4)]"
             title={isSidebarOpen ? "Recolher Menu" : "Expandir Menu"}
           >
-            {isSidebarOpen ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            {isSidebarOpen ? <ChevronLeft className="w-4 h-4 text-[var(--on-surface-variant)]" /> : <ChevronRight className="w-4 h-4 text-[var(--on-surface-variant)]" />}
           </button>
         </div>
 
-        {/* ─── Mobile Bottom Sheet Backdrop ─── */}
+        {/* Mobile Scrim */}
         {isSidebarOpen && (
           <div
-            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+            className="md:hidden fixed inset-0 bg-[var(--on-surface)]/32 z-40 transition-opacity duration-[var(--duration-medium2)]"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
 
-        {/* ─── Mobile Bottom Sheet Sidebar ─── */}
-        <div className={`md:hidden fixed inset-x-0 bottom-0 z-50 flex flex-col bg-[var(--card)] rounded-t-[1.75rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
-          ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
+        {/* Mobile Bottom Sheet — M3 Pattern */}
+        <div
+          className={`md:hidden fixed inset-x-0 bottom-0 z-50 flex flex-col bg-[var(--surface-container-low)] rounded-t-[var(--shape-extra-large)] elevation-4 transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
+            ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
           style={{ height: '85dvh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
-          {/* Drag Handle */}
-          <div className="w-full flex justify-center pt-3 pb-1 shrink-0 cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
-            <div className="w-10 h-[5px] bg-white/20 rounded-full" />
+          {/* M3 Bottom Sheet Drag Handle */}
+          <div className="w-full flex justify-center pt-3.5 pb-2 shrink-0 cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
+            <div className="w-8 h-1 bg-[var(--on-surface-variant)]/40 rounded-[var(--shape-full)]" />
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">
             <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
           </div>
         </div>
 
-        {/* ─── Main Content Area ─── */}
+        {/* Main Content */}
         <main className="flex-1 flex flex-col bg-[var(--background)] relative min-h-0 overflow-hidden">
 
-          {/* Desktop Generate Button */}
-          <div className="hidden md:block flex-shrink-0 px-8 pt-6 pb-2 z-10">
-            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-base transition-all duration-300 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.98] shadow-lg hover:shadow-2xl bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white border border-white/10">
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Desktop Generate Button — M3 Filled Button */}
+          <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">
+            <button
+              onClick={handleGenerate}
+              disabled={!canGenerate}
+              className="w-full flex items-center justify-center gap-3 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 state-layer"
+            >
               {isGenerating ? (
-                <><div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span>Criando Magia...</span></>
+                <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
               ) : (
-                <><Sparkles className="w-5 h-5 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span></>
+                <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
               )}
             </button>
           </div>
@@ -289,17 +324,17 @@ function StudioContent() {
             />
           </div>
 
-          {/* Desktop Gallery Strip */}
+          {/* Desktop Gallery Strip — M3 Surface Container */}
           {recentImages.length > 0 && (
-            <div className="hidden md:flex flex-shrink-0 h-[88px] border-t border-white/[0.06] bg-[var(--card)]/60 backdrop-blur-lg px-6 py-3 items-center transition-all">
+            <div className="hidden md:flex flex-shrink-0 h-20 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container)] px-6 py-3 items-center">
               <div className="flex flex-col h-full justify-center">
-                <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-2 active:scale-[0.97] transition-transform">
-                  <span className="text-[11px] font-bold text-[var(--foreground)]/70 group-hover:text-[var(--primary)] transition-colors uppercase tracking-widest">Galeria</span>
-                  <Images className="w-3 h-3 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
+                <button onClick={() => setIsGalleryOpen(true)} className="flex items-center gap-2 mb-2 text-left group">
+                  <span className="md3-label-small text-[var(--on-surface-variant)] uppercase tracking-wider">Galeria</span>
+                  <Images className="w-3.5 h-3.5 text-[var(--on-surface-variant)] group-hover:text-[var(--primary)] transition-colors" />
                 </button>
                 <div className="flex items-center gap-2">
                   {recentImages.slice(0, 8).map((img, idx) => (
-                    <div key={idx} className="w-10 h-10 rounded-lg overflow-hidden border border-white/[0.08] cursor-pointer hover:border-[var(--primary)] transition-all hover:scale-110 active:scale-95 shadow-sm" onClick={() => setImageUrl(img)}>
+                    <div key={idx} className="w-10 h-10 rounded-[var(--shape-small)] overflow-hidden border border-[var(--outline-variant)]/30 cursor-pointer hover:border-[var(--primary)] transition-colors duration-[var(--duration-short4)]" onClick={() => setImageUrl(img)}>
                       <img src={img} alt={`Recente ${idx}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -310,31 +345,53 @@ function StudioContent() {
         </main>
       </div>
 
-      {/* ═══════════════════════════════════════ MOBILE STICKY BOTTOM BAR ═══════════════════════════════════════ */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--card)]/80 backdrop-blur-2xl border-t border-white/[0.06]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <div className="flex items-center gap-2 px-3 py-2.5">
-          {/* Config Button */}
-          <button onClick={() => setIsSidebarOpen(true)} className="flex items-center justify-center w-11 h-11 rounded-xl bg-white/[0.06] border border-white/[0.08] active:scale-[0.93] transition-all shrink-0">
-            <Layers className="w-5 h-5 text-[var(--foreground)]" />
-          </button>
+      {/* ── Mobile Extended FAB — M3 Pattern ── */}
+      <button
+        onClick={handleGenerate}
+        disabled={!canGenerate}
+        className="md:hidden fixed z-35 right-4 h-14 px-5 rounded-[var(--shape-large)] md3-label-large elevation-3 flex items-center gap-2.5 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] active:scale-[0.96] disabled:opacity-[0.38] disabled:shadow-none bg-[var(--primary-container)] text-[var(--on-primary-container)]"
+        style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px) + 12px)' }}
+      >
+        {isGenerating ? (
+          <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
+        ) : (
+          <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar' : 'Upload'}</span></>
+        )}
+      </button>
 
-          {/* Generate Button */}
-          <button onClick={handleGenerate} disabled={!canGenerate} className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-bold text-[14px] transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white shadow-lg border border-white/10">
-            {isGenerating ? (
-              <><div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span className="text-[13px]">Gerando...</span></>
-            ) : (
-              <><Sparkles className="w-4 h-4 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem' : 'Upload primeiro'}</span></>
-            )}
-          </button>
-
-          {/* Credits Pill */}
-          <div className="flex items-center gap-1 px-2.5 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs font-bold shrink-0" style={{ color: credits > 2 ? 'var(--primary)' : '#ef4444' }}>
-            <Gem className="w-3.5 h-3.5" />{credits}
-          </div>
+      {/* ── Mobile Bottom Navigation — M3 Navigation Bar ── */}
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--surface-container)] border-t border-[var(--outline-variant)]/20"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        <div className="flex items-center justify-around h-20 px-2">
+          {[
+            { id: 'compose', icon: <SlidersHorizontal className="w-[22px] h-[22px]" />, label: 'Compor', action: () => setIsSidebarOpen(true) },
+            { id: 'gallery', icon: <Images className="w-[22px] h-[22px]" />, label: 'Galeria', action: () => setIsGalleryOpen(true) },
+            { id: 'plans', icon: <CreditCard className="w-[22px] h-[22px]" />, label: 'Planos', action: () => setIsPricingOpen(true) },
+            { id: 'logout', icon: <LogOut className="w-[22px] h-[22px]" />, label: 'Sair', action: () => router.push('/') },
+          ].map((item) => {
+            const isActive = activeNav === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={item.action}
+                className="flex flex-col items-center gap-1 min-w-[64px] py-2 group"
+              >
+                {/* M3 Active Indicator Pill */}
+                <div className={`flex items-center justify-center w-16 h-8 rounded-[var(--shape-full)] transition-all duration-[var(--duration-medium1)] ease-[var(--easing-standard)]
+                  ${isActive ? 'bg-[var(--secondary-container)]' : 'group-hover:bg-[var(--on-surface-variant)]/8'}`}
+                >
+                  <span className={`transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-secondary-container)]' : 'text-[var(--on-surface-variant)]'}`}>{item.icon}</span>
+                </div>
+                <span className={`md3-label-small transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-surface)]' : 'text-[var(--on-surface-variant)]'}`}>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </nav>
 
-      {/* ═══════════════════════════════════════ OVERLAYS ═══════════════════════════════════════ */}
+      {/* ── Overlays ── */}
       {nicheMenuOpen && <div className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
       <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} />
       <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} />
@@ -344,7 +401,11 @@ function StudioContent() {
 
 export default function StudioPage() {
   return (
-    <Suspense fallback={<div className="h-[100dvh] flex items-center justify-center bg-[#09090b]"><div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" /></div>}>
+    <Suspense fallback={
+      <div className="h-[100dvh] flex items-center justify-center bg-[var(--background)]">
+        <div className="w-12 h-12 rounded-full border-[3px] border-[var(--outline-variant)] border-t-[var(--primary)] animate-spin" />
+      </div>
+    }>
       <StudioContent />
     </Suspense>
   );

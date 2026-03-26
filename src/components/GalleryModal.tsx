@@ -13,67 +13,71 @@ interface GalleryModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   niche: string;
-  images: string[]; // NOVO: Recebe as imagens reais
+  images: string[];
 }
 
 export function GalleryModal({ isOpen, onOpenChange, niche, images }: GalleryModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90dvh] bg-[var(--background)] border border-white/[0.06] p-0 gap-0 overflow-hidden text-[var(--foreground)] rounded-t-[2rem] md:rounded-2xl">
-        <DialogHeader className="p-5 md:p-6 pb-3 md:pb-4 border-b border-white/[0.06] bg-[var(--card)]/60 backdrop-blur-xl">
+      <DialogContent className="max-w-5xl max-h-[90dvh] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 p-0 gap-0 overflow-hidden text-[var(--foreground)] rounded-t-[var(--shape-extra-large)] md:rounded-[var(--shape-extra-large)]">
+        {/* M3 Dialog Header */}
+        <DialogHeader className="p-5 md:p-6 pb-3 md:pb-4 border-b border-[var(--outline-variant)]/20 bg-[var(--surface-container-high)]">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <DialogTitle className="md3-headline-small font-semibold flex items-center gap-2">
                 Minhas Criações
-                <span className="px-2 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-medium">
+                {/* M3 Badge */}
+                <span className="px-2.5 py-0.5 rounded-[var(--shape-full)] bg-[var(--primary)]/10 text-[var(--primary)] md3-label-small">
                   {images.length} imagens
                 </span>
               </DialogTitle>
-              <p className="text-[var(--muted-foreground)] text-sm mt-1">
+              <p className="text-[var(--on-surface-variant)] md3-body-medium mt-1">
                 Histórico de renderizações geradas nesta sessão
               </p>
             </div>
           </div>
         </DialogHeader>
 
-        <ScrollArea className="h-[65vh] p-6">
+        <ScrollArea className="h-[65vh] p-5 md:p-6">
           {images.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center opacity-50 py-20">
-              <ImageIcon className="w-16 h-16 mb-4 text-[var(--muted-foreground)] opacity-50" />
-              <p className="text-lg font-medium">Nenhuma imagem gerada ainda.</p>
-              <p className="text-sm mt-1">As suas criações de IA aparecerão aqui.</p>
+            <div className="flex flex-col items-center justify-center h-full text-center py-20">
+              <div className="w-16 h-16 rounded-[var(--shape-extra-large)] bg-[var(--surface-container-highest)] flex items-center justify-center mb-4">
+                <ImageIcon className="w-8 h-8 text-[var(--on-surface-variant)] opacity-50" />
+              </div>
+              <p className="md3-title-medium text-[var(--on-surface-variant)]">Nenhuma imagem gerada ainda.</p>
+              <p className="md3-body-medium mt-1 text-[var(--outline)]">As suas criações de IA aparecerão aqui.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {images.map((url, i) => (
                 <div
                   key={i}
-                  className="group relative aspect-square rounded-2xl overflow-hidden bg-black/20 border border-white/[0.06] active:scale-[0.97] transition-transform"
+                  className="group relative aspect-square rounded-[var(--shape-large)] overflow-hidden bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/20"
                 >
                   <img
                     src={url}
                     alt={`Criação IA ${i}`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-[var(--duration-medium2)] ease-[var(--easing-standard)] group-hover:scale-105"
                   />
 
-                  {/* Ações ao passar o rato */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-sm">
+                  {/* Hover Overlay — M3 Scrim */}
+                  <div className="absolute inset-0 bg-[var(--on-surface)]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--duration-short4)] flex items-center justify-center gap-3">
                     <button
                       onClick={() => window.open(url, '_blank')}
-                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all active:scale-[0.93]"
+                      className="w-10 h-10 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] text-[var(--foreground)] flex items-center justify-center transition-colors hover:bg-[var(--surface-bright)]"
                     >
                       <Maximize2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => window.open(url, '_blank')}
-                      className="w-10 h-10 rounded-full bg-[var(--primary)] hover:brightness-110 text-[var(--primary-foreground)] flex items-center justify-center transition-all active:scale-[0.93] shadow-[0_0_15px_var(--primary)]"
+                      className="w-10 h-10 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center transition-opacity hover:opacity-90 state-layer"
                     >
                       <Download className="w-4 h-4" />
                     </button>
                   </div>
 
-                  {/* Data real de hoje */}
-                  <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/60 text-white/80 text-[10px] backdrop-blur-sm pointer-events-none">
+                  {/* Date label */}
+                  <div className="absolute bottom-2 left-2 px-2 py-1 rounded-[var(--shape-extra-small)] bg-[var(--surface-container)]/90 text-[var(--foreground)]/80 md3-label-small pointer-events-none">
                     {new Date().toLocaleDateString('pt-BR')}
                   </div>
                 </div>

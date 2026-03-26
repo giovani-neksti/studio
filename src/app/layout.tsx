@@ -1,15 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans, Noto_Serif_Display } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
+const notoSans = Noto_Sans({
   variable: "--font-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const notoSerif = Noto_Serif_Display({
+  variable: "--font-serif",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -21,12 +25,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Studio AI – Gerador de Imagens de Alta Conversão",
-  description: "Plataforma de geração de imagens com IA para joalheria, moda e calçados. Crie imagens profissionais que convertem em segundos.",
-  keywords: ["IA", "geração de imagens", "e-commerce", "joias", "moda", "calçados", "fotografia de produto"],
+  title: "Studio AI – Transforme Fotos de Celular em Estúdio Profissional",
+  description: "Plataforma de IA especializada em fotografia de produto para joalheria, moda e calçados. Componha cenários de luxo em segundos.",
+  keywords: ["IA", "fotografia de produto", "e-commerce", "joias", "moda", "calçados", "material design 3"],
   openGraph: {
     title: "Studio AI",
-    description: "Imagens de alta conversão geradas por IA para seu negócio",
+    description: "Fotos de estúdio profissionais geradas por IA a partir do seu celular.",
     type: "website",
     url: "https://studio.neksti.com.br",
   },
@@ -39,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="h-full">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
+      <body className={`${notoSans.variable} ${notoSerif.variable} antialiased h-full`}>
         {children}
       </body>
     </html>

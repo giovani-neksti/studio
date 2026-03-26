@@ -2,19 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { NicheConfig } from '@/lib/niche-config';
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import {
   ChevronDown,
   Layers,
   Image as ImageIcon,
   Maximize2,
-  CheckCircle2,
+  Check,
   BoxSelect,
   AlignVerticalSpaceAround,
   UploadCloud,
   Type as TypeIcon,
-  Camera // IMPORT NOVO
+  Camera
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -33,18 +32,15 @@ const getCategoryIcon = (cat: string) => {
   if (cat.includes('Broche')) return '🏵️';
   if (cat.includes('Pingente')) return '🧿';
   if (cat.includes('Pandora')) return '🔮';
-
   if (cat.includes('Camisa') || cat.includes('Blusa')) return '👚';
   if (cat.includes('Calça') || cat.includes('Saia')) return '👖';
   if (cat.includes('Vestido')) return '👗';
   if (cat.includes('Casaco')) return '🧥';
   if (cat.includes('Acessórios')) return '👜';
-
   if (cat.includes('Tênis Urbano') || cat.includes('Esportivo')) return '👟';
   if (cat.includes('Salto Alto')) return '👠';
   if (cat.includes('Bota')) return '🥾';
   if (cat.includes('Sapato')) return '👞';
-
   return '🏷️';
 };
 
@@ -71,25 +67,57 @@ const getDisplayIcon = (id: string) => {
   }
 };
 
+/* M3 Collapsible Section */
 function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <div className="mb-1 md:mb-2">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-4 py-3.5 md:px-5 md:py-4 text-left hover:bg-white/[0.04] rounded-2xl transition-all duration-200 active:scale-[0.97]">
-        <div className="flex items-center gap-2.5 md:gap-3">
-          <span className="text-[var(--primary)] w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">{icon}</span>
-          <span className="text-[13px] md:text-sm font-bold text-[var(--foreground)] tracking-wide">{title}</span>
+    <div className="mb-0.5">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 md:px-5 md:py-3.5 text-left rounded-[var(--shape-large)] hover:bg-[var(--on-surface-variant)]/8 transition-colors duration-[var(--duration-short4)] state-layer"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="text-[var(--primary)] w-5 h-5 flex items-center justify-center">{icon}</span>
+          <span className="md3-title-small font-serif font-semibold text-[var(--foreground)]">{title}</span>
         </div>
-        <ChevronDown className={`w-4 h-4 md:w-4 md:h-4 text-[var(--muted-foreground)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-[var(--on-surface-variant)] transition-transform duration-[var(--duration-short4)] ease-[var(--easing-standard)] ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="px-3 pb-4 pt-1 md:px-4 md:pb-5">{children}</div>}
+      <div className={`grid transition-all duration-[var(--duration-medium2)] ease-[var(--easing-emphasized)] ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+        <div className="overflow-hidden">
+          <div className="px-4 pb-4 pt-1.5 md:px-5">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* M3 Segmented Button */
+function SegmentedButton({ options, value, onChange }: { options: { id: string; label: string }[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex h-10 rounded-[var(--shape-full)] border border-[var(--outline)]/40 overflow-hidden mb-4 bg-[var(--surface-container)]/30 p-0.5">
+      {options.map((opt) => {
+        const isActive = value === opt.id;
+        return (
+          <button
+            key={opt.id}
+            onClick={() => onChange(opt.id)}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-2 md3-label-medium rounded-[var(--shape-full)] transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)]
+              ${isActive
+                ? 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)] elevation-1'
+                : 'text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8'}`}
+          >
+            {isActive && <Check className="w-3.5 h-3.5" />}
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
 export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null); // REF DA CÂMERA
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const bgTab = selections.bgTab || 'solid';
   const displayTab = selections.displayTab || 'expositor';
@@ -115,18 +143,19 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
   const hasProps = config.propOptions && config.propOptions.length > 0;
 
   return (
-    <div className="flex flex-col h-full w-full min-h-0 bg-[var(--card)]">
-      <div className="hidden md:flex px-5 py-4 border-b border-[var(--border)] shrink-0 items-center gap-3">
+    <div className="flex flex-col h-full w-full min-h-0 bg-[var(--surface-container-low)]">
+      {/* Desktop Header */}
+      <div className="hidden md:flex px-5 py-4 border-b border-[var(--outline-variant)]/20 shrink-0 items-center gap-3">
         <span className="text-xl">{config.icon}</span>
-        <h2 className="text-[var(--foreground)] font-bold text-sm leading-tight">Configurações</h2>
+        <h2 className="md3-title-small text-[var(--foreground)]">Configurações</h2>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth w-full no-scrollbar">
         <div className="py-2 md:py-3 pb-32 md:pb-16">
 
-          {/* PASSO 1: CATEGORIA */}
-          <SectionWrapper title="1. Produtos & Categorias" icon={<Layers />}>
-            <div className="grid grid-cols-2 gap-2 md:gap-3">
+          {/* STEP 1: CATEGORY — M3 Filter Chips style */}
+          <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-5 h-5" />}>
+            <div className="grid grid-cols-2 gap-2">
               {config.categories.map((cat) => {
                 const uploadKey = `upload_${cat}`;
                 const hasUpload = !!selections[uploadKey];
@@ -137,16 +166,18 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   <button
                     key={cat}
                     onClick={() => onSelect('category', cat)}
-                    className={`relative flex flex-col items-center justify-center p-3 md:p-4 rounded-2xl border transition-all duration-200 active:scale-[0.95] min-h-[72px]
+                    className={`relative flex flex-col items-center justify-center p-3 md:p-3.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] min-h-[68px]
                       ${isActive
-                        ? 'border-[var(--primary)] bg-[var(--primary)]/10 ring-1 ring-[var(--primary)]/20 shadow-[0_0_20px_rgba(var(--primary-rgb,212,175,55),0.08)]'
-                        : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]'
+                        : 'border-[var(--outline-variant)]/40 bg-transparent text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
                   >
                     {hasUpload && (
-                      <CheckCircle2 className="absolute top-2 right-2 w-3.5 h-3.5 md:w-4 md:h-4 text-green-500 bg-white rounded-full" />
+                      <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 text-white" />
+                      </div>
                     )}
-                    <span className="text-2xl md:text-3xl mb-1.5 transition-transform group-hover:scale-110">{icon}</span>
-                    <span className={`text-[11px] md:text-xs font-bold leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                    <span className="text-2xl md:text-[28px] mb-1">{icon}</span>
+                    <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : ''}`}>
                       {cat}
                     </span>
                   </button>
@@ -154,57 +185,60 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               })}
             </div>
 
-            {/* SEÇÃO DE UPLOAD MELHORADA: CÂMERA E GALERIA */}
+            {/* UPLOAD AREA */}
             {activeCategory && (
-              <div className="mt-2.5 md:mt-3">
+              <div className="mt-3">
                 {selections[activeUploadKey!] ? (
-                  <div className="p-3.5 md:p-4 border border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-xl flex items-center justify-between shadow-sm min-h-[56px]">
+                  <div className="p-3 md:p-4 border border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-[var(--shape-medium)] flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-[13px] md:text-sm font-semibold text-[var(--foreground)] truncate">
+                      <div className="w-6 h-6 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <span className="md3-body-small font-medium text-[var(--foreground)] truncate">
                         {selections[activeUploadKey!].name}
                       </span>
                     </div>
                     <button
                       onClick={() => onSelect(activeUploadKey!, null)}
-                      className="text-[11px] md:text-xs text-red-500 hover:text-red-400 font-bold ml-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl shrink-0 transition-all active:scale-[0.93]"
+                      className="md3-label-medium text-[var(--error)] ml-2 px-3 py-1.5 rounded-[var(--shape-full)] hover:bg-[var(--error)]/10 transition-colors duration-[var(--duration-short4)] shrink-0"
                     >
                       Remover
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 md:gap-3">
-                    {/* Botão de Câmera Direta */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Camera — M3 Outlined Card */}
                     <div
                       onClick={() => cameraInputRef.current?.click()}
-                      className="p-4 md:p-5 border-2 border-dashed border-[var(--primary)]/20 bg-[var(--primary)]/5 rounded-2xl text-center cursor-pointer hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/40 transition-all duration-200 active:scale-[0.95] flex flex-col items-center justify-center min-h-[80px]"
+                      className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
                     >
                       <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileUpload} />
-                      <Camera className="w-6 h-6 md:w-7 md:h-7 mb-2 text-[var(--primary)] opacity-90" />
-                      <span className="text-[11px] md:text-xs font-bold text-[var(--primary)]">Tirar Foto</span>
+                      <Camera className="w-6 h-6 mb-2 text-[var(--primary)]" />
+                      <span className="md3-label-small text-[var(--primary)]">Tirar Foto</span>
                     </div>
 
-                    {/* Botão de Arquivo/Galeria */}
+                    {/* Gallery */}
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-4 md:p-5 border-2 border-dashed border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-xl text-center cursor-pointer hover:bg-[var(--primary)]/10 hover:border-[var(--primary)]/60 transition-all active:scale-95 flex flex-col items-center justify-center min-h-[80px]"
+                      className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
                     >
                       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                      <UploadCloud className="w-6 h-6 md:w-7 md:h-7 mb-2 text-[var(--primary)] opacity-90" />
-                      <span className="text-[11px] md:text-xs font-bold text-[var(--primary)]">Galeria</span>
+                      <UploadCloud className="w-6 h-6 mb-2 text-[var(--primary)]" />
+                      <span className="md3-label-small text-[var(--primary)]">Galeria</span>
                     </div>
                   </div>
                 )}
               </div>
             )}
 
+            {/* Material Select — M3 Outlined Text Field style */}
             {hasMaterials && (
-              <div className="mt-3 pt-3 md:mt-4 md:pt-4 border-t border-[var(--border)]">
-                <p className="text-[11px] md:text-xs text-[var(--muted-foreground)] mb-1.5 font-medium">Material Predominante</p>
+              <div className="mt-4 pt-4 border-t border-[var(--outline-variant)]/20">
+                <p className="md3-label-small text-[var(--on-surface-variant)] mb-2">Material Predominante</p>
                 <select
                   value={selections.material || ''}
                   onChange={(e) => onSelect('material', e.target.value)}
-                  className="w-full h-11 md:h-12 px-3 md:px-4 rounded-xl text-[13px] md:text-sm border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)] transition-all outline-none"
+                  className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-colors duration-[var(--duration-short4)] outline-none"
                 >
                   <option value="" disabled>Selecione o Material</option>
                   {config.materialOptions?.map((mat) => (
@@ -215,44 +249,57 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             )}
           </SectionWrapper>
 
-          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
+          <div className="mx-4 md:mx-5 my-1 m3-divider" />
 
-          {/* PASSO 2: AMBIENTAÇÃO & ADEREÇOS */}
-          <SectionWrapper title="2. Ambientação & Adereços" icon={<ImageIcon />}>
+          {/* STEP 2: AMBIENCE */}
+          <SectionWrapper title="2. Ambientação & Adereços" icon={<ImageIcon className="w-5 h-5" />}>
             {hasScenarios && (
-              <div className="flex p-1 bg-white/[0.04] rounded-xl mb-3 border border-white/[0.04]">
-                <button onClick={() => onSelect('bgTab', 'solid')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${bgTab === 'solid' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Cor Sólida</button>
-                <button onClick={() => onSelect('bgTab', 'scenario')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${bgTab === 'scenario' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Cenário IA</button>
-              </div>
+              <SegmentedButton
+                options={[
+                  { id: 'solid', label: 'Cor Sólida' },
+                  { id: 'scenario', label: 'Cenário IA' },
+                ]}
+                value={bgTab}
+                onChange={(v) => onSelect('bgTab', v)}
+              />
             )}
 
             {(!hasScenarios || bgTab === 'solid') ? (
-              <div className="grid grid-cols-5 gap-1.5 md:gap-2">
+              <div className="grid grid-cols-5 gap-2">
                 {config.solidColors.map((color) => (
                   <button
                     key={color.name}
                     title={color.name}
                     onClick={() => { onSelect('background', color.name); onSelect('backgroundHex', color.hex); }}
-                    className={`aspect-square rounded-full border shadow-sm transition-all duration-200 hover:scale-110 active:scale-90 ${selections.background === color.name ? 'ring-2 ring-offset-2 ring-[var(--primary)] scale-110' : 'border-white/10'}`}
+                    className={`aspect-square rounded-[var(--shape-full)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:scale-110 ${selections.background === color.name ? 'ring-2 ring-offset-2 ring-[var(--primary)] ring-offset-[var(--surface-container-low)] scale-110' : 'border-[var(--outline-variant)]/30'}`}
                     style={{ backgroundColor: color.hex }}
                   />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {config.scenarios?.map((scenario) => (
-                  <button key={scenario.title} onClick={() => onSelect('background', scenario.title)} className={`text-left p-2 rounded-md border text-[10px] md:text-xs ${selections.background === scenario.title ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-medium' : 'border-[var(--border)]'}`}>{scenario.title}</button>
+                  <button
+                    key={scenario.title}
+                    onClick={() => onSelect('background', scenario.title)}
+                    className={`text-left p-3 rounded-[var(--shape-medium)] border md3-label-medium transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
+                      ${selections.background === scenario.title
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
+                        : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                  >
+                    {scenario.title}
+                  </button>
                 ))}
               </div>
             )}
 
             {hasProps && (
-              <div className="mt-3 pt-3 md:mt-4 md:pt-4 border-t border-[var(--border)]">
-                <p className="text-[11px] md:text-xs text-[var(--muted-foreground)] mb-1.5 font-medium">Adereços de Composição</p>
+              <div className="mt-4 pt-4 border-t border-[var(--outline-variant)]/20">
+                <p className="md3-label-small text-[var(--on-surface-variant)] mb-2">Adereços de Composição</p>
                 <select
                   value={selections.prop || 'none'}
                   onChange={(e) => onSelect('prop', e.target.value)}
-                  className="w-full h-11 md:h-12 px-3 md:px-4 rounded-xl text-[13px] md:text-sm border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)] transition-all outline-none"
+                  className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-colors duration-[var(--duration-short4)] outline-none"
                 >
                   {config.propOptions?.map((prop) => (
                     <option key={prop.id} value={prop.id}>{prop.label}</option>
@@ -262,17 +309,21 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             )}
           </SectionWrapper>
 
-          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
+          <div className="mx-4 md:mx-5 my-1 m3-divider" />
 
-          {/* PASSO 3: EXIBIÇÃO */}
-          <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect />}>
-            <div className="flex p-1 bg-white/[0.04] rounded-xl mb-3 border border-white/[0.04]">
-              <button onClick={() => onSelect('displayTab', 'expositor')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${displayTab === 'expositor' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Expositor</button>
-              <button onClick={() => onSelect('displayTab', 'human')} className={`flex-1 text-[11px] md:text-xs py-2 rounded-lg transition-all duration-200 active:scale-[0.97] ${displayTab === 'human' ? 'bg-[var(--card)] shadow-md font-semibold text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'}`}>Modelo</button>
-            </div>
+          {/* STEP 3: DISPLAY TYPE */}
+          <SectionWrapper title="3. Tipo de Exibição" icon={<BoxSelect className="w-5 h-5" />}>
+            <SegmentedButton
+              options={[
+                { id: 'expositor', label: 'Expositor' },
+                { id: 'human', label: 'Modelo' },
+              ]}
+              value={displayTab}
+              onChange={(v) => onSelect('displayTab', v)}
+            />
 
             {displayTab === 'expositor' ? (
-              <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {config.displayOptions.map((opt: any) => {
                   const isActive = selections.display === opt.label;
                   const icon = getDisplayIcon(opt.id);
@@ -280,11 +331,14 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     <button
                       key={opt.id}
                       onClick={() => onSelect('display', opt.label)}
-                      className={`relative flex flex-col items-center justify-center p-3 md:p-3.5 rounded-2xl border transition-all duration-200 active:scale-[0.95] ${isActive ? 'border-[var(--primary)] bg-[var(--primary)]/8 ring-1 ring-[var(--primary)]/20' : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
+                      className={`relative flex flex-col items-center justify-center p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
+                        ${isActive
+                          ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
+                          : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
                     >
-                      {isActive && <CheckCircle2 className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" />}
+                      {isActive && <Check className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" />}
                       <span className="text-xl md:text-2xl mb-1">{icon}</span>
-                      <span className={`text-[10px] md:text-[11px] font-medium leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                      <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : ''}`}>
                         {opt.label}
                       </span>
                     </button>
@@ -292,24 +346,24 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 })}
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {config.humanDisplayOptions.map((opt: any) => {
                   const isActive = selections.display === opt.name;
                   return (
                     <button
                       key={opt.id}
                       onClick={() => onSelect('display', opt.name)}
-                      className={`relative flex flex-col items-center justify-center p-2.5 md:p-3 rounded-xl border transition-all duration-200 active:scale-[0.95] text-center h-16 md:h-20
+                      className={`relative flex flex-col items-center justify-center p-2.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-center h-16 md:h-20
                         ${isActive
-                          ? 'border-[var(--primary)] bg-[var(--primary)]/8 ring-1 ring-[var(--primary)]/20'
-                          : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
+                          ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
+                          : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
                     >
-                      {isActive && <CheckCircle2 className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--primary)]" />}
-                      <span className={`text-[10px] md:text-[11px] font-bold leading-tight mb-0.5 ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                      {isActive && <Check className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--primary)]" />}
+                      <span className={`md3-label-small font-semibold leading-tight mb-0.5 ${isActive ? 'text-[var(--primary)]' : ''}`}>
                         {opt.name}
                       </span>
                       {opt.type && (
-                        <span className="text-[8px] md:text-[9px] opacity-60 leading-tight line-clamp-2">
+                        <span className="text-[8px] md:text-[9px] text-[var(--outline)] leading-tight line-clamp-2">
                           {opt.type}
                         </span>
                       )}
@@ -320,14 +374,23 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             )}
           </SectionWrapper>
 
-          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
+          <div className="mx-4 md:mx-5 my-1 m3-divider" />
 
-          {/* PASSO 4: ASSINATURA VISUAL */}
-          <SectionWrapper title="4. Assinatura Visual" icon={<TypeIcon />}>
-            <div className="space-y-2.5 md:space-y-3">
-              <Input placeholder="Ex: Coleção Verão" value={selections.text || ''} onChange={(e) => onSelect('text', e.target.value)} className="bg-white/[0.04] text-[var(--foreground)] h-11 md:h-12 border border-white/[0.06] rounded-xl text-[13px] md:text-sm focus:ring-2 focus:ring-[var(--primary)]/30 transition-all" />
+          {/* STEP 4: VISUAL SIGNATURE — M3 Text Fields */}
+          <SectionWrapper title="4. Assinatura Visual" icon={<TypeIcon className="w-5 h-5" />}>
+            <div className="space-y-3">
+              <Input
+                placeholder="Ex: Coleção Verão"
+                value={selections.text || ''}
+                onChange={(e) => onSelect('text', e.target.value)}
+                className="bg-transparent text-[var(--foreground)] h-11 border border-[var(--outline)]/40 rounded-[var(--shape-extra-small)] md3-body-medium focus:ring-2 focus:ring-[var(--primary)]/30 transition-colors"
+              />
 
-              <select value={selections.typography || ''} onChange={(e) => onSelect('typography', e.target.value)} className="w-full h-11 md:h-12 px-3 md:px-4 rounded-xl text-[13px] md:text-sm border border-white/[0.06] bg-white/[0.04] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/30 transition-all outline-none">
+              <select
+                value={selections.typography || ''}
+                onChange={(e) => onSelect('typography', e.target.value)}
+                className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/30 transition-colors duration-[var(--duration-short4)] outline-none"
+              >
                 <option value="" disabled>Escolha a Fonte</option>
                 {config.typographyOptions.map((font) => <option key={font.label} value={font.label}>{font.label}</option>)}
               </select>
@@ -336,15 +399,16 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                 <div className="pt-2 flex flex-col gap-3">
                   <div className="flex items-start gap-3 w-full">
                     <div className="flex-1">
-                      <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium">Tamanho</p>
-                      <div className="flex w-full bg-[var(--background)] border border-[var(--border)] rounded-md overflow-hidden h-7 md:h-8">
+                      <p className="md3-label-small text-[var(--on-surface-variant)] mb-1.5">Tamanho</p>
+                      <div className="flex w-full border border-[var(--outline)]/40 rounded-[var(--shape-full)] overflow-hidden h-8">
                         {config.textSizeOptions?.map(size => {
                           const isActive = selections.textSize === size.id || (!selections.textSize && size.id === 'medium');
                           return (
                             <button
                               key={size.id}
                               onClick={() => onSelect('textSize', size.id)}
-                              className={`flex-1 flex items-center justify-center text-[10px] transition-colors ${isActive ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold' : 'hover:bg-[var(--accent)] text-[var(--foreground)]'}`}
+                              className={`flex-1 flex items-center justify-center md3-label-small transition-all duration-[var(--duration-short4)]
+                                ${isActive ? 'bg-[var(--primary)] text-[var(--on-primary)]' : 'hover:bg-[var(--on-surface-variant)]/8 text-[var(--foreground)]'}`}
                             >
                               {size.label}
                             </button>
@@ -354,8 +418,8 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     </div>
 
                     <div className="flex-shrink-0">
-                      <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium">Cor da Letra</p>
-                      <div className="flex items-center gap-1.5 md:gap-2 h-7 md:h-8">
+                      <p className="md3-label-small text-[var(--on-surface-variant)] mb-1.5">Cor da Letra</p>
+                      <div className="flex items-center gap-1.5 h-8">
                         {config.textColorOptions?.map(color => {
                           const isActive = selections.textColor === color.id || (!selections.textColor && color.id === 'white');
                           return (
@@ -363,7 +427,8 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                               key={color.id}
                               title={color.label}
                               onClick={() => onSelect('textColor', color.id)}
-                              className={`w-5 h-5 md:w-6 md:h-6 rounded-full border shadow-sm transition-all ${isActive ? 'ring-2 ring-offset-1 ring-[var(--primary)] scale-110' : 'border-gray-500/30 hover:scale-110'}`}
+                              className={`w-5 h-5 md:w-6 md:h-6 rounded-[var(--shape-full)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
+                                ${isActive ? 'ring-2 ring-offset-1 ring-[var(--primary)] ring-offset-[var(--surface-container-low)] scale-110' : 'border-[var(--outline-variant)]/30 hover:scale-110'}`}
                               style={{ backgroundColor: color.hex }}
                             />
                           );
@@ -373,16 +438,25 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   </div>
 
                   <div>
-                    <p className="text-[10px] md:text-[11px] text-[var(--muted-foreground)] mb-1.5 font-medium flex items-center gap-1">
-                      <AlignVerticalSpaceAround className="w-3 h-3 md:w-3.5 md:h-3.5" /> Posição na Imagem
+                    <p className="md3-label-small text-[var(--on-surface-variant)] mb-1.5 flex items-center gap-1">
+                      <AlignVerticalSpaceAround className="w-3.5 h-3.5" /> Posição na Imagem
                     </p>
-                    <div className="grid grid-cols-3 gap-1.5 md:gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {config.textPositionOptions?.map((pos: any) => (
-                        <button key={pos.id} onClick={() => onSelect('textPosition', pos.id)} className={`flex flex-col items-center p-1.5 md:p-2 rounded-md border transition-all ${selections.textPosition === pos.id ? 'border-[var(--primary)] bg-[var(--primary)]/5 ring-1 ring-[var(--primary)]/30' : 'border-[var(--border)] hover:border-[var(--primary)]/50'}`}>
-                          <div className={`w-full aspect-square mb-1 border border-dashed rounded flex p-1 ${pos.gridClass} ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--border)]'}`}>
-                            <div className={`h-1 w-4 md:h-1.5 md:w-5 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
+                        <button
+                          key={pos.id}
+                          onClick={() => onSelect('textPosition', pos.id)}
+                          className={`flex flex-col items-center p-2 rounded-[var(--shape-small)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
+                            ${selections.textPosition === pos.id
+                              ? 'border-[var(--primary)] bg-[var(--primary)]/5'
+                              : 'border-[var(--outline-variant)]/30 hover:bg-[var(--on-surface-variant)]/8'}`}
+                        >
+                          <div className={`w-full aspect-square mb-1 border border-dashed rounded-[var(--shape-extra-small)] flex p-1 ${pos.gridClass}
+                            ${selections.textPosition === pos.id ? 'border-[var(--primary)]/50 bg-[var(--primary)]/10' : 'border-[var(--outline-variant)]/30'}`}
+                          >
+                            <div className={`h-1 w-5 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
                           </div>
-                          <span className={`text-[9px] md:text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}>{pos.label}</span>
+                          <span className={`text-[9px] md:text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--on-surface-variant)]'}`}>{pos.label}</span>
                         </button>
                       ))}
                     </div>
@@ -392,25 +466,28 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
             </div>
           </SectionWrapper>
 
-          <Separator className="mx-3 md:mx-4 my-1.5 md:my-2 opacity-50" />
+          <div className="mx-4 md:mx-5 my-1 m3-divider" />
 
-          {/* PASSO 5: FORMATO DE SAÍDA */}
-          <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 />}>
-            <div className="grid grid-cols-2 gap-1.5 md:gap-2">
-              {config.formats.map((fmt) => (
-                <button
-                  key={fmt.id}
-                  onClick={() => onSelect('format', fmt.ratio)}
-                  className={`flex flex-col items-center justify-center p-2.5 md:p-3 rounded-2xl border transition-all duration-200 active:scale-[0.95] text-center
-                    ${selections.format === fmt.ratio
-                      ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)] shadow-[0_0_15px_rgba(var(--primary-rgb,212,175,55),0.06)]'
-                      : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]'}`}
-                >
-                  <span className="font-bold text-xs md:text-[13px] mb-0.5 text-[var(--foreground)]">{fmt.ratio}</span>
-                  <span className="text-[10px] md:text-[11px] font-medium mb-1">{fmt.label}</span>
-                  <span className="text-[8px] md:text-[9px] opacity-50 hidden md:block">{fmt.pixels}</span>
-                </button>
-              ))}
+          {/* STEP 5: OUTPUT FORMAT — M3 Outlined Cards */}
+          <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-5 h-5" />}>
+            <div className="grid grid-cols-2 gap-2">
+              {config.formats.map((fmt) => {
+                const isActive = selections.format === fmt.ratio;
+                return (
+                  <button
+                    key={fmt.id}
+                    onClick={() => onSelect('format', fmt.ratio)}
+                    className={`flex flex-col items-center justify-center p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-center
+                      ${isActive
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
+                        : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                  >
+                    <span className="md3-label-large mb-0.5">{fmt.ratio}</span>
+                    <span className="md3-label-small mb-1">{fmt.label}</span>
+                    <span className="text-[8px] md:text-[9px] text-[var(--outline)] hidden md:block">{fmt.pixels}</span>
+                  </button>
+                );
+              })}
             </div>
           </SectionWrapper>
 

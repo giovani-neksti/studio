@@ -1,353 +1,174 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
-import { getNicheConfig, nicheConfigs, NicheKey } from '@/lib/niche-config';
-import { buildEnglishPrompt } from '@/lib/prompt-builder';
-import { Sidebar } from '@/components/Sidebar';
-import { ImagePreviewCard } from '@/components/ImagePreviewCard';
-import { GalleryModal } from '@/components/GalleryModal';
-import { PricingModal } from '@/components/PricingModal';
-import { Button } from '@/components/ui/button';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Sparkles, Camera, Zap, ShieldCheck, ArrowRight, Star, Play, Gem, Shirt, Footprints } from 'lucide-react';
 
-function StudioContent() {
-  const searchParams = useSearchParams();
+export default function LandingPage() {
   const router = useRouter();
-  const nicheParam = searchParams.get('niche') as NicheKey | null;
-  const config = getNicheConfig(nicheParam);
-  const niche = nicheParam && nicheParam in nicheConfigs ? nicheParam : 'jewelry';
-
-  const [selections, setSelections] = useState<Record<string, any>>({});
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  const [credits, setCredits] = useState(5);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [recentImages, setRecentImages] = useState<string[]>([]);
-
-  const [nicheMenuOpen, setNicheMenuOpen] = useState(false);
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [isPricingOpen, setIsPricingOpen] = useState(false);
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  useEffect(() => {
-    if (!selections.bgTab) {
-      setSelections(prev => ({ ...prev, bgTab: 'solid', displayTab: 'expositor' }));
-    }
-  }, []);
-
-  const handleSelect = (key: string, value: string) => {
-    setSelections((prev) => {
-      if (prev[key] === value && key !== 'bgTab' && key !== 'displayTab') {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      }
-      return { ...prev, [key]: value };
-    });
-  };
-
-  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_'));
-  const hasPreviewContent = isGenerating || !!imageUrl;
-
-  const processImageForAI = async (file: File): Promise<File> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_SIZE = 1024;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height && width > MAX_SIZE) {
-          height *= MAX_SIZE / width;
-          width = MAX_SIZE;
-        } else if (height > MAX_SIZE) {
-          width *= MAX_SIZE / height;
-          height = MAX_SIZE;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return resolve(file);
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const newFile = new File([blob], "imagem_processada.jpg", {
-              type: 'image/jpeg',
-              lastModified: Date.now(),
-            });
-            resolve(newFile);
-          } else {
-            resolve(file);
-          }
-        }, 'image/jpeg', 0.85);
-      };
-      img.onerror = () => resolve(file);
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
-  const handleGenerate = async () => {
-    if (credits <= 0) return;
-    if (!hasUpload) {
-      alert("Por favor, selecione uma categoria e faça o upload de pelo menos uma imagem do produto.");
-      return;
-    }
-
-    setIsGenerating(true);
-    setImageUrl(null);
-
-    if (window.innerWidth < 768) {
-      setIsSidebarOpen(false);
-    }
-
-    try {
-      const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
-      if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
-
-      const formData = new FormData();
-      formData.append('niche', niche);
-
-      // CORREÇÃO: Processa cada ficheiro selecionado e anexa à chave "files" que o backend (route.ts) espera
-      for (const key of uploadKeys) {
-        const originalFile = selections[key] as File;
-        const processedFile = await processImageForAI(originalFile);
-        formData.append('files', processedFile);
-      }
-
-      const cleanSelections = { ...selections };
-      uploadKeys.forEach(k => delete cleanSelections[k]);
-      cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
-
-      formData.append('selections', JSON.stringify(cleanSelections));
-
-      const res = await fetch('/api/generate', { method: 'POST', body: formData });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');
-
-      setImageUrl(data.url);
-      setRecentImages(prev => [data.url, ...prev].slice(0, 12));
-      setImageIndex((i) => i + 1);
-      setCredits((c) => c - 1);
-
-    } catch (e: any) {
-      console.error(e);
-      alert("Houve um erro ao gerar a imagem: " + e.message);
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(true);
-      }
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const switchNiche = (n: NicheKey) => {
-    if (n !== 'jewelry') return;
-    router.push(`/studio?niche=${n}`);
-    setNicheMenuOpen(false);
-    setSelections({ bgTab: 'solid', displayTab: 'expositor' });
-    setImageUrl(null);
-  };
-
-  const canGenerate = !isGenerating && credits > 0 && hasUpload;
-
-  const liveSelections = { ...selections };
-  const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
-  if (uploadKeys.length > 0) {
-    liveSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
-  }
-  const currentPrompt = buildEnglishPrompt(niche, liveSelections);
 
   return (
-    <div className={`${config.themeClass} flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--background)]`}>
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/20 overflow-x-hidden">
 
-      {/* ═══════════════════════════════════════ HEADER — Glassmorphic ═══════════════════════════════════════ */}
-      <header className="h-14 md:h-16 flex-shrink-0 flex items-center justify-between px-3 md:px-5 border-b border-white/[0.06] bg-[var(--card)]/80 backdrop-blur-xl backdrop-saturate-150 z-40 relative">
-        <div className="flex items-center gap-2 md:gap-4 h-full">
-          <div className="flex items-center h-full cursor-pointer py-2 active:scale-[0.97] transition-transform" onClick={() => router.push('/')}>
-            <img src="/logo.png" alt="Logo joIAs" className="h-9 md:h-12 lg:h-14 w-auto object-contain" />
+      {/* ── M3 Top App Bar — Small ── */}
+      <nav className="h-16 flex items-center justify-between px-4 md:px-6 fixed top-0 w-full z-50 bg-[var(--surface-container-low)]/90 backdrop-blur-lg border-b border-[var(--outline-variant)]/20">
+        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push('/')}>
+          <div className="w-9 h-9 rounded-[var(--shape-medium)] bg-[var(--primary)] flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-[var(--on-primary)]" />
           </div>
-          <div className="hidden sm:block h-5 w-px bg-white/[0.08]" />
-          <div className="relative">
-            <button onClick={() => setNicheMenuOpen(!nicheMenuOpen)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-[var(--foreground)] text-xs md:text-sm transition-all duration-200 active:scale-[0.97]">
-              <span className="text-sm">{config.icon}</span>
-              <span className="font-medium hidden xs:inline">{config.label}</span>
-              <ChevronDown className={`w-3 h-3 text-[var(--muted-foreground)] transition-transform duration-300 ${nicheMenuOpen ? 'rotate-180' : ''}`} />
+          <span className="font-serif text-lg font-bold tracking-tight">Studio AI</span>
+        </div>
+        <button
+          onClick={() => router.push('/studio')}
+          className="h-10 px-6 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large transition-all duration-[var(--duration-medium2)] hover:shadow-lg hover:elevation-2 active:scale-[0.98] state-layer"
+        >
+          Entrar no Estúdio
+        </button>
+      </nav>
+
+      {/* ── Hero Section ── */}
+      <section className="relative pt-28 pb-16 md:pt-44 md:pb-28 px-6 overflow-hidden">
+        {/* M3 decorative background — subtle primary tint */}
+        <div className="absolute top-20 -right-40 w-[500px] h-[500px] bg-[var(--primary)] opacity-[0.06] blur-[160px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 -left-40 w-[400px] h-[400px] bg-[var(--tertiary)] opacity-[0.06] blur-[140px] rounded-full pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto flex flex-col items-center text-center relative z-10">
+          {/* M3 Assist Chip */}
+          <div className="animate-fade-up inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] md3-label-medium mb-8">
+            <Star className="w-3.5 h-3.5 text-[var(--primary)] fill-[var(--primary)]" />
+            <span>Redefinindo a Fotografia Digital</span>
+          </div>
+
+          <h1 className="animate-fade-up stagger-1 font-serif text-[clamp(2.5rem,7vw,4.5rem)] font-bold tracking-tight mb-6 max-w-4xl leading-[1.08]">
+            Transforme Fotos de Celular em{' '}
+            <span className="text-gradient">Estúdio Profissional</span>
+          </h1>
+
+          <p className="animate-fade-up stagger-2 text-[var(--on-surface-variant)] md3-body-large md:text-xl max-w-2xl mb-10 leading-relaxed">
+            A primeira plataforma de IA brasileira focada em compor cenários de luxo para joias, moda e calçados em segundos.
+          </p>
+
+          {/* M3 Button Group — Filled + Tonal */}
+          <div className="animate-fade-up stagger-3 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => router.push('/studio')}
+              className="h-14 px-8 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-3 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] state-layer group"
+            >
+              Começar Agora <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-[var(--duration-short4)]" />
             </button>
-            {nicheMenuOpen && (
-              <div className="absolute top-full left-0 mt-2 w-52 bg-[var(--card)]/95 backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50">
-                {Object.entries(nicheConfigs).map(([key, cfg]) => {
-                  const isEnabled = key === 'jewelry';
-                  return (
-                    <button
-                      key={key}
-                      onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
-                      disabled={!isEnabled}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] transition-all text-left active:scale-[0.98] ${isEnabled ? 'hover:bg-white/[0.06]' : 'grayscale opacity-40 cursor-not-allowed'} ${key === niche ? 'text-[var(--primary)] font-semibold' : 'text-[var(--foreground)]'}`}
-                    >
-                      <span className="text-lg">{cfg.icon}</span>
-                      <div className="flex flex-col">
-                        <span>{cfg.label}</span>
-                        {!isEnabled && <span className="text-[10px] text-[var(--muted-foreground)] mt-0.5 font-medium">Em breve</span>}
-                      </div>
-                      {key === niche && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />}
-                    </button>
-                  );
-                })}
+            <button
+              className="h-14 px-8 rounded-[var(--shape-full)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-1 active:scale-[0.98] state-layer flex items-center justify-center gap-2"
+            >
+              <Play className="w-4 h-4" /> Ver Demonstração
+            </button>
+          </div>
+
+          {/* M3 Suggestion Chips — Niche indicators */}
+          <div className="animate-fade-up stagger-4 mt-14 flex flex-wrap justify-center gap-2">
+            {[
+              { icon: <Gem className="w-3.5 h-3.5" />, label: 'Joalheria' },
+              { icon: <Shirt className="w-3.5 h-3.5" />, label: 'Moda' },
+              { icon: <Footprints className="w-3.5 h-3.5" />, label: 'Calçados' },
+            ].map((chip) => (
+              <div
+                key={chip.label}
+                className="inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] border border-[var(--outline-variant)] text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--surface-container-high)]"
+              >
+                {chip.icon}
+                <span>{chip.label}</span>
               </div>
-            )}
+            ))}
           </div>
         </div>
+      </section>
 
-        <div className="flex items-center gap-1.5 md:gap-2.5">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/[0.08] text-xs font-semibold whitespace-nowrap bg-white/[0.03]" style={{ color: credits > 2 ? 'var(--primary)' : '#ef4444' }}>
-            <Gem className="w-3 h-3" />{credits} <span className="hidden sm:inline">Créditos</span>
-          </div>
-          <Button variant="default" size="sm" onClick={() => setIsPricingOpen(true)} className="gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90 text-xs hidden lg:flex h-7 rounded-lg active:scale-[0.97] transition-transform">
-            <CreditCard className="w-3.5 h-3.5" />Assinatura
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/[0.04] text-xs h-7 px-2 rounded-lg active:scale-[0.97] transition-transform">
-            <LogOut className="w-3 h-3" /><span className="hidden sm:inline">Sair</span>
-          </Button>
-        </div>
-      </header>
-
-      {/* ═══════════════════════════════════════ BODY ═══════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-
-        {/* ─── Desktop Sidebar ─── */}
-        <div className={`hidden md:flex flex-col min-h-0 border-r border-white/[0.06] bg-[var(--card)] transition-all duration-300 ease-in-out shrink-0
-          ${isSidebarOpen ? 'w-[30%] lg:w-[320px] xl:w-[380px]' : 'w-0 overflow-hidden border-r-0'}`}
-        >
-          <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
-        </div>
-
-        {/* ─── Desktop Sidebar Toggle ─── */}
-        <div className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 transition-all duration-300" style={{ transform: `translate(${isSidebarOpen ? 'min(calc(30vw), 380px)' : '0px'}, -50%)` }}>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center justify-center w-5 h-12 bg-[var(--card)]/90 backdrop-blur-xl border border-white/[0.08] rounded-r-lg shadow-lg hover:bg-white/[0.06] transition-all active:scale-[0.95] focus:outline-none -ml-[1px]"
-            title={isSidebarOpen ? "Recolher Menu" : "Expandir Menu"}
-          >
-            {isSidebarOpen ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-          </button>
-        </div>
-
-        {/* ─── Mobile Bottom Sheet Backdrop ─── */}
-        {isSidebarOpen && (
-          <div
-            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
-
-        {/* ─── Mobile Bottom Sheet Sidebar ─── */}
-        <div className={`md:hidden fixed inset-x-0 bottom-0 z-50 flex flex-col bg-[var(--card)] rounded-t-[1.75rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
-          ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
-          style={{ height: '85dvh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-        >
-          {/* Drag Handle */}
-          <div className="w-full flex justify-center pt-3 pb-1 shrink-0 cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
-            <div className="w-10 h-[5px] bg-white/20 rounded-full" />
-          </div>
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} />
-          </div>
-        </div>
-
-        {/* ─── Main Content Area ─── */}
-        <main className="flex-1 flex flex-col bg-[var(--background)] relative min-h-0 overflow-hidden">
-
-          {/* Desktop Generate Button */}
-          <div className="hidden md:block flex-shrink-0 px-8 pt-6 pb-2 z-10">
-            <button onClick={handleGenerate} disabled={!canGenerate} className="w-full relative overflow-hidden group flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-base transition-all duration-300 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.98] shadow-lg hover:shadow-2xl bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white border border-white/10">
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              {isGenerating ? (
-                <><div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span>Criando Magia...</span></>
-              ) : (
-                <><Sparkles className="w-5 h-5 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem de Alta Conversão' : 'Faça upload de uma peça'}</span></>
-              )}
-            </button>
+      {/* ── Features Section — M3 Filled Cards ── */}
+      <section className="py-16 md:py-24 bg-[var(--surface-container-lowest)] relative px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 animate-fade-up">Como funciona</h2>
+            <p className="text-[var(--on-surface-variant)] md3-body-large max-w-xl mx-auto animate-fade-up stagger-1">
+              Três passos simples para transformar suas fotos de produto.
+            </p>
           </div>
 
-          {/* Preview Area */}
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <ImagePreviewCard
-              isGenerating={isGenerating}
-              imageUrl={imageUrl}
-              selections={selections}
-              niche={niche}
-              onGenerate={handleGenerate}
-              livePrompt={currentPrompt}
-            />
-          </div>
-
-          {/* Desktop Gallery Strip */}
-          {recentImages.length > 0 && (
-            <div className="hidden md:flex flex-shrink-0 h-[88px] border-t border-white/[0.06] bg-[var(--card)]/60 backdrop-blur-lg px-6 py-3 items-center transition-all">
-              <div className="flex flex-col h-full justify-center">
-                <button onClick={() => setIsGalleryOpen(true)} className="group flex items-center gap-2 focus:outline-none text-left mb-2 active:scale-[0.97] transition-transform">
-                  <span className="text-[11px] font-bold text-[var(--foreground)]/70 group-hover:text-[var(--primary)] transition-colors uppercase tracking-widest">Galeria</span>
-                  <Images className="w-3 h-3 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors" />
-                </button>
-                <div className="flex items-center gap-2">
-                  {recentImages.slice(0, 8).map((img, idx) => (
-                    <div key={idx} className="w-10 h-10 rounded-lg overflow-hidden border border-white/[0.08] cursor-pointer hover:border-[var(--primary)] transition-all hover:scale-110 active:scale-95 shadow-sm" onClick={() => setImageUrl(img)}>
-                      <img src={img} alt={`Recente ${idx}`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            {[
+              {
+                icon: <Camera className="w-6 h-6" />,
+                step: '01',
+                title: 'Envie a Foto',
+                description: 'Tire uma foto com seu celular. Sem câmeras profissionais, sem estúdios — só o produto e a IA.'
+              },
+              {
+                icon: <Zap className="w-6 h-6" />,
+                step: '02',
+                title: 'Compose o Cenário',
+                description: 'Escolha fundos, expositor, iluminação e adereços. A IA gera o prompt perfeito para você.'
+              },
+              {
+                icon: <ShieldCheck className="w-6 h-6" />,
+                step: '03',
+                title: 'Resultado Premium',
+                description: 'Em 15 segundos, sua foto estará pronta para e-commerce, redes sociais e catálogos profissionais.'
+              }
+            ].map((feature, idx) => (
+              <div
+                key={feature.step}
+                className={`animate-fade-up stagger-${idx + 1} group p-6 md:p-8 rounded-[var(--shape-extra-large)] bg-[var(--surface-container)] transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:bg-[var(--surface-container-high)] hover:elevation-1`}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 rounded-[var(--shape-large)] bg-[var(--primary-container)] flex items-center justify-center text-[var(--on-primary-container)] group-hover:scale-105 transition-transform duration-[var(--duration-medium2)]">
+                    {feature.icon}
+                  </div>
+                  <span className="md3-label-small text-[var(--outline)]">{feature.step}</span>
                 </div>
+                <h3 className="font-serif text-xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-[var(--on-surface-variant)] md3-body-medium leading-relaxed">{feature.description}</p>
               </div>
-            </div>
-          )}
-        </main>
-      </div>
-
-      {/* ═══════════════════════════════════════ MOBILE STICKY BOTTOM BAR ═══════════════════════════════════════ */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--card)]/80 backdrop-blur-2xl border-t border-white/[0.06]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <div className="flex items-center gap-2 px-3 py-2.5">
-          {/* Config Button */}
-          <button onClick={() => setIsSidebarOpen(true)} className="flex items-center justify-center w-11 h-11 rounded-xl bg-white/[0.06] border border-white/[0.08] active:scale-[0.93] transition-all shrink-0">
-            <Layers className="w-5 h-5 text-[var(--foreground)]" />
-          </button>
-
-          {/* Generate Button */}
-          <button onClick={handleGenerate} disabled={!canGenerate} className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-bold text-[14px] transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-[var(--primary)] to-indigo-600 text-white shadow-lg border border-white/10">
-            {isGenerating ? (
-              <><div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /><span className="text-[13px]">Gerando...</span></>
-            ) : (
-              <><Sparkles className="w-4 h-4 text-yellow-200" /><span>{hasUpload ? 'Gerar Imagem' : 'Upload primeiro'}</span></>
-            )}
-          </button>
-
-          {/* Credits Pill */}
-          <div className="flex items-center gap-1 px-2.5 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs font-bold shrink-0" style={{ color: credits > 2 ? 'var(--primary)' : '#ef4444' }}>
-            <Gem className="w-3.5 h-3.5" />{credits}
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ═══════════════════════════════════════ OVERLAYS ═══════════════════════════════════════ */}
-      {nicheMenuOpen && <div className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
-      <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} />
-      <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} />
+      {/* ── CTA Banner — M3 Filled Card ── */}
+      <section className="py-16 md:py-20 px-6">
+        <div className="max-w-4xl mx-auto rounded-[var(--shape-extra-large)] bg-[var(--primary-container)] p-10 md:p-16 text-center relative overflow-hidden elevation-2">
+          <div className="absolute inset-0 bg-[var(--primary)]/[0.04] pointer-events-none" />
+          <h2 className="font-serif text-3xl md:text-[2.75rem] font-bold mb-6 text-[var(--on-primary-container)] leading-tight relative z-10">
+            Pronto para elevar sua marca?
+          </h2>
+          <p className="text-[var(--on-primary-container)]/80 md3-body-large mb-10 max-w-lg mx-auto relative z-10">
+            Junte-se a milhares de empreendedores que já economizam tempo e dinheiro com a Studio AI.
+          </p>
+          <button
+            onClick={() => router.push('/studio')}
+            className="relative z-10 h-14 px-10 rounded-[var(--shape-full)] bg-[var(--on-primary-container)] text-[var(--primary-container)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-3 active:scale-[0.98] state-layer"
+          >
+            Começar Grátis
+          </button>
+        </div>
+      </section>
+
+      {/* ── Footer — M3 Surface Container ── */}
+      <footer className="py-10 border-t border-[var(--outline-variant)]/20 px-6 bg-[var(--surface-container-lowest)]">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-[var(--shape-small)] bg-[var(--primary)] flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-[var(--on-primary)]" />
+            </div>
+            <span className="font-serif text-base font-bold">Studio AI</span>
+          </div>
+          <div className="flex gap-6 text-[var(--on-surface-variant)] md3-body-medium">
+            <a href="#" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Termos</a>
+            <a href="#" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Privacidade</a>
+            <a href="#" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Contato</a>
+          </div>
+          <p className="text-[var(--outline)] md3-body-small">
+            © 2026 Neksti. Todos os direitos reservados.
+          </p>
+        </div>
+      </footer>
+
     </div>
-  );
-}
-
-export default function StudioPage() {
-  return (
-    <Suspense fallback={<div className="h-[100dvh] flex items-center justify-center bg-[#09090b]"><div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" /></div>}>
-      <StudioContent />
-    </Suspense>
   );
 }

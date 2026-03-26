@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, Download, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface ImagePreviewCardProps {
   isGenerating: boolean;
@@ -49,62 +48,79 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
   const aspectClass = format.includes('9:16') ? 'aspect-[9/16]' : format.includes('4:5') ? 'aspect-[4/5]' : 'aspect-square';
 
   return (
-    <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-4 md:gap-6 px-4 py-3 md:px-8 md:py-6 overflow-y-auto no-scrollbar min-h-0 pb-20 md:pb-6">
+    <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-4 md:gap-5 px-4 py-3 md:px-8 md:py-5 overflow-y-auto no-scrollbar min-h-0 pb-24 md:pb-6">
 
-      {/* IMAGE / LOADING */}
-      <div className={`relative group ${aspectClass} w-full max-w-[500px] h-full max-h-[50vh] md:max-h-[65vh] shrink-0 overflow-hidden rounded-3xl border border-white/[0.06] bg-[var(--card)] shadow-2xl transition-all duration-500 mx-auto`}>
+      {/* IMAGE / LOADING — M3 Card */}
+      <div className={`relative ${aspectClass} w-full max-w-[500px] h-full max-h-[50vh] md:max-h-[65vh] shrink-0 overflow-hidden rounded-[var(--shape-extra-large)] border border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)] transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] mx-auto`}>
         {isGenerating ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 md:gap-6 bg-[var(--card)]/90 backdrop-blur-xl z-10 px-8 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[var(--surface-container-low)] z-10 px-8 text-center">
+            {/* M3 Circular Progress Indicator */}
             <div className="relative flex items-center justify-center">
-              <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-[3px] border-[var(--primary)]/15 border-t-[var(--primary)] animate-spin" />
-              <Sparkles className="absolute w-5 h-5 md:w-6 md:h-6 text-[var(--primary)] animate-pulse" />
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border-[3px] border-[var(--surface-container-highest)] border-t-[var(--primary)] animate-spin" />
+              <Sparkles className="absolute w-5 h-5 text-[var(--primary)]" />
             </div>
 
             <div className="h-10 flex items-center justify-center">
-              <p className="text-[13px] md:text-sm font-semibold text-[var(--foreground)] transition-opacity duration-500">
+              <p className="md3-body-medium text-[var(--foreground)]">
                 {loadingMessages[messageIndex]}{dots}
               </p>
             </div>
 
-            <div className="w-full max-w-[220px] h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+            {/* M3 Linear Progress Indicator */}
+            <div className="w-full max-w-[220px] h-1 bg-[var(--surface-container-highest)] rounded-[var(--shape-full)] overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] via-purple-500 to-[var(--primary)] animate-shimmer transition-all duration-1000 ease-out"
+                className="h-full rounded-[var(--shape-full)] bg-[var(--primary)] transition-all duration-1000 ease-out"
                 style={{ width: `${((messageIndex + 1) / loadingMessages.length) * 100}%` }}
               />
             </div>
           </div>
         ) : imageUrl ? (
-          <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]" />
+          <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover animate-scale-in" />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center opacity-40">
-            <div className="p-5 rounded-full bg-[var(--primary)]/5 mb-2 animate-float">
-              <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-[var(--primary)]" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[var(--surface-container)]">
+            <div className="w-20 h-20 rounded-[var(--shape-extra-large)] bg-[var(--primary-container)] flex items-center justify-center mb-6 animate-float elevation-2">
+              <Sparkles className="w-10 h-10 text-[var(--on-primary-container)]" />
             </div>
-            <p className="text-[13px] md:text-sm font-medium tracking-wide">Aguardando seleções...</p>
+            <h2 className="font-serif md3-headline-small font-bold mb-3">Pronto para a Mágica?</h2>
+            <p className="text-[var(--on-surface-variant)] md3-body-medium max-w-[280px] leading-relaxed mb-8">
+              Escolha as opções no menu lateral e clique em gerar para ver o seu produto em um cenário de luxo.
+            </p>
+            <button
+              onClick={onGenerate}
+              className="md:hidden flex items-center justify-center gap-3 h-14 px-10 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large elevation-1 transition-all duration-[var(--duration-medium2)] active:scale-[0.96] state-layer"
+            >
+              Começar Agora
+            </button>
           </div>
         )}
       </div>
 
-      {/* LIVE PROMPT — Desktop only */}
+      {/* LIVE PROMPT — M3 Outlined Card, Desktop only */}
       {livePrompt && Object.keys(selections).length > 0 && (
-        <div className="hidden md:block w-full max-w-[480px] bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 text-left shrink-0">
+        <div className="hidden md:block w-full max-w-[480px] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 rounded-[var(--shape-medium)] p-4 text-left shrink-0">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" />
-            <p className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-widest">Prompt ao Vivo</p>
+            <p className="md3-label-small text-[var(--primary)] uppercase tracking-wider">Prompt ao Vivo</p>
           </div>
-          <p className="text-[11px] text-[var(--muted-foreground)] font-mono leading-relaxed break-words">{livePrompt}</p>
+          <p className="md3-body-small text-[var(--on-surface-variant)] font-mono leading-relaxed break-words">{livePrompt}</p>
         </div>
       )}
 
-      {/* ACTION BUTTONS */}
+      {/* ACTION BUTTONS — M3 Outlined + Filled */}
       {imageUrl && (
-        <div className="flex gap-2.5 md:gap-3 shrink-0 mb-4 md:mb-8 mt-1 w-full max-w-[500px]">
-          <Button variant="outline" size="sm" onClick={onGenerate} className="flex-1 gap-2 border-white/[0.08] bg-white/[0.03] hover:bg-[var(--primary)] hover:border-[var(--primary)] hover:text-[var(--primary-foreground)] text-[13px] md:text-sm h-12 rounded-2xl transition-all duration-200 active:scale-[0.97]">
+        <div className="flex gap-3 shrink-0 mb-4 md:mb-8 mt-1 w-full max-w-[500px]">
+          <button
+            onClick={onGenerate}
+            className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:bg-[var(--on-surface-variant)]/8"
+          >
             <RefreshCw className="w-4 h-4" /> Regenerar
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.open(imageUrl)} className="flex-1 gap-2 border-white/[0.08] bg-white/[0.03] hover:bg-[var(--primary)] hover:border-[var(--primary)] hover:text-[var(--primary-foreground)] text-[13px] md:text-sm h-12 rounded-2xl transition-all duration-200 active:scale-[0.97]">
+          </button>
+          <button
+            onClick={() => window.open(imageUrl)}
+            className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:elevation-1 state-layer"
+          >
             <Download className="w-4 h-4" /> Baixar HD
-          </Button>
+          </button>
         </div>
       )}
     </div>
