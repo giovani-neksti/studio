@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { getNicheConfig, nicheConfigs, NicheKey } from '@/lib/niche-config';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
+import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
@@ -13,6 +14,7 @@ import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, Ch
 function StudioContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user, loading: authLoading, signOut } = useAuth();
   const nicheParam = searchParams.get('niche') as NicheKey | null;
   const config = getNicheConfig(nicheParam);
   const niche = nicheParam && nicheParam in nicheConfigs ? nicheParam : 'jewelry';
@@ -30,6 +32,13 @@ function StudioContent() {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Auth guard — redirect to /auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth');
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     setIsSidebarOpen(window.innerWidth >= 768);
@@ -168,6 +177,14 @@ function StudioContent() {
 
   const activeNav = isSidebarOpen ? 'compose' : isGalleryOpen ? 'gallery' : isPricingOpen ? 'plans' : '';
 
+  if (authLoading || !user) {
+    return (
+      <div className="h-[100dvh] flex items-center justify-center bg-[var(--background)]">
+        <div className="w-12 h-12 rounded-full border-[3px] border-[var(--outline-variant)] border-t-[var(--primary)] animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className={`${config.themeClass} flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--background)]`}>
 
@@ -239,7 +256,7 @@ function StudioContent() {
 
           {/* Desktop: Logout — M3 Text Button */}
           <button
-            onClick={() => router.push('/')}
+            onClick={() => { signOut(); router.push('/'); }}
             className="hidden md:flex items-center gap-1.5 h-9 px-3 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
           >
             <LogOut className="w-3.5 h-3.5" /><span className="hidden sm:inline">Sair</span>
@@ -369,7 +386,7 @@ function StudioContent() {
             { id: 'compose', icon: <SlidersHorizontal className="w-[22px] h-[22px]" />, label: 'Compor', action: () => setIsSidebarOpen(true) },
             { id: 'gallery', icon: <Images className="w-[22px] h-[22px]" />, label: 'Galeria', action: () => setIsGalleryOpen(true) },
             { id: 'plans', icon: <CreditCard className="w-[22px] h-[22px]" />, label: 'Planos', action: () => setIsPricingOpen(true) },
-            { id: 'logout', icon: <LogOut className="w-[22px] h-[22px]" />, label: 'Sair', action: () => router.push('/') },
+            { id: 'logout', icon: <LogOut className="w-[22px] h-[22px]" />, label: 'Sair', action: () => { signOut(); router.push('/'); } },
           ].map((item) => {
             const isActive = activeNav === item.id;
             return (

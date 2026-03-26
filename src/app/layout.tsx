@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans, Noto_Serif_Display } from "next/font/google";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const notoSans = Noto_Sans({
@@ -44,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="h-full">
       <body className={`${notoSans.variable} ${notoSerif.variable} antialiased h-full`}>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

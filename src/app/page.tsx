@@ -18,7 +18,7 @@ export default function LandingPage() {
           <span className="font-serif text-lg font-bold tracking-tight">Studio AI</span>
         </div>
         <button
-          onClick={() => router.push('/studio')}
+          onClick={() => router.push('/auth')}
           className="h-10 px-6 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large transition-all duration-[var(--duration-medium2)] hover:shadow-lg hover:elevation-2 active:scale-[0.98] state-layer"
         >
           Entrar no Estúdio
@@ -50,7 +50,7 @@ export default function LandingPage() {
           {/* M3 Button Group — Filled + Tonal */}
           <div className="animate-fade-up stagger-3 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button
-              onClick={() => router.push('/studio')}
+              onClick={() => router.push('/auth')}
               className="h-14 px-8 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-3 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] state-layer group"
             >
               Começar Agora <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-[var(--duration-short4)]" />
@@ -141,7 +141,7 @@ export default function LandingPage() {
             Junte-se a milhares de empreendedores que já economizam tempo e dinheiro com a Studio AI.
           </p>
           <button
-            onClick={() => router.push('/studio')}
+            onClick={() => router.push('/auth')}
             className="relative z-10 h-14 px-10 rounded-[var(--shape-full)] bg-[var(--on-primary-container)] text-[var(--primary-container)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-3 active:scale-[0.98] state-layer"
           >
             Começar Grátis

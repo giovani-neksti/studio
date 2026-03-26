@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 import { NicheConfig } from '@/lib/niche-config';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,7 +13,39 @@ import {
   AlignVerticalSpaceAround,
   UploadCloud,
   Type as TypeIcon,
-  Camera
+  Camera,
+  // Jewelry icons
+  Circle,
+  Sparkle,
+  Diamond,
+  Link,
+  Watch,
+  Flower2,
+  Droplet,
+  Gem,
+  // Clothing icons
+  Shirt,
+  RectangleVertical,
+  Crown,
+  ShoppingBag,
+  // Shoe icons
+  Footprints,
+  // Display icons
+  User,
+  Box,
+  Landmark,
+  Triangle,
+  Hand,
+  Square,
+  Wind,
+  PersonStanding,
+  Package,
+  RotateCcw,
+  Ruler,
+  Cuboid,
+  Tag,
+  Minus,
+  Grip,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -23,47 +55,51 @@ interface SidebarProps {
   onSelect: (key: string, value: any) => void;
 }
 
-const getCategoryIcon = (cat: string) => {
-  if (cat.includes('Colar')) return '📿';
-  if (cat.includes('Brinco')) return '✨';
-  if (cat.includes('Anel')) return '💍';
-  if (cat.includes('Pulseira')) return '⛓️';
-  if (cat.includes('Relógio')) return '⌚';
-  if (cat.includes('Broche')) return '🏵️';
-  if (cat.includes('Pingente')) return '🧿';
-  if (cat.includes('Pandora')) return '🔮';
-  if (cat.includes('Camisa') || cat.includes('Blusa')) return '👚';
-  if (cat.includes('Calça') || cat.includes('Saia')) return '👖';
-  if (cat.includes('Vestido')) return '👗';
-  if (cat.includes('Casaco')) return '🧥';
-  if (cat.includes('Acessórios')) return '👜';
-  if (cat.includes('Tênis Urbano') || cat.includes('Esportivo')) return '👟';
-  if (cat.includes('Salto Alto')) return '👠';
-  if (cat.includes('Bota')) return '🥾';
-  if (cat.includes('Sapato')) return '👞';
-  return '🏷️';
+const ICON_CLASS = "w-6 h-6 transition-colors duration-[var(--duration-short4)]";
+
+const getCategoryIcon = (cat: string): ReactNode => {
+  if (cat.includes('Colar')) return <Circle className={ICON_CLASS} />;
+  if (cat.includes('Brinco')) return <Sparkle className={ICON_CLASS} />;
+  if (cat.includes('Anel')) return <Diamond className={ICON_CLASS} />;
+  if (cat.includes('Pulseira')) return <Link className={ICON_CLASS} />;
+  if (cat.includes('Relógio')) return <Watch className={ICON_CLASS} />;
+  if (cat.includes('Broche')) return <Flower2 className={ICON_CLASS} />;
+  if (cat.includes('Pingente')) return <Droplet className={ICON_CLASS} />;
+  if (cat.includes('Pandora')) return <Gem className={ICON_CLASS} />;
+  if (cat.includes('Camisa') || cat.includes('Blusa')) return <Shirt className={ICON_CLASS} />;
+  if (cat.includes('Calça') || cat.includes('Saia')) return <RectangleVertical className={ICON_CLASS} />;
+  if (cat.includes('Vestido')) return <Crown className={ICON_CLASS} />;
+  if (cat.includes('Casaco')) return <Shirt className={ICON_CLASS} />;
+  if (cat.includes('Acessórios')) return <ShoppingBag className={ICON_CLASS} />;
+  if (cat.includes('Tênis') || cat.includes('Esportivo')) return <Footprints className={ICON_CLASS} />;
+  if (cat.includes('Salto')) return <Footprints className={ICON_CLASS} />;
+  if (cat.includes('Bota')) return <Footprints className={ICON_CLASS} />;
+  if (cat.includes('Sapato')) return <Footprints className={ICON_CLASS} />;
+  return <Tag className={ICON_CLASS} />;
 };
 
-const getDisplayIcon = (id: string) => {
+const DISPLAY_ICON_CLASS = "w-5 h-5 md:w-6 md:h-6 transition-colors duration-[var(--duration-short4)]";
+
+const getDisplayIcon = (id: string): ReactNode => {
   switch (id) {
-    case 'bust': return '👤';
-    case 'box': return '🎁';
-    case 'pedestal': return '🏛️';
-    case 'cone': return '🔺';
-    case 'velvet_hand': return '🖐️';
-    case 'cushion': return '🛋️';
-    case 'surface': return '🪞';
-    case 'floating': return '✨';
-    case 'ghost_mannequin': return '👻';
-    case 'hanger_wood': return '🪵';
-    case 'hanger_metal': return '🪝';
-    case 'flat_lay_folded': return '👕';
-    case 'flat_lay_open': return '👚';
-    case 'clothesline': return '〰️';
-    case 'acrylic_box': return '🧊';
-    case 'dynamic_angle': return '📐';
-    case 'shoebox_top': return '📦';
-    default: return '🪄';
+    case 'bust': return <User className={DISPLAY_ICON_CLASS} />;
+    case 'box': return <Box className={DISPLAY_ICON_CLASS} />;
+    case 'pedestal': return <Landmark className={DISPLAY_ICON_CLASS} />;
+    case 'cone': return <Triangle className={DISPLAY_ICON_CLASS} />;
+    case 'velvet_hand': return <Hand className={DISPLAY_ICON_CLASS} />;
+    case 'cushion': return <Square className={DISPLAY_ICON_CLASS} />;
+    case 'surface': return <Minus className={DISPLAY_ICON_CLASS} />;
+    case 'floating': return <Wind className={DISPLAY_ICON_CLASS} />;
+    case 'ghost_mannequin': return <PersonStanding className={DISPLAY_ICON_CLASS} />;
+    case 'hanger_wood': return <Grip className={DISPLAY_ICON_CLASS} />;
+    case 'hanger_metal': return <Grip className={DISPLAY_ICON_CLASS} />;
+    case 'flat_lay_folded': return <Square className={DISPLAY_ICON_CLASS} />;
+    case 'flat_lay_open': return <Shirt className={DISPLAY_ICON_CLASS} />;
+    case 'clothesline': return <Minus className={DISPLAY_ICON_CLASS} />;
+    case 'acrylic_box': return <Cuboid className={DISPLAY_ICON_CLASS} />;
+    case 'dynamic_angle': return <RotateCcw className={DISPLAY_ICON_CLASS} />;
+    case 'shoebox_top': return <Package className={DISPLAY_ICON_CLASS} />;
+    default: return <Ruler className={DISPLAY_ICON_CLASS} />;
   }
 };
 
@@ -146,14 +182,14 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
     <div className="flex flex-col h-full w-full min-h-0 bg-[var(--surface-container-low)]">
       {/* Desktop Header */}
       <div className="hidden md:flex px-5 py-4 border-b border-[var(--outline-variant)]/20 shrink-0 items-center gap-3">
-        <span className="text-xl">{config.icon}</span>
+        <Gem className="w-5 h-5 text-[var(--primary)]" />
         <h2 className="md3-title-small text-[var(--foreground)]">Configurações</h2>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth w-full no-scrollbar">
         <div className="py-2 md:py-3 pb-32 md:pb-16">
 
-          {/* STEP 1: CATEGORY — M3 Filter Chips style */}
+          {/* STEP 1: CATEGORY */}
           <SectionWrapper title="1. Produtos & Categorias" icon={<Layers className="w-5 h-5" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.categories.map((cat) => {
@@ -166,18 +202,18 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   <button
                     key={cat}
                     onClick={() => onSelect('category', cat)}
-                    className={`relative flex flex-col items-center justify-center p-3 md:p-3.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] min-h-[68px]
+                    className={`group/cat relative flex flex-col items-center justify-center p-3 md:p-3.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] min-h-[68px]
                       ${isActive
                         ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]'
-                        : 'border-[var(--outline-variant)]/40 bg-transparent text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                        : 'border-[var(--outline-variant)]/40 bg-transparent text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 hover:text-[var(--primary)]'}`}
                   >
                     {hasUpload && (
                       <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center">
                         <Check className="w-2.5 h-2.5 text-white" />
                       </div>
                     )}
-                    <span className="text-2xl md:text-[28px] mb-1">{icon}</span>
-                    <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : ''}`}>
+                    <span className="mb-1.5">{icon}</span>
+                    <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)] group-hover/cat:text-[var(--primary)]'}`}>
                       {cat}
                     </span>
                   </button>
@@ -207,7 +243,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
-                    {/* Camera — M3 Outlined Card */}
                     <div
                       onClick={() => cameraInputRef.current?.click()}
                       className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
@@ -216,8 +251,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                       <Camera className="w-6 h-6 mb-2 text-[var(--primary)]" />
                       <span className="md3-label-small text-[var(--primary)]">Tirar Foto</span>
                     </div>
-
-                    {/* Gallery */}
                     <div
                       onClick={() => fileInputRef.current?.click()}
                       className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
@@ -231,7 +264,6 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
               </div>
             )}
 
-            {/* Material Select — M3 Outlined Text Field style */}
             {hasMaterials && (
               <div className="mt-4 pt-4 border-t border-[var(--outline-variant)]/20">
                 <p className="md3-label-small text-[var(--on-surface-variant)] mb-2">Material Predominante</p>
@@ -331,14 +363,14 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
                     <button
                       key={opt.id}
                       onClick={() => onSelect('display', opt.label)}
-                      className={`relative flex flex-col items-center justify-center p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
+                      className={`group/disp relative flex flex-col items-center justify-center p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
                         ${isActive
                           ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
-                          : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                          : 'border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 hover:text-[var(--primary)]'}`}
                     >
                       {isActive && <Check className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" />}
-                      <span className="text-xl md:text-2xl mb-1">{icon}</span>
-                      <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : ''}`}>
+                      <span className="mb-1.5">{icon}</span>
+                      <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)] group-hover/disp:text-[var(--primary)]'}`}>
                         {opt.label}
                       </span>
                     </button>
@@ -376,7 +408,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <div className="mx-4 md:mx-5 my-1 m3-divider" />
 
-          {/* STEP 4: VISUAL SIGNATURE — M3 Text Fields */}
+          {/* STEP 4: VISUAL SIGNATURE */}
           <SectionWrapper title="4. Assinatura Visual" icon={<TypeIcon className="w-5 h-5" />}>
             <div className="space-y-3">
               <Input
@@ -468,7 +500,7 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
           <div className="mx-4 md:mx-5 my-1 m3-divider" />
 
-          {/* STEP 5: OUTPUT FORMAT — M3 Outlined Cards */}
+          {/* STEP 5: OUTPUT FORMAT */}
           <SectionWrapper title="5. Formato de Saída" icon={<Maximize2 className="w-5 h-5" />}>
             <div className="grid grid-cols-2 gap-2">
               {config.formats.map((fmt) => {
