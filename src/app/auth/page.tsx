@@ -8,6 +8,12 @@ import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2 } from 'lucide-react';
 
 const OTP_LENGTH = 8;
 
+const ADMIN_EMAILS = [
+  'giovani@neksti.com.br',
+  'lucas@neksti.com.br',
+  'jefferson@neksti.com.br',
+];
+
 type Step = 'email' | 'otp' | 'check-email';
 
 export default function AuthPage() {
@@ -46,6 +52,25 @@ export default function AuthPage() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
+  const handleAdminBypass = async () => {
+    // Call API to ensure admin user exists with password
+    const res = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.toLowerCase() }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro no bypass admin');
+
+    // Sign in with password on the client
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.toLowerCase(),
+      password: process.env.NEXT_PUBLIC_ADMIN_BYPASS_PASSWORD || '',
+    });
+    if (error) throw error;
+    router.replace('/studio');
+  };
+
   const handleSendOtp = async () => {
     if (!email || !email.includes('@')) {
       setError('Digite um e-mail válido.');
@@ -56,6 +81,12 @@ export default function AuthPage() {
     setError('');
 
     try {
+      // Admin bypass — skip OTP entirely
+      if (ADMIN_EMAILS.includes(email.toLowerCase())) {
+        await handleAdminBypass();
+        return;
+      }
+
       const redirectTo = `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.signInWithOtp({
         email,
