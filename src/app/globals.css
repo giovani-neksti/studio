@@ -151,32 +151,34 @@
    NICHE THEMES — M3 Color Mapping
    ============================================ */
 
-/* JEWELRY — Neksti Dark with Gold accent for jewelry niche */
+/* JEWELRY — Pure Black with Gold accent */
 .theme-jewelry {
-  --background: #0A1320;
-  --surface: #0D1B2E;
-  --surface-dim: #0A1320;
-  --surface-bright: #2A3A4E;
-  --surface-container-lowest: #060E18;
-  --surface-container-low: #0D1B2E;
-  --surface-container: #122240;
-  --surface-container-high: #1A2D4A;
-  --surface-container-highest: #233752;
+  --background: #09090B;
+  --foreground: #F0F0F0;
+  --surface: #111113;
+  --surface-dim: #09090B;
+  --surface-bright: #2A2A2E;
+  --surface-container-lowest: #050506;
+  --surface-container-low: #111113;
+  --surface-container: #1A1A1E;
+  --surface-container-high: #222226;
+  --surface-container-highest: #2C2C30;
   --primary: #D4AF37;
   --on-primary: #1C1600;
   --primary-container: #503E00;
   --on-primary-container: #FFE08A;
-  --secondary: #8FA8C4;
-  --secondary-container: #1A2D4A;
-  --on-secondary-container: #CDDAE8;
-  --tertiary: #6DBF8A;
-  --tertiary-container: #3D8A58;
-  --on-tertiary-container: #D4EABC;
-  --border: #1E3048;
-  --surface-variant: #1E3048;
-  --on-surface-variant: #B0BEC5;
-  --outline: #607D8B;
-  --outline-variant: #1E3048;
+  --secondary: #C9B99A;
+  --on-secondary: #1C1600;
+  --secondary-container: #2A2518;
+  --on-secondary-container: #E8D9B8;
+  --tertiary: #D4AF37;
+  --tertiary-container: #3D2E00;
+  --on-tertiary-container: #FFE08A;
+  --border: #2A2A2E;
+  --surface-variant: #2A2A2E;
+  --on-surface-variant: #B0B0B4;
+  --outline: #6E6E72;
+  --outline-variant: #2A2A2E;
 }
 
 /* CLOTHING — M3 Light Surface */
