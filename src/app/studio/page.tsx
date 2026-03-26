@@ -193,7 +193,7 @@ function StudioContent() {
         {/* Left: Logo + Niche Selector */}
         <div className="flex items-center gap-3 h-full">
           <div className="flex items-center h-full cursor-pointer py-2" onClick={() => router.push('/')}>
-            <img src="/logo_joias.png" alt="Logo" className="h-8 md:h-10 w-auto object-contain" />
+            <img src="/logo_joias.png" alt="Logo" className="h-12 md:h-14 w-auto object-contain" />
           </div>
 
           {/* M3 Filled Tonal Button as niche selector */}
