@@ -731,7 +731,7 @@ export function Sidebar({
   const isLastStep = currentStep === 4;
 
   return (
-    <div className="flex flex-col h-full w-full min-h-0 bg-[var(--surface-container-low)]">
+    <div className="relative flex flex-col h-full w-full min-h-0 bg-[var(--surface-container-low)]">
 
       {/* Desktop Header */}
       <div className="hidden md:flex px-5 py-4 border-b border-[var(--outline-variant)]/20 shrink-0 items-center gap-3">
@@ -749,18 +749,18 @@ export function Sidebar({
         </h3>
       </div>
 
-      {/* Animated Step Content */}
+      {/* Animated Step Content — pb-24 so content never hides behind the absolute footer */}
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scroll-smooth w-full no-scrollbar">
         <div
           key={`${currentStep}-${animDir}`}
-          className={`px-4 md:px-5 pb-8 ${animDir === 'fwd' ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}
+          className={`px-4 md:px-5 pb-24 ${animDir === 'fwd' ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}
         >
           {renderStep()}
         </div>
       </div>
 
       {/* Footer Navigation */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
+      <div className="absolute bottom-0 left-0 w-full z-10 px-4 py-3 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
         <div className="flex items-center gap-2">
 
           {/* Back button — only from step 1+ */}
