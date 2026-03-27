@@ -7,7 +7,6 @@ import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
-import { BatchPanel } from '@/components/BatchPanel';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
 import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon, Layers } from 'lucide-react';
@@ -84,7 +83,8 @@ function StudioContent() {
     });
   };
 
-  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_') && !!selections[k]);
+  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_') && !!selections[k]) 
+    || (showBatch && selections.batchFiles && selections.batchFiles.length > 0);
   const hasPreviewContent = isGenerating || !!imageUrl;
 
   const processImageForAI = async (file: File): Promise<File> => {
@@ -137,73 +137,134 @@ function StudioContent() {
       return;
     }
 
+    const isBatchMode = showBatch && selections.batchFiles && selections.batchFiles.length > 0;
+    const requiredCredits = isBatchMode ? selections.batchFiles.length : 1;
+
+    if (!userIsAdmin && (credits ?? 0) < requiredCredits) {
+      alert(`Créditos insuficientes. Você tem ${credits} mas precisa de ${requiredCredits}.`);
+      return;
+    }
+
     setIsGenerating(true);
     setImageUrl(null);
 
+    // No mobile, escondemos o wizard modal imediatamente para ele ver os resultados gerando/espinando
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
     }
 
     try {
-      const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
-      if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
-
-      const formData = new FormData();
-      formData.append('niche', niche);
-
-      for (const key of uploadKeys) {
-        const originalFile = selections[key] as File;
-        const processedFile = await processImageForAI(originalFile);
-        formData.append('files', processedFile);
-      }
-
       const cleanSelections = { ...selections };
-      uploadKeys.forEach(k => delete cleanSelections[k]);
-      cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
-
-      formData.append('selections', JSON.stringify(cleanSelections));
-
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');
-
-      setImageUrl(data.url);
-      setRecentImages(prev => [data.url, ...prev].slice(0, 12));
-      setImageIndex((i) => i + 1);
-
-      // Decrement credit in database (skip for admins)
-      if (!userIsAdmin) {
-        const creditRes = await fetch('/api/credits', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user!.id }),
+      
+      if (isBatchMode) {
+        // Remove file references from payload
+        Object.keys(cleanSelections).forEach(k => {
+          if (k.startsWith('upload_') || k === 'batchFiles') delete cleanSelections[k];
         });
-        const creditData = await creditRes.json();
-        if (creditRes.ok) {
-          setCredits(creditData.credits);
-        } else {
-          setCredits((c) => Math.max(0, (c ?? 0) - 1));
+        cleanSelections.uploadedCategories = [selections.category || ''];
+
+        const bFiles = selections.batchFiles as File[];
+        let successCount = 0;
+
+        for (let i = 0; i < bFiles.length; i++) {
+          const originalFile = bFiles[i];
+          const processedFile = await processImageForAI(originalFile);
+          
+          const formData = new FormData();
+          formData.append('niche', niche);
+          formData.append('files', processedFile);
+          formData.append('selections', JSON.stringify(cleanSelections));
+
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
+            body: formData,
+          });
+          const data = await res.json();
+          
+          if (res.ok && data.url) {
+            setRecentImages(prev => [data.url, ...prev].slice(0, 12));
+            if (i === 0) setImageUrl(data.url); // Mostra a primeira que gerar
+            setImageIndex((idx) => idx + 1);
+            successCount++;
+
+            if (!userIsAdmin) {
+              const creditRes = await fetch('/api/credits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user!.id }),
+              });
+              if (creditRes.ok) {
+                const creditData = await creditRes.json();
+                setCredits(creditData.credits);
+              } else {
+                setCredits((c) => Math.max(0, (c ?? 0) - 1));
+              }
+            }
+          } else {
+             console.error(`Falha ao gerar o item ${i+1}: ${data.error}`);
+          }
+        }
+        
+        if (successCount === 0) {
+          throw new Error("Nenhuma imagem em lote pôde ser gerada com sucesso.");
+        }
+      } else {
+        // --- MODO SINGLE ORIGINAL ---
+        const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
+        if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
+
+        // Remove file refernces
+        uploadKeys.forEach(k => delete cleanSelections[k]);
+        if (cleanSelections.batchFiles) delete cleanSelections.batchFiles;
+        cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
+
+        const formData = new FormData();
+        formData.append('niche', niche);
+
+        for (const key of uploadKeys) {
+          const originalFile = selections[key] as File;
+          const processedFile = await processImageForAI(originalFile);
+          formData.append('files', processedFile);
+        }
+
+        formData.append('selections', JSON.stringify(cleanSelections));
+
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
+          body: formData,
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');
+
+        setImageUrl(data.url);
+        setRecentImages(prev => [data.url, ...prev].slice(0, 12));
+        setImageIndex((i) => i + 1);
+
+        if (!userIsAdmin) {
+          const creditRes = await fetch('/api/credits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user!.id }),
+          });
+          if (creditRes.ok) {
+             const creditData = await creditRes.json();
+             setCredits(creditData.credits);
+          } else {
+             setCredits((c) => Math.max(0, (c ?? 0) - 1));
+          }
         }
       }
 
     } catch (e: any) {
       console.error(e);
       alert("Houve um erro ao gerar a imagem: " + e.message);
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(true);
-      }
+      if (window.innerWidth < 768) setIsSidebarOpen(true);
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const handleBatchCreditSpent = () => {
-    if (!userIsAdmin) setCredits((c) => Math.max(0, (c ?? 0) - 1));
   };
 
   const switchNiche = (n: NicheKey) => {
@@ -397,16 +458,12 @@ function StudioContent() {
           />
         )}
 
-        {/* Mobile Bottom Sheet — M3 Pattern */}
+        {/* Mobile Full-Screen Modal — M3 Pattern Adaptation */}
         <div
-          className={`md:hidden fixed inset-x-0 bottom-0 z-50 flex flex-col bg-[var(--surface-container-low)] rounded-t-[var(--shape-extra-large)] elevation-4 transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
+          className={`md:hidden fixed inset-0 z-[100] flex flex-col bg-[var(--surface-container-low)] transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
             ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
-          style={{ height: '85dvh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', paddingTop: 'env(safe-area-inset-top, 0px)' }}
         >
-          {/* M3 Bottom Sheet Drag Handle */}
-          <div className="w-full flex justify-center pt-3.5 pb-2 shrink-0 cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
-            <div className="w-8 h-1 bg-[var(--on-surface-variant)]/40 rounded-[var(--shape-full)]" />
-          </div>
           <div className="flex flex-col flex-1 min-h-0">
             <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} />
           </div>
@@ -415,9 +472,8 @@ function StudioContent() {
         {/* Main Content */}
         <main className="flex-1 flex flex-col bg-transparent relative min-h-0 overflow-hidden">
 
-          {/* Desktop Generate Button — M3 Filled Button (hidden in batch mode) */}
-          {!showBatch && (
-            <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">
+          {/* Desktop Generate Button — M3 Filled Button */}
+          <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">
               <button
                 onClick={handleGenerate}
                 disabled={!canGenerate}
@@ -430,29 +486,17 @@ function StudioContent() {
                 )}
               </button>
             </div>
-          )}
 
           {/* Preview Area */}
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {showBatch ? (
-              <BatchPanel
-                selections={selections}
-                niche={niche}
-                accessToken={session?.access_token ?? ''}
-                credits={credits}
-                isAdmin={userIsAdmin}
-                onCreditSpent={handleBatchCreditSpent}
-              />
-            ) : (
-              <ImagePreviewCard
-                isGenerating={isGenerating}
-                imageUrl={imageUrl}
-                selections={selections}
-                niche={niche}
-                onGenerate={handleGenerate}
-                livePrompt={currentPrompt}
-              />
-            )}
+            <ImagePreviewCard
+              isGenerating={isGenerating}
+              imageUrl={imageUrl}
+              selections={selections}
+              niche={niche}
+              onGenerate={handleGenerate}
+              livePrompt={currentPrompt}
+            />
           </div>
 
           {/* Desktop Gallery Strip — M3 Surface Container */}
