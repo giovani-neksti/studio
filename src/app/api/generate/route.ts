@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { GoogleAuth } from 'google-auth-library';
-import { buildEnglishPrompt, getAspectRatioInfo } from '@/lib/prompt-builder';
+import { buildEnglishPrompt } from '@/lib/prompt-builder';
 
 export async function POST(req: Request) {
   try {
@@ -26,7 +26,6 @@ export async function POST(req: Request) {
 
     // 2. Construção do Prompt Inteligente (que agora entende o Plural e Múltiplas Peças)
     const finalPrompt = buildEnglishPrompt(niche, selections);
-    const { geminiRatio } = getAspectRatioInfo(selections.format || '1:1');
 
     // NOVO: Prepara a matriz de imagens para a IA "ver" todas as peças juntas!
     const parts: any[] = [{ text: finalPrompt }];
@@ -80,8 +79,7 @@ export async function POST(req: Request) {
         generationConfig: {
           responseModalities: ["IMAGE"],
           candidateCount: 1,
-          temperature: 0.7,
-          aspectRatio: geminiRatio
+          temperature: 0.7
         }
       })
     });
