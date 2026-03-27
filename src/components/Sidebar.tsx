@@ -175,7 +175,22 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && activeUploadKey) {
-      onSelect(activeUploadKey, e.target.files[0]);
+      const file = e.target.files[0];
+      const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        alert('Formato não suportado. Use JPG, PNG ou WebP.');
+        e.target.value = '';
+        return;
+      }
+      if (file.size > MAX_SIZE) {
+        alert('Arquivo muito grande. O limite é 10 MB.');
+        e.target.value = '';
+        return;
+      }
+
+      onSelect(activeUploadKey, file);
     }
   };
 
@@ -252,7 +267,7 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                       onClick={() => cameraInputRef.current?.click()}
                       className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
                     >
-                      <input type="file" ref={cameraInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileUpload} />
+                      <input type="file" ref={cameraInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" onChange={handleFileUpload} />
                       <Camera className="w-6 h-6 mb-2 text-[var(--primary)]" />
                       <span className="md3-label-small text-[var(--primary)]">Tirar Foto</span>
                     </div>
@@ -260,7 +275,7 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                       onClick={() => fileInputRef.current?.click()}
                       className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
                     >
-                      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                      <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleFileUpload} />
                       <UploadCloud className="w-6 h-6 mb-2 text-[var(--primary)]" />
                       <span className="md3-label-small text-[var(--primary)]">Galeria</span>
                     </div>

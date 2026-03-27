@@ -81,6 +81,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Faltam arquivos ou seleções.' }, { status: 400 });
     }
 
+    // Validate files: max 10 MB each, max 5 files, images only
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const MAX_FILES = 5;
+    const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
+
+    if (files.length > MAX_FILES) {
+      return NextResponse.json({ error: `Máximo de ${MAX_FILES} arquivos por geração.` }, { status: 400 });
+    }
+
+    for (const file of files) {
+      if (!ALLOWED_TYPES.has(file.type)) {
+        return NextResponse.json({ error: `Formato não suportado: ${file.type}. Use JPG, PNG ou WebP.` }, { status: 400 });
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json({ error: `Arquivo "${file.name}" excede o limite de 10 MB.` }, { status: 400 });
+      }
+    }
+
     const selections = JSON.parse(selectionsStr);
 
     // 1. Upload original para o Supabase (grava apenas o primeiro na base de dados para referência visual)
