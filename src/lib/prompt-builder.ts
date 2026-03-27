@@ -90,6 +90,17 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
     }
 };
 
+// Map format ratio strings to Gemini-compatible aspect ratio and orientation description
+export function getAspectRatioInfo(formatRatio: string): { geminiRatio: string; orientation: string } {
+    switch (formatRatio) {
+        case '1:1': return { geminiRatio: '1:1', orientation: 'square' };
+        case '4:5': return { geminiRatio: '3:4', orientation: 'vertical portrait' };
+        case '9:16': return { geminiRatio: '9:16', orientation: 'tall vertical (portrait/story)' };
+        case '1.91:1': return { geminiRatio: '16:9', orientation: 'wide horizontal landscape' };
+        default: return { geminiRatio: '1:1', orientation: 'square' };
+    }
+}
+
 export function buildEnglishPrompt(niche: string, selections: any) {
     const dict = jewelryDictionary;
 
@@ -148,7 +159,12 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         ? `ALL the exact uploaded jewelry pieces together in the same composition (${productText})`
         : `the exact uploaded jewelry piece (${productText})`;
 
-    const finalEnglishPrompt = `A hyper-realistic commercial macro photograph of ${pieceDescription}, maintaining original designs, shapes, and details perfectly,${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
+    // Format / aspect ratio instruction
+    const formatRatio = selections.format || '1:1';
+    const { orientation } = getAspectRatioInfo(formatRatio);
+    const formatInstruction = `The image MUST be composed in a ${orientation} format (aspect ratio ${formatRatio}). Frame the composition accordingly.`;
+
+    const finalEnglishPrompt = `${formatInstruction} A hyper-realistic commercial macro photograph of ${pieceDescription}, maintaining original designs, shapes, and details perfectly,${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
 
     return finalEnglishPrompt;
 }
