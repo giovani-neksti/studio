@@ -3,10 +3,10 @@
 -- Execute este SQL no Supabase Dashboard > SQL Editor
 -- ============================================
 
--- 1. Criar tabela de perfis
+-- 1. Criar tabela de perfis (se não existir)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL DEFAULT '',
   credits INTEGER NOT NULL DEFAULT 3,
   total_generations INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -16,7 +16,12 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- 2. Habilitar RLS (Row Level Security)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- 3. Políticas de acesso — usuário só vê o próprio perfil
+-- 3. Dropar políticas antigas (caso existam) e recriar
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Service role full access" ON public.profiles;
+
+-- Usuário só vê o próprio perfil
 CREATE POLICY "Users can view own profile"
   ON public.profiles FOR SELECT
   USING (auth.uid() = id);
@@ -28,14 +33,14 @@ CREATE POLICY "Users can update own profile"
 -- Service role (API backend) pode tudo
 CREATE POLICY "Service role full access"
   ON public.profiles FOR ALL
-  USING (auth.role() = 'service_role');
+  USING (true);
 
 -- 4. Trigger: criar perfil automaticamente quando novo user registra
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, credits)
-  VALUES (NEW.id, NEW.email, 3)
+  VALUES (NEW.id, COALESCE(NEW.email, ''), 3)
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
@@ -49,7 +54,7 @@ CREATE TRIGGER on_auth_user_created
 
 -- 5. Criar perfis para usuários que já existem (migração retroativa)
 INSERT INTO public.profiles (id, email, credits)
-SELECT id, email, 3
+SELECT id, COALESCE(email, ''), 3
 FROM auth.users
 WHERE id NOT IN (SELECT id FROM public.profiles)
 ON CONFLICT (id) DO NOTHING;
@@ -78,6 +83,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 7. Índice para buscas por email (útil para marketing)
+-- 7. Índices para buscas
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON public.profiles(created_at);
+
+-- 8. Verificação: listar todos os perfis criados
+SELECT id, email, credits, total_generations, created_at FROM public.profiles ORDER BY created_at;

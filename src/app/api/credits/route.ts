@@ -11,19 +11,33 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'userId obrigatório' }, { status: 400 });
     }
 
+    // Try to get existing profile
     const { data, error } = await supabaseAdmin
       .from('profiles')
       .select('credits')
       .eq('id', userId)
       .single();
 
-    if (error) {
-      // Profile might not exist yet (user registered before migration)
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ credits: 0, needsProfile: true });
+    if (error && error.code === 'PGRST116') {
+      // Profile doesn't exist — auto-create with 3 credits
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+      const email = userData?.user?.email || '';
+
+      const { data: newProfile, error: insertError } = await supabaseAdmin
+        .from('profiles')
+        .insert({ id: userId, email, credits: 3, total_generations: 0 })
+        .select('credits')
+        .single();
+
+      if (insertError) {
+        console.error('Erro ao criar perfil:', insertError);
+        return NextResponse.json({ credits: 3 });
       }
-      throw error;
+
+      return NextResponse.json({ credits: newProfile.credits });
     }
+
+    if (error) throw error;
 
     return NextResponse.json({ credits: data.credits });
   } catch (error: any) {
