@@ -9,7 +9,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck } from 'lucide-react';
+import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History } from 'lucide-react';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { isAdmin } from '@/lib/admin';
 
@@ -290,6 +290,14 @@ function StudioContent() {
             <Gem className="w-3.5 h-3.5" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
           </div>
 
+          {/* Desktop: My Generations */}
+          <button
+            onClick={() => router.push('/studio/geracoes')}
+            className="hidden md:flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] md3-label-medium transition-all duration-[var(--duration-short4)] hover:elevation-1 state-layer"
+          >
+            <History className="w-3.5 h-3.5" />Minhas Gerações
+          </button>
+
           {/* Desktop: Subscription — M3 Filled Tonal Button */}
           <button
             onClick={() => setIsPricingOpen(true)}
@@ -438,7 +446,7 @@ function StudioContent() {
         <div className="flex items-center justify-around h-20 px-2">
           {[
             { id: 'compose', icon: <SlidersHorizontal className="w-[22px] h-[22px]" />, label: 'Compor', action: () => setIsSidebarOpen(true) },
-            { id: 'gallery', icon: <Images className="w-[22px] h-[22px]" />, label: 'Galeria', action: () => setIsGalleryOpen(true) },
+            { id: 'gallery', icon: <History className="w-[22px] h-[22px]" />, label: 'Histórico', action: () => router.push('/studio/geracoes') },
             { id: 'plans', icon: <CreditCard className="w-[22px] h-[22px]" />, label: 'Planos', action: () => setIsPricingOpen(true) },
             { id: 'logout', icon: <LogOut className="w-[22px] h-[22px]" />, label: 'Sair', action: () => { signOut(); router.push('/'); } },
           ].map((item) => {

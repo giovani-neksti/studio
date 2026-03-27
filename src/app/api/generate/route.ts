@@ -168,6 +168,7 @@ export async function POST(req: Request) {
 
     // 6. Registro no banco de dados
     await supabaseAdmin.from('generations').insert({
+      user_id: user.id,
       niche,
       original_image_url: originalUrl,
       generated_image_url: generatedUrl,
