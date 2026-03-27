@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Inter } from "next/font/google";
+import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
+
+const GA_ID = "G-5S3354R4FJ";
 
 const montserrat = Montserrat({
   variable: "--font-serif",
@@ -44,6 +47,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="h-full">
+      <head>
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}
+        </Script>
+      </head>
       <body className={`${inter.variable} ${montserrat.variable} antialiased h-full`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
