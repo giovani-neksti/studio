@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { GlobalErrorCatcher } from "@/components/GlobalErrorCatcher";
 import "./globals.css";
 
 const GA_ID = "G-5S3354R4FJ";
@@ -59,7 +61,10 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${inter.variable} ${montserrat.variable} antialiased h-full`}>
-        <AuthProvider>{children}</AuthProvider>
+        <ErrorBoundary>
+          <GlobalErrorCatcher />
+          <AuthProvider>{children}</AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

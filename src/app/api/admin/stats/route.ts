@@ -59,6 +59,16 @@ export async function GET(req: Request) {
     // Users with 0 credits
     const usersNoCredits = profiles?.filter(p => p.credits === 0).length ?? 0;
 
+    // Fetch recent error logs (last 100)
+    const { data: errorLogs } = await supabaseAdmin
+      .from('error_logs')
+      .select('id, message, source, url, user_id, created_at, stack')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    // Errors today
+    const errorsToday = errorLogs?.filter(e => new Date(e.created_at) >= todayStart).length ?? 0;
+
     return NextResponse.json({
       stats: {
         totalUsers,
@@ -69,9 +79,12 @@ export async function GET(req: Request) {
         generationsToday,
         activeUsers,
         usersNoCredits,
+        errorsToday,
+        totalErrors: errorLogs?.length ?? 0,
       },
       users: profiles ?? [],
       recentGenerations: generations ?? [],
+      errorLogs: errorLogs ?? [],
     });
   } catch (error: any) {
     console.error('Admin stats error:', error);

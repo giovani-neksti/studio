@@ -15,6 +15,9 @@ import {
   ShieldCheck,
   UserPlus,
   AlertTriangle,
+  Bug,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 interface Stats {
@@ -26,6 +29,18 @@ interface Stats {
   generationsToday: number;
   activeUsers: number;
   usersNoCredits: number;
+  errorsToday: number;
+  totalErrors: number;
+}
+
+interface ErrorLog {
+  id: string;
+  message: string;
+  source: string;
+  url: string | null;
+  user_id: string | null;
+  created_at: string;
+  stack: string | null;
 }
 
 interface UserProfile {
@@ -45,7 +60,7 @@ interface Generation {
   generated_image_url: string;
 }
 
-type Tab = 'overview' | 'users' | 'generations';
+type Tab = 'overview' | 'users' | 'generations' | 'errors';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -54,6 +69,8 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [generations, setGenerations] = useState<Generation[]>([]);
+  const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([]);
+  const [expandedError, setExpandedError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('overview');
@@ -80,6 +97,7 @@ export default function AdminPage() {
         setStats(data.stats);
         setUsers(data.users);
         setGenerations(data.recentGenerations);
+        setErrorLogs(data.errorLogs);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -125,6 +143,8 @@ export default function AdminPage() {
         { label: 'Gerações Hoje', value: stats.generationsToday, icon: ImageIcon, color: '#e65100' },
         { label: 'Usuários Ativos', value: stats.activeUsers, icon: ShieldCheck, color: '#2e7d32' },
         { label: 'Sem Créditos', value: stats.usersNoCredits, icon: AlertTriangle, color: '#c62828' },
+        { label: 'Erros Hoje', value: stats.errorsToday, icon: Bug, color: '#d32f2f' },
+        { label: 'Erros (últimos 100)', value: stats.totalErrors, icon: Bug, color: '#b71c1c' },
       ]
     : [];
 
@@ -132,6 +152,7 @@ export default function AdminPage() {
     { key: 'overview', label: 'Visão Geral' },
     { key: 'users', label: 'Usuários' },
     { key: 'generations', label: 'Gerações Recentes' },
+    { key: 'errors', label: 'Erros' },
   ];
 
   return (
@@ -277,6 +298,72 @@ export default function AdminPage() {
                 <div className="mt-3 md3-label-small text-[var(--outline)]">
                   {filteredUsers.length} de {users.length} usuários
                 </div>
+              </div>
+            )}
+
+            {/* Errors Tab */}
+            {tab === 'errors' && (
+              <div>
+                <p className="md3-label-medium text-[var(--on-surface-variant)] mb-4">
+                  Últimos 100 erros registrados
+                </p>
+                <div className="space-y-2">
+                  {errorLogs.map((e) => (
+                    <div
+                      key={e.id}
+                      className="rounded-[var(--shape-large)] border border-[var(--outline-variant)]/20 bg-[var(--surface-container)] overflow-hidden"
+                    >
+                      <button
+                        onClick={() => setExpandedError(expandedError === e.id ? null : e.id)}
+                        className="w-full px-4 py-3 flex items-start gap-3 text-left hover:bg-[var(--surface-container-high)]/50 transition-colors"
+                      >
+                        <Bug className="w-4 h-4 text-[#d32f2f] mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="md3-body-medium text-[var(--foreground)] truncate">
+                            {e.message}
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            <span className="md3-label-small text-[var(--outline)]">
+                              {formatDate(e.created_at)}
+                            </span>
+                            {e.source && (
+                              <span className="md3-label-small px-1.5 py-0.5 rounded bg-[var(--secondary-container)] text-[var(--on-secondary-container)]">
+                                {e.source}
+                              </span>
+                            )}
+                            {e.user_id && (
+                              <span className="md3-label-small text-[var(--outline)] font-mono">
+                                user: {e.user_id.slice(0, 8)}...
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {e.stack ? (
+                          expandedError === e.id
+                            ? <ChevronUp className="w-4 h-4 text-[var(--on-surface-variant)] shrink-0" />
+                            : <ChevronDown className="w-4 h-4 text-[var(--on-surface-variant)] shrink-0" />
+                        ) : null}
+                      </button>
+                      {expandedError === e.id && e.stack && (
+                        <div className="px-4 pb-3">
+                          {e.url && (
+                            <div className="mb-2 md3-label-small text-[var(--outline)]">
+                              URL: {e.url}
+                            </div>
+                          )}
+                          <pre className="text-xs p-3 rounded-[var(--shape-medium)] bg-[var(--surface-container-highest)] text-[var(--on-surface-variant)] overflow-x-auto whitespace-pre-wrap break-words max-h-60 overflow-y-auto">
+                            {e.stack}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {errorLogs.length === 0 && (
+                  <div className="text-center py-10 text-[var(--on-surface-variant)] md3-body-medium">
+                    Nenhum erro registrado.
+                  </div>
+                )}
               </div>
             )}
 
