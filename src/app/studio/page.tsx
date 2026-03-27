@@ -9,7 +9,8 @@ import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History } from 'lucide-react';
+import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { isAdmin } from '@/lib/admin';
 
@@ -218,6 +219,8 @@ function StudioContent() {
 
   const activeNav = isSidebarOpen ? 'compose' : isGalleryOpen ? 'gallery' : isPricingOpen ? 'plans' : '';
 
+  const { mode: themeMode, toggle: toggleTheme, isDark } = useTheme();
+
   if (authLoading || !user) {
     return (
       <div className="h-[100dvh] flex items-center justify-center bg-[var(--background)]">
@@ -227,7 +230,7 @@ function StudioContent() {
   }
 
   return (
-    <div className={`${config.themeClass} flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--background)]`}>
+    <div className={`${config.themeClass}${isDark ? '' : ' light'} flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--background)]`}>
 
       {/* Neural network animated background — gold variant */}
       <NeuralBackground variant="gold" />
@@ -315,6 +318,15 @@ function StudioContent() {
               <ShieldCheck className="w-3.5 h-3.5" /><span className="hidden sm:inline">Admin</span>
             </button>
           )}
+
+          {/* Theme Toggle — M3 Icon Button */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center w-9 h-9 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
+            title={isDark ? 'Modo claro' : 'Modo escuro'}
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
 
           {/* Desktop: Logout — M3 Text Button */}
           <button

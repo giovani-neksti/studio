@@ -181,6 +181,38 @@
   --outline-variant: #2A2A2E;
 }
 
+/* JEWELRY LIGHT — Warm ivory with deep gold accent */
+.theme-jewelry.light {
+  --background: #FFFDF5;
+  --foreground: #1A1500;
+  --surface: #FFF8E7;
+  --surface-dim: #EDE3C8;
+  --surface-bright: #FFFFFF;
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #FFF8E7;
+  --surface-container: #F5EDD5;
+  --surface-container-high: #EDE3C0;
+  --surface-container-highest: #E5D8AB;
+  --primary: #8B6800;
+  --on-primary: #FFFFFF;
+  --primary-container: #FFE08A;
+  --on-primary-container: #281900;
+  --secondary: #6B5B00;
+  --on-secondary: #FFFFFF;
+  --secondary-container: #EDD98A;
+  --on-secondary-container: #221A00;
+  --tertiary: #8B6800;
+  --on-tertiary: #FFFFFF;
+  --tertiary-container: #FFE08A;
+  --on-tertiary-container: #281900;
+  --border: #C9B270;
+  --surface-variant: #E8D9B0;
+  --on-surface-variant: #4A3D00;
+  --outline: #8B7000;
+  --outline-variant: #D4BF7A;
+  --on-surface: #1A1500;
+}
+
 /* CLOTHING — M3 Light Surface */
 .theme-clothing {
   --background: #FEF7FF;

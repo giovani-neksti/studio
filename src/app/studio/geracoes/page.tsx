@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Download, Maximize2, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import { ArrowLeft, Download, Maximize2, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Sparkles, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 interface Generation {
   id: string;
@@ -23,6 +24,7 @@ export default function GeracoesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { toggle: toggleTheme, isDark } = useTheme();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -70,7 +72,7 @@ export default function GeracoesPage() {
   }
 
   return (
-    <div className="theme-jewelry min-h-[100dvh] bg-[var(--background)]">
+    <div className={`theme-jewelry${isDark ? '' : ' light'} min-h-[100dvh] bg-[var(--background)]`}>
       {/* Header */}
       <header className="sticky top-0 z-40 h-16 flex items-center gap-3 px-4 md:px-6 bg-[var(--surface-container)] border-b border-[var(--outline-variant)]/20">
         <button
@@ -85,6 +87,13 @@ export default function GeracoesPage() {
             {loading ? 'Carregando...' : `${total} ${total === 1 ? 'imagem' : 'imagens'} geradas`}
           </p>
         </div>
+        <button
+          onClick={toggleTheme}
+          className="flex items-center justify-center w-9 h-9 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 transition-colors"
+          title={isDark ? 'Modo claro' : 'Modo escuro'}
+        >
+          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
         <button
           onClick={() => router.push('/studio')}
           className="flex items-center gap-2 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-medium hover:elevation-1 transition-all"
