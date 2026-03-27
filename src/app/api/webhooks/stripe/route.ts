@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
 // Credits by amount paid (centavos BRL)
 function creditsFromAmount(centavos: number): { credits: number; plan: string } {
@@ -56,6 +58,7 @@ export async function POST(req: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   let event: Stripe.Event;
+  const stripe = getStripe();
 
   try {
     if (webhookSecret && !webhookSecret.startsWith('whsec_CONFIGURE') && sig) {
