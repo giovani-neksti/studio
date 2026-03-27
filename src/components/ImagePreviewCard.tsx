@@ -51,7 +51,7 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
     <div className="flex flex-col items-center justify-start flex-1 w-full h-full gap-4 md:gap-5 px-4 py-3 md:px-8 md:py-5 overflow-y-auto no-scrollbar min-h-0 pb-24 md:pb-6">
 
       {/* IMAGE / LOADING — M3 Card */}
-      <div className={`relative ${aspectClass} w-full max-w-[500px] h-full max-h-[50vh] md:max-h-[65vh] shrink-0 overflow-hidden rounded-[var(--shape-extra-large)] border border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)] transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] mx-auto`}>
+      <div className={`relative ${aspectClass} w-full max-w-[500px] h-full max-h-[50vh] md:max-h-[65vh] shrink-0 overflow-hidden rounded-[var(--shape-extra-large)] border border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]/60 backdrop-blur-sm transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] mx-auto`}>
         {isGenerating ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[var(--surface-container-low)] z-10 px-8 text-center">
             {/* M3 Circular Progress Indicator */}

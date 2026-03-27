@@ -269,7 +269,7 @@ function StudioContent() {
       </header>
 
       {/* ── Body ── */}
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative z-[2]">
 
         {/* Desktop Sidebar — M3 Side Sheet */}
         <div className={`hidden md:flex flex-col min-h-0 bg-[var(--surface-container-low)] transition-all duration-[var(--duration-medium4)] ease-[var(--easing-emphasized)] shrink-0
@@ -316,7 +316,7 @@ function StudioContent() {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col bg-[var(--background)] relative min-h-0 overflow-hidden">
+        <main className="flex-1 flex flex-col bg-transparent relative min-h-0 overflow-hidden">
 
           {/* Desktop Generate Button — M3 Filled Button */}
           <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">

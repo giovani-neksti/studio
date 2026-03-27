@@ -210,8 +210,8 @@ export function NeuralBackground({ variant = 'green' }: NeuralBackgroundProps) {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ pointerEvents: 'auto' }}
+      className="fixed inset-0 pointer-events-none z-[1]"
+      style={{ pointerEvents: 'none' }}
     />
   );
 }
