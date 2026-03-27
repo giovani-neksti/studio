@@ -16,7 +16,7 @@ import { isAdmin } from '@/lib/admin';
 function StudioContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, session, loading: authLoading, signOut } = useAuth();
   const nicheParam = searchParams.get('niche') as NicheKey | null;
   const config = getNicheConfig(nicheParam);
   const niche = nicheParam && nicheParam in nicheConfigs ? nicheParam : 'jewelry';
@@ -160,7 +160,11 @@ function StudioContent() {
 
       formData.append('selections', JSON.stringify(cleanSelections));
 
-      const res = await fetch('/api/generate', { method: 'POST', body: formData });
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
+        body: formData,
+      });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');

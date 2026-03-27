@@ -3,11 +3,70 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { GoogleAuth } from 'google-auth-library';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
 
+// ── Rate Limiter (in-memory, per-user) ──
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minuto
+const RATE_LIMIT_MAX = 10; // max 10 gerações por minuto
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
+// Limpa entradas expiradas a cada 5 minutos
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitMap) {
+    if (now > val.resetAt) rateLimitMap.delete(key);
+  }
+}, 5 * 60_000);
+
 export async function POST(req: Request) {
   try {
+    // ── 0. Autenticação — verificar JWT do usuário ──
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Token inválido ou expirado.' }, { status: 401 });
+    }
+
+    // ── Rate limit por usuário ──
+    if (isRateLimited(user.id)) {
+      return NextResponse.json(
+        { error: 'Muitas gerações em pouco tempo. Aguarde um momento.' },
+        { status: 429 }
+      );
+    }
+
+    // ── Deduzir 1 crédito (atômico) ──
+    const { data: newCredits, error: creditError } = await supabaseAdmin
+      .rpc('decrement_credit', { user_id: user.id });
+
+    if (creditError) {
+      // RPC lança exception se perfil não existe ou créditos = 0
+      return NextResponse.json(
+        { error: 'Sem créditos disponíveis. Faça upgrade do seu plano.' },
+        { status: 403 }
+      );
+    }
+
     const formData = await req.formData();
 
-    // NOVO: Pegar TODOS os arquivos enviados (suporta 1, 2, 3 ou mais)
     const files = formData.getAll('files') as File[];
     const selectionsStr = formData.get('selections') as string;
     const niche = formData.get('niche') as string;
