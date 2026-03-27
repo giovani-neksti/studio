@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { GoogleAuth } from 'google-auth-library';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { sendCreditsExhaustedEmail } from '@/lib/resend';
+import sharp from 'sharp';
 
 // ── Rate Limiter (in-memory, per-user) ──
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minuto
@@ -101,10 +102,11 @@ export async function POST(req: Request) {
 
     const selections = JSON.parse(selectionsStr);
 
-    // 1. Upload original para o Supabase (grava apenas o primeiro na base de dados para referência visual)
+    // 1. Upload original para o Supabase (comprimido para WebP)
     const firstFileBuffer = Buffer.from(await files[0].arrayBuffer());
-    const fileName = `${Date.now()}_original_${files[0].name.replace(/\s/g, '_')}`;
-    await supabaseAdmin.storage.from('uploads').upload(fileName, firstFileBuffer, { contentType: files[0].type });
+    const originalWebp = await sharp(firstFileBuffer).webp({ quality: 80 }).toBuffer();
+    const fileName = `${Date.now()}_original.webp`;
+    await supabaseAdmin.storage.from('uploads').upload(fileName, originalWebp, { contentType: 'image/webp' });
     const originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
 
     // 2. Construção do Prompt Inteligente (que agora entende o Plural e Múltiplas Peças)
@@ -178,10 +180,11 @@ export async function POST(req: Request) {
 
     if (!generatedBase64) throw new Error("A IA Pro não retornou a imagem. Verifique os filtros de segurança.");
 
-    // 5. Salvar imagem gerada
+    // 5. Salvar imagem gerada (comprimida para WebP)
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
-    const genFileName = `ai_pro_${Date.now()}.png`;
-    await supabaseAdmin.storage.from('compositions').upload(genFileName, generatedBuffer, { contentType: 'image/png' });
+    const optimizedBuffer = await sharp(generatedBuffer).webp({ quality: 82 }).toBuffer();
+    const genFileName = `ai_pro_${Date.now()}.webp`;
+    await supabaseAdmin.storage.from('compositions').upload(genFileName, optimizedBuffer, { contentType: 'image/webp' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
     // 6. Registro no banco de dados
