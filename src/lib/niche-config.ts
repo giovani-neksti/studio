@@ -112,7 +112,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     themeClass: 'theme-jewelry',
     icon: '💎',
     tagline: 'Componha cenários de luxo ao redor das suas joias',
-    categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Relógio', 'Broche', 'Pingente', 'Bracelete Pandora'],
+    categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Tiara', 'Broche', 'Pingente', 'Bracelete Pandora'],
 
     materialOptions: [
       { id: 'gold_yellow', label: 'Ouro Amarelo' },
@@ -172,7 +172,7 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'model_valentina', name: 'Valentina', type: 'Ruiva / Editorial', imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80' },
       { id: 'model_close_neck', name: 'Close Pescoço', type: 'Foco no Colar', imageUrl: 'https://images.unsplash.com/photo-1599643478514-46bfa3321526?w=400&q=80' },
       { id: 'model_close_hand', name: 'Mão / Manicure', type: 'Foco no Anel', imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b2548e?w=400&q=80' },
-      { id: 'model_close_wrist', name: 'Pulso', type: 'Pulseira / Relógio', imageUrl: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&q=80' },
+      { id: 'model_close_wrist', name: 'Pulso', type: 'Pulseira', imageUrl: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&q=80' },
       { id: 'model_close_ear', name: 'Perfil / Orelha', type: 'Foco no Brinco', imageUrl: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,

@@ -19,7 +19,6 @@ import {
   Sparkle,
   Diamond,
   Link,
-  Watch,
   Flower2,
   Droplet,
   Gem,
@@ -68,7 +67,7 @@ const getCategoryIcon = (cat: string): ReactNode => {
   if (cat.includes('Brinco')) return <Sparkle className={ICON_CLASS} />;
   if (cat.includes('Anel')) return <Diamond className={ICON_CLASS} />;
   if (cat.includes('Pulseira')) return <Link className={ICON_CLASS} />;
-  if (cat.includes('Relógio')) return <Watch className={ICON_CLASS} />;
+  if (cat.includes('Tiara')) return <Crown className={ICON_CLASS} />;
   if (cat.includes('Broche')) return <Flower2 className={ICON_CLASS} />;
   if (cat.includes('Pingente')) return <Droplet className={ICON_CLASS} />;
   if (cat.includes('Pandora')) return <Gem className={ICON_CLASS} />;

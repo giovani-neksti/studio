@@ -4,7 +4,7 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Brinco": "a pair of elegant premium earrings",
         "Anel": "a stunning high-end ring",
         "Pulseira": "a sophisticated luxury bracelet",
-        "Relógio": "a premium luxury watch",
+        "Tiara": "an exquisite jeweled tiara with sparkling crystals and precious stones",
         "Broche": "an exquisite designer brooch",
         "Pingente": "a beautiful delicate pendant",
         "Bracelete Pandora": "a premium charm bracelet loaded with intricate silver and glass charms, Pandora style"
