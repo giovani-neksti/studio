@@ -53,21 +53,28 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
       {/* IMAGE / LOADING — M3 Card */}
       <div className={`relative ${aspectClass} w-full max-w-[500px] h-full max-h-[50vh] md:max-h-[65vh] shrink-0 overflow-hidden rounded-[var(--shape-extra-large)] border border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]/60 backdrop-blur-sm transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] mx-auto`}>
         {isGenerating ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[var(--surface-container-low)] z-10 px-8 text-center">
+          <div aria-busy="true" aria-label="Gerando imagem" className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[var(--surface-container-low)] z-10 px-8 text-center">
             {/* M3 Circular Progress Indicator */}
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center" aria-hidden="true">
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border-[3px] border-[var(--surface-container-highest)] border-t-[var(--primary)] animate-spin" />
               <Sparkles className="absolute w-5 h-5 text-[var(--primary)]" />
             </div>
 
             <div className="h-10 flex items-center justify-center">
-              <p className="md3-body-medium text-[var(--foreground)]">
+              <p aria-live="polite" aria-atomic="true" className="md3-body-medium text-[var(--foreground)]">
                 {loadingMessages[messageIndex]}{dots}
               </p>
             </div>
 
             {/* M3 Linear Progress Indicator */}
-            <div className="w-full max-w-[220px] h-1 bg-[var(--surface-container-highest)] rounded-[var(--shape-full)] overflow-hidden">
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(((messageIndex + 1) / loadingMessages.length) * 100)}
+              aria-label="Progresso da geração"
+              className="w-full max-w-[220px] h-1 bg-[var(--surface-container-highest)] rounded-[var(--shape-full)] overflow-hidden"
+            >
               <div
                 className="h-full rounded-[var(--shape-full)] bg-[var(--primary)] transition-all duration-1000 ease-out"
                 style={{ width: `${((messageIndex + 1) / loadingMessages.length) * 100}%` }}

@@ -241,8 +241,8 @@ export default function AuthPage() {
 
             {/* Error */}
             {error && (
-              <div className="mb-5 p-3 rounded-[var(--shape-medium)] bg-[var(--error-container)] text-[var(--on-error-container)] md3-body-small flex items-start gap-2 animate-scale-in">
-                <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />
+              <div role="alert" aria-live="assertive" className="mb-5 p-3 rounded-[var(--shape-medium)] bg-[var(--error-container)] text-[var(--on-error-container)] md3-body-small flex items-start gap-2 animate-scale-in">
+                <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
                 <span>{error}</span>
               </div>
             )}
@@ -251,10 +251,11 @@ export default function AuthPage() {
               /* ── STEP 1: Email Input ── */
               <div className="space-y-5">
                 <div>
-                  <label className="md3-label-medium text-[var(--on-surface-variant)] mb-2 block">E-mail</label>
+                  <label htmlFor="auth-email" className="md3-label-medium text-[var(--on-surface-variant)] mb-2 block">E-mail</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--on-surface-variant)]/60" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--on-surface-variant)]/60" aria-hidden="true" />
                     <input
+                      id="auth-email"
                       type="email"
                       placeholder="seu@email.com"
                       value={email}
@@ -272,7 +273,7 @@ export default function AuthPage() {
                   className="w-full h-14 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-2.5 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
                 >
                   {loading ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
+                    <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Enviando...</>
                   ) : (
                     'Enviar Código de Acesso'
                   )}
@@ -289,11 +290,11 @@ export default function AuthPage() {
 
                 {/* OTP Label */}
                 <div className="text-center">
-                  <label className="md3-label-medium text-[var(--on-surface-variant)]">Código de verificação</label>
+                  <p className="md3-label-medium text-[var(--on-surface-variant)]" id="otp-label">Código de verificação</p>
                 </div>
 
                 {/* OTP Inputs */}
-                <div>
+                <div role="group" aria-labelledby="otp-label">
                   <div className="flex justify-center gap-1.5 md:gap-2">
                     {otp.map((digit, i) => (
                       <input
@@ -302,6 +303,7 @@ export default function AuthPage() {
                         type="text"
                         inputMode="numeric"
                         maxLength={OTP_LENGTH}
+                        aria-label={`Dígito ${i + 1} de ${OTP_LENGTH}`}
                         value={digit}
                         onChange={(e) => handleOtpChange(i, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(i, e)}
@@ -321,9 +323,9 @@ export default function AuthPage() {
                   className="w-full h-14 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-2.5 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
                 >
                   {loading ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Verificando...</>
+                    <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Verificando...</>
                   ) : (
-                    <><ShieldCheck className="w-5 h-5" /> Verificar e Entrar</>
+                    <><ShieldCheck className="w-5 h-5" aria-hidden="true" /> Verificar e Entrar</>
                   )}
                 </button>
 
@@ -340,7 +342,7 @@ export default function AuthPage() {
                     onClick={() => { setStep('email'); setOtp(Array(OTP_LENGTH).fill('')); setError(''); }}
                     className="md3-body-small text-[var(--on-surface-variant)] hover:text-[var(--foreground)] transition-colors duration-[var(--duration-short4)] flex items-center gap-1"
                   >
-                    <ArrowLeft className="w-3 h-3" /> Usar outro e-mail
+                    <ArrowLeft className="w-3 h-3" aria-hidden="true" /> Usar outro e-mail
                   </button>
                 </div>
               </div>

@@ -115,6 +115,7 @@ function SectionWrapper({ title, icon, defaultOpen = true, children }: any) {
     <div className="mb-0.5">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
         className="w-full flex items-center justify-between px-4 py-3 md:px-5 md:py-3.5 text-left rounded-[var(--shape-large)] hover:bg-[var(--on-surface-variant)]/8 transition-colors duration-[var(--duration-short4)] state-layer"
       >
         <div className="flex items-center gap-2.5">
@@ -147,7 +148,7 @@ function SegmentedButton({ options, value, onChange }: { options: { id: string; 
                 ? 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)] elevation-1'
                 : 'text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8'}`}
           >
-            {isActive && <Check className="w-3.5 h-3.5" />}
+            {isActive && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
             {opt.label}
           </button>
         );
@@ -222,13 +223,14 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                   <button
                     key={cat}
                     onClick={() => onSelect('category', cat)}
+                    aria-pressed={isActive}
                     className={`group/cat relative flex flex-col items-center justify-center p-3 md:p-3.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] min-h-[68px]
                       ${isActive
                         ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]'
                         : 'border-[var(--outline-variant)]/40 bg-transparent text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 hover:text-[var(--primary)]'}`}
                   >
                     {hasUpload && (
-                      <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center">
+                      <div aria-hidden="true" className="absolute top-1.5 right-1.5 w-4 h-4 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center">
                         <Check className="w-2.5 h-2.5 text-white" />
                       </div>
                     )}
@@ -263,22 +265,26 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
-                    <div
+                    <button
+                      type="button"
                       onClick={() => cameraInputRef.current?.click()}
+                      aria-label="Tirar foto com câmera"
                       className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
                     >
-                      <input type="file" ref={cameraInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" onChange={handleFileUpload} />
-                      <Camera className="w-6 h-6 mb-2 text-[var(--primary)]" />
+                      <input type="file" ref={cameraInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
+                      <Camera className="w-6 h-6 mb-2 text-[var(--primary)]" aria-hidden="true" />
                       <span className="md3-label-small text-[var(--primary)]">Tirar Foto</span>
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => fileInputRef.current?.click()}
+                      aria-label="Selecionar imagem da galeria"
                       className="p-4 border-2 border-dashed border-[var(--outline-variant)]/50 rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]"
                     >
-                      <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleFileUpload} />
-                      <UploadCloud className="w-6 h-6 mb-2 text-[var(--primary)]" />
+                      <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
+                      <UploadCloud className="w-6 h-6 mb-2 text-[var(--primary)]" aria-hidden="true" />
                       <span className="md3-label-small text-[var(--primary)]">Galeria</span>
-                    </div>
+                    </button>
                   </div>
                 )}
               </div>
@@ -286,8 +292,9 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
 
             {hasMaterials && (
               <div className="mt-4 pt-4 border-t border-[var(--outline-variant)]/20">
-                <p className="md3-label-small text-[var(--on-surface-variant)] mb-2">Material Predominante</p>
+                <label htmlFor="select-material" className="md3-label-small text-[var(--on-surface-variant)] mb-2 block">Material Predominante</label>
                 <select
+                  id="select-material"
                   value={selections.material || ''}
                   onChange={(e) => onSelect('material', e.target.value)}
                   className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-colors duration-[var(--duration-short4)] outline-none"
@@ -321,7 +328,8 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                 {config.solidColors.map((color) => (
                   <button
                     key={color.name}
-                    title={color.name}
+                    aria-label={color.name}
+                    aria-pressed={selections.background === color.name}
                     onClick={() => { onSelect('background', color.name); onSelect('backgroundHex', color.hex); }}
                     className={`aspect-square rounded-[var(--shape-full)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:scale-110 ${selections.background === color.name ? 'ring-2 ring-offset-2 ring-[var(--primary)] ring-offset-[var(--surface-container-low)] scale-110' : 'border-[var(--outline-variant)]/30'}`}
                     style={{ backgroundColor: color.hex }}
@@ -347,8 +355,9 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
 
             {hasProps && (
               <div className="mt-4 pt-4 border-t border-[var(--outline-variant)]/20">
-                <p className="md3-label-small text-[var(--on-surface-variant)] mb-2">Adereços de Composição</p>
+                <label htmlFor="select-prop" className="md3-label-small text-[var(--on-surface-variant)] mb-2 block">Adereços de Composição</label>
                 <select
+                  id="select-prop"
                   value={selections.prop || 'none'}
                   onChange={(e) => onSelect('prop', e.target.value)}
                   className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-colors duration-[var(--duration-short4)] outline-none"
@@ -383,12 +392,13 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                     <button
                       key={opt.id}
                       onClick={() => onSelect('display', opt.label)}
+                      aria-pressed={isActive}
                       className={`group/disp relative flex flex-col items-center justify-center p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
                         ${isActive
                           ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
                           : 'border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 hover:text-[var(--primary)]'}`}
                     >
-                      {isActive && <Check className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" />}
+                      {isActive && <Check className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" aria-hidden="true" />}
                       <span className="mb-1.5">{icon}</span>
                       <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)] group-hover/disp:text-[var(--primary)]'}`}>
                         {opt.label}
@@ -405,12 +415,13 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                     <button
                       key={opt.id}
                       onClick={() => onSelect('display', opt.name)}
+                      aria-pressed={isActive}
                       className={`relative flex flex-col items-center justify-center p-2.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-center h-16 md:h-20
                         ${isActive
                           ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
                           : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
                     >
-                      {isActive && <Check className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--primary)]" />}
+                      {isActive && <Check className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--primary)]" aria-hidden="true" />}
                       <span className={`md3-label-small font-semibold leading-tight mb-0.5 ${isActive ? 'text-[var(--primary)]' : ''}`}>
                         {opt.name}
                       </span>
@@ -433,12 +444,14 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
             <div className="space-y-3">
               <Input
                 placeholder="Ex: Coleção Verão"
+                aria-label="Texto da assinatura visual"
                 value={selections.text || ''}
                 onChange={(e) => onSelect('text', e.target.value)}
                 className="bg-transparent text-[var(--foreground)] h-11 border border-[var(--outline)]/40 rounded-[var(--shape-extra-small)] md3-body-medium focus:ring-2 focus:ring-[var(--primary)]/30 transition-colors"
               />
 
               <select
+                aria-label="Escolher fonte tipográfica"
                 value={selections.typography || ''}
                 onChange={(e) => onSelect('typography', e.target.value)}
                 className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/30 transition-colors duration-[var(--duration-short4)] outline-none"
@@ -459,6 +472,7 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                             <button
                               key={size.id}
                               onClick={() => onSelect('textSize', size.id)}
+                              aria-pressed={isActive}
                               className={`flex-1 flex items-center justify-center md3-label-small transition-all duration-[var(--duration-short4)]
                                 ${isActive ? 'bg-[var(--primary)] text-[var(--on-primary)]' : 'hover:bg-[var(--on-surface-variant)]/8 text-[var(--foreground)]'}`}
                             >
@@ -477,7 +491,8 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                           return (
                             <button
                               key={color.id}
-                              title={color.label}
+                              aria-label={color.label}
+                              aria-pressed={isActive}
                               onClick={() => onSelect('textColor', color.id)}
                               className={`w-5 h-5 md:w-6 md:h-6 rounded-[var(--shape-full)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
                                 ${isActive ? 'ring-2 ring-offset-1 ring-[var(--primary)] ring-offset-[var(--surface-container-low)] scale-110' : 'border-[var(--outline-variant)]/30 hover:scale-110'}`}
@@ -498,6 +513,7 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                         <button
                           key={pos.id}
                           onClick={() => onSelect('textPosition', pos.id)}
+                          aria-pressed={selections.textPosition === pos.id}
                           className={`flex flex-col items-center p-2 rounded-[var(--shape-small)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)]
                             ${selections.textPosition === pos.id
                               ? 'border-[var(--primary)] bg-[var(--primary)]/5'
@@ -529,6 +545,7 @@ export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGe
                   <button
                     key={fmt.id}
                     onClick={() => onSelect('format', fmt.ratio)}
+                    aria-pressed={isActive}
                     className={`flex flex-col items-center justify-center p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-center
                       ${isActive
                         ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'

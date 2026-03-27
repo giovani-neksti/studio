@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Check, X, Zap } from 'lucide-react';
 
 interface PricingModalProps {
@@ -10,6 +11,15 @@ interface PricingModalProps {
 }
 
 export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: PricingModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onOpenChange]);
+
   if (!isOpen) return null;
 
   const plans = [
@@ -56,24 +66,29 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
   return (
     /* M3 Full-screen Dialog (mobile) / Dialog (desktop) */
     <div
+      aria-hidden="true"
       className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-[var(--on-surface)]/32 p-0 md:p-10"
       onClick={() => onOpenChange(false)}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pricing-dialog-title"
         className="bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 rounded-t-[var(--shape-extra-large)] md:rounded-[var(--shape-extra-large)] w-full max-w-5xl relative flex flex-col overflow-y-auto max-h-[92dvh] md:max-h-[90vh] elevation-3"
         onClick={(e) => e.stopPropagation()}
       >
         {/* M3 Close — Icon Button */}
         <button
           onClick={() => onOpenChange(false)}
+          aria-label="Fechar"
           className="absolute top-4 right-4 text-[var(--on-surface-variant)] hover:text-[var(--foreground)] bg-[var(--surface-container-highest)] rounded-[var(--shape-full)] w-10 h-10 flex items-center justify-center transition-colors duration-[var(--duration-short4)] z-10"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Header */}
         <div className="px-6 md:px-8 py-10 md:py-12 text-center border-b border-[var(--outline-variant)]/20">
-          <h2 className="font-serif md3-headline-medium font-bold text-[var(--foreground)] mb-3">Escale as vendas da sua loja</h2>
+          <h2 id="pricing-dialog-title" className="font-serif md3-headline-medium font-bold text-[var(--foreground)] mb-3">Escale as vendas da sua loja</h2>
           <p className="text-[var(--on-surface-variant)] md3-body-large max-w-2xl mx-auto">
             Faça upgrade para gerar muito mais composições em alta qualidade por uma fração do preço de um estúdio fotográfico.
           </p>

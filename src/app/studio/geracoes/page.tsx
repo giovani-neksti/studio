@@ -77,9 +77,10 @@ export default function GeracoesPage() {
       <header className="theme-jewelry sticky top-0 z-40 h-16 flex items-center gap-3 px-4 md:px-6 bg-[var(--surface-container)] border-b border-[var(--outline-variant)]/20">
         <button
           onClick={() => router.push('/studio')}
+          aria-label="Retornar ao estúdio"
           className="flex items-center justify-center w-10 h-10 rounded-[var(--shape-full)] hover:bg-[var(--on-surface-variant)]/8 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-[var(--on-surface)]" />
+          <ArrowLeft className="w-5 h-5 text-[var(--on-surface)]" aria-hidden="true" />
         </button>
         <div className="flex-1">
           <h1 className="md3-title-large font-semibold text-[var(--on-surface)]">Minhas Gerações</h1>
@@ -89,10 +90,10 @@ export default function GeracoesPage() {
         </div>
         <button
           onClick={toggleTheme}
+          aria-label={isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro'}
           className="flex items-center justify-center w-9 h-9 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 transition-colors"
-          title={isDark ? 'Modo claro' : 'Modo escuro'}
         >
-          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {isDark ? <Sun className="w-4 h-4" aria-hidden="true" /> : <Moon className="w-4 h-4" aria-hidden="true" />}
         </button>
         <button
           onClick={() => router.push('/studio')}
@@ -146,15 +147,17 @@ export default function GeracoesPage() {
                   <div className="absolute inset-0 bg-[var(--on-surface)]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--duration-short4)] flex items-center justify-center gap-3">
                     <button
                       onClick={() => setSelectedImage(gen.generated_image_url)}
+                      aria-label="Ampliar imagem"
                       className="w-10 h-10 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] text-[var(--foreground)] flex items-center justify-center hover:bg-[var(--surface-bright)] transition-colors"
                     >
-                      <Maximize2 className="w-4 h-4" />
+                      <Maximize2 className="w-4 h-4" aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => downloadImage(gen.generated_image_url, `neksti_${gen.id}.png`)}
+                      aria-label="Baixar imagem"
                       className="w-10 h-10 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center hover:opacity-90 transition-opacity"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-4 h-4" aria-hidden="true" />
                     </button>
                   </div>
 
@@ -196,27 +199,33 @@ export default function GeracoesPage() {
       {/* Lightbox */}
       {selectedImage && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Visualização da imagem em tamanho completo"
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
           onClick={() => setSelectedImage(null)}
+          onKeyDown={(e) => e.key === 'Escape' && setSelectedImage(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh]" onClick={e => e.stopPropagation()}>
             <img
               src={selectedImage}
-              alt="Visualização"
+              alt="Imagem gerada em tamanho completo"
               className="max-w-full max-h-[85vh] object-contain rounded-[var(--shape-large)]"
             />
             <div className="absolute top-3 right-3 flex gap-2">
               <button
                 onClick={() => downloadImage(selectedImage, `neksti_${Date.now()}.png`)}
+                aria-label="Baixar imagem"
                 className="w-10 h-10 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center hover:opacity-90 transition-opacity"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4" aria-hidden="true" />
               </button>
               <button
                 onClick={() => setSelectedImage(null)}
+                aria-label="Fechar visualização"
                 className="w-10 h-10 rounded-[var(--shape-full)] bg-[var(--surface-container)] text-[var(--on-surface)] flex items-center justify-center hover:bg-[var(--surface-container-high)] transition-colors"
               >
-                &times;
+                <span aria-hidden="true">&times;</span>
               </button>
             </div>
           </div>

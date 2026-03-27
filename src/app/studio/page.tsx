@@ -247,34 +247,39 @@ function StudioContent() {
           <div className="relative">
             <button
               onClick={() => setNicheMenuOpen(!nicheMenuOpen)}
+              aria-expanded={nicheMenuOpen}
+              aria-haspopup="listbox"
+              aria-label={`Nicho selecionado: ${config.label}. Clique para alterar`}
               className="flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] md3-label-medium transition-all duration-[var(--duration-short4)] hover:elevation-1 state-layer"
             >
-              <span className="text-sm">{config.icon}</span>
+              <span className="text-sm" aria-hidden="true">{config.icon}</span>
               <span className="font-semibold hidden sm:inline">{config.label}</span>
-              <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-[var(--duration-short4)] ${nicheMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-[var(--duration-short4)] ${nicheMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
 
             {/* M3 Menu */}
             {nicheMenuOpen && (
-              <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/30 rounded-[var(--shape-extra-small)] overflow-hidden z-50 elevation-3 animate-scale-in origin-top-left">
+              <div role="listbox" aria-label="Nichos disponíveis" className="absolute top-full left-0 mt-1 w-56 bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/30 rounded-[var(--shape-extra-small)] overflow-hidden z-50 elevation-3 animate-scale-in origin-top-left">
                 {Object.entries(nicheConfigs).map(([key, cfg]) => {
                   const isEnabled = key === 'jewelry';
                   const isSelected = key === niche;
                   return (
                     <button
                       key={key}
+                      role="option"
+                      aria-selected={isSelected}
                       onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
                       disabled={!isEnabled}
                       className={`w-full flex items-center gap-3 px-3 py-3 md3-body-medium transition-colors duration-[var(--duration-short4)] text-left
                         ${isEnabled ? 'hover:bg-[var(--on-surface-variant)]/8' : 'opacity-38 cursor-not-allowed'}
                         ${isSelected ? 'bg-[var(--secondary-container)]' : ''}`}
                     >
-                      <span className="text-lg w-7 text-center">{cfg.icon}</span>
+                      <span className="text-lg w-7 text-center" aria-hidden="true">{cfg.icon}</span>
                       <div className="flex flex-col flex-1">
                         <span className={isSelected ? 'font-semibold text-[var(--on-secondary-container)]' : ''}>{cfg.label}</span>
                         {!isEnabled && <span className="md3-label-small text-[var(--outline)]">Em breve</span>}
                       </div>
-                      {isSelected && <Check className="w-4 h-4 text-[var(--primary)]" />}
+                      {isSelected && <Check className="w-4 h-4 text-[var(--primary)]" aria-hidden="true" />}
                     </button>
                   );
                 })}
@@ -322,10 +327,10 @@ function StudioContent() {
           {/* Theme Toggle — M3 Icon Button */}
           <button
             onClick={toggleTheme}
+            aria-label={isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro'}
             className="flex items-center justify-center w-9 h-9 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
-            title={isDark ? 'Modo claro' : 'Modo escuro'}
           >
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {isDark ? <Sun className="w-4 h-4" aria-hidden="true" /> : <Moon className="w-4 h-4" aria-hidden="true" />}
           </button>
 
           {/* Desktop: Logout — M3 Text Button */}
@@ -355,16 +360,18 @@ function StudioContent() {
         >
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            aria-label={isSidebarOpen ? 'Recolher menu lateral' : 'Expandir menu lateral'}
+            aria-expanded={isSidebarOpen}
             className="flex items-center justify-center w-6 h-12 bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/30 border-l-0 rounded-r-[var(--shape-medium)] hover:bg-[var(--surface-container-highest)] transition-colors duration-[var(--duration-short4)]"
-            title={isSidebarOpen ? "Recolher Menu" : "Expandir Menu"}
           >
-            {isSidebarOpen ? <ChevronLeft className="w-4 h-4 text-[var(--on-surface-variant)]" /> : <ChevronRight className="w-4 h-4 text-[var(--on-surface-variant)]" />}
+            {isSidebarOpen ? <ChevronLeft className="w-4 h-4 text-[var(--on-surface-variant)]" aria-hidden="true" /> : <ChevronRight className="w-4 h-4 text-[var(--on-surface-variant)]" aria-hidden="true" />}
           </button>
         </div>
 
         {/* Mobile Scrim */}
         {isSidebarOpen && (
           <div
+            aria-hidden="true"
             className="md:hidden fixed inset-0 bg-[var(--on-surface)]/32 z-40 transition-opacity duration-[var(--duration-medium2)]"
             onClick={() => setIsSidebarOpen(false)}
           />
@@ -425,9 +432,9 @@ function StudioContent() {
                 </button>
                 <div className="flex items-center gap-2">
                   {recentImages.slice(0, 8).map((img, idx) => (
-                    <div key={idx} className="w-10 h-10 rounded-[var(--shape-small)] overflow-hidden border border-[var(--outline-variant)]/30 cursor-pointer hover:border-[var(--primary)] transition-colors duration-[var(--duration-short4)]" onClick={() => setImageUrl(img)}>
-                      <img src={img} alt={`Recente ${idx}`} className="w-full h-full object-cover" />
-                    </div>
+                    <button key={idx} aria-label={`Visualizar imagem recente ${idx + 1}`} onClick={() => setImageUrl(img)} className="w-10 h-10 rounded-[var(--shape-small)] overflow-hidden border border-[var(--outline-variant)]/30 cursor-pointer hover:border-[var(--primary)] transition-colors duration-[var(--duration-short4)]">
+                      <img src={img} alt="" aria-hidden="true" className="w-full h-full object-cover" />
+                    </button>
                   ))}
                 </div>
               </div>
@@ -452,6 +459,7 @@ function StudioContent() {
 
       {/* ── Mobile Bottom Navigation — M3 Navigation Bar ── */}
       <nav
+        aria-label="Navegação principal"
         className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--surface-container)] border-t border-[var(--outline-variant)]/20"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
@@ -483,7 +491,7 @@ function StudioContent() {
       </nav>
 
       {/* ── Overlays ── */}
-      {nicheMenuOpen && <div className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
+      {nicheMenuOpen && <div aria-hidden="true" className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
       <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} themeClass={config.themeClass} />
       <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} userEmail={user?.email} userId={user?.id} />
     </div>
