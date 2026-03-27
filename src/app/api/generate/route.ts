@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { GoogleAuth } from 'google-auth-library';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
+import { sendCreditsExhaustedEmail } from '@/lib/resend';
 
 // ── Rate Limiter (in-memory, per-user) ──
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minuto
@@ -63,6 +64,11 @@ export async function POST(req: Request) {
         { error: 'Sem créditos disponíveis. Faça upgrade do seu plano.' },
         { status: 403 }
       );
+    }
+
+    // If credits just hit 0, notify user by email
+    if (newCredits === 0 && user.email) {
+      sendCreditsExhaustedEmail(user.email).catch(() => {});
     }
 
     const formData = await req.formData();

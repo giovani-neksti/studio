@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendPurchaseConfirmationEmail } from '@/lib/resend';
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -88,6 +89,12 @@ export async function POST(req: Request) {
 
     if (resolvedId) {
       console.log(`Stripe: +${credits} credits (${plan}) -> user ${resolvedId}`);
+      // Send purchase confirmation email
+      const buyerEmail = email;
+      if (buyerEmail) {
+        const amountPaid = ((session.amount_total || 0) / 100).toFixed(2).replace('.', ',');
+        sendPurchaseConfirmationEmail(buyerEmail, credits, amountPaid).catch(() => {});
+      }
     } else {
       console.error(`Stripe: could not find user. userId=${userId}, email=${email}, session=${session.id}`);
     }
