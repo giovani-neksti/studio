@@ -11,7 +11,11 @@ interface Particle {
   opacity: number;
 }
 
-export function NeuralBackground() {
+interface NeuralBackgroundProps {
+  variant?: 'green' | 'gold';
+}
+
+export function NeuralBackground({ variant = 'green' }: NeuralBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const particlesRef = useRef<Particle[]>([]);
@@ -25,7 +29,12 @@ export function NeuralBackground() {
 
     const CONNECTION_DISTANCE = 140;
     const MOUSE_RADIUS = 200;
-    const PARTICLE_COUNT_FACTOR = 0.00008; // particles per pixel²
+    const PARTICLE_COUNT_FACTOR = variant === 'gold' ? 0.00005 : 0.00008;
+
+    // Color scheme based on variant
+    const colors = variant === 'gold'
+      ? { base: '212, 175, 55', bright: '255, 224, 138', glow: '212, 175, 55' }   // Gold (#D4AF37)
+      : { base: '45, 110, 69', bright: '109, 191, 138', glow: '45, 110, 69' };     // Green
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -123,8 +132,7 @@ export function NeuralBackground() {
           if (dist < CONNECTION_DISTANCE) {
             const alpha = (1 - dist / CONNECTION_DISTANCE) * 0.15;
 
-            // Gold gradient for connections
-            ctx.strokeStyle = `rgba(45, 110, 69, ${alpha})`;
+            ctx.strokeStyle = `rgba(${colors.base}, ${alpha})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -141,7 +149,7 @@ export function NeuralBackground() {
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < MOUSE_RADIUS) {
           const alpha = (1 - dist / MOUSE_RADIUS) * 0.3;
-          ctx.strokeStyle = `rgba(109, 191, 138, ${alpha})`;
+          ctx.strokeStyle = `rgba(${colors.bright}, ${alpha})`;
           ctx.lineWidth = 0.8;
           ctx.beginPath();
           ctx.moveTo(mouse.x, mouse.y);
@@ -163,7 +171,7 @@ export function NeuralBackground() {
           const glowAlpha = (1 - distMouse / MOUSE_RADIUS) * 0.3;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.radius * 4, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(45, 110, 69, ${glowAlpha})`;
+          ctx.fillStyle = `rgba(${colors.glow}, ${glowAlpha})`;
           ctx.fill();
         }
 
@@ -173,7 +181,7 @@ export function NeuralBackground() {
         const coreOpacity = isNearMouse
           ? Math.min(p.opacity + 0.4, 0.9)
           : p.opacity;
-        ctx.fillStyle = `rgba(45, 110, 69, ${coreOpacity})`;
+        ctx.fillStyle = `rgba(${colors.base}, ${coreOpacity})`;
         ctx.fill();
       }
 

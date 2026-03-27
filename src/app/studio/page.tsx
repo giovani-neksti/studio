@@ -10,6 +10,7 @@ import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
 import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check } from 'lucide-react';
+import { NeuralBackground } from '@/components/NeuralBackground';
 
 function StudioContent() {
   const searchParams = useSearchParams();
@@ -41,7 +42,7 @@ function StudioContent() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    setIsSidebarOpen(window.innerWidth >= 768);
+    setIsSidebarOpen(true);
     if (!selections.bgTab) {
       setSelections(prev => ({ ...prev, bgTab: 'solid', displayTab: 'expositor' }));
     }
@@ -187,6 +188,9 @@ function StudioContent() {
 
   return (
     <div className={`${config.themeClass} flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--background)]`}>
+
+      {/* Neural network animated background — gold variant */}
+      <NeuralBackground variant="gold" />
 
       {/* ── M3 Small Top App Bar ── */}
       <header className="h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-[var(--surface-container)] z-40 relative border-b border-[var(--outline-variant)]/20">

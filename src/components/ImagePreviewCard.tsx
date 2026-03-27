@@ -77,20 +77,13 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         ) : imageUrl ? (
           <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover animate-scale-in" />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[var(--surface-container)]">
-            <div className="w-20 h-20 rounded-[var(--shape-extra-large)] bg-[var(--primary-container)] flex items-center justify-center mb-6 animate-float elevation-2">
-              <Sparkles className="w-10 h-10 text-[var(--on-primary-container)]" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-transparent">
+            <div className="w-14 h-14 rounded-[var(--shape-extra-large)] bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center mb-4">
+              <Sparkles className="w-7 h-7 text-[var(--primary)]/60" />
             </div>
-            <h2 className="font-serif md3-headline-small font-bold mb-3">Pronto para a Mágica?</h2>
-            <p className="text-[var(--on-surface-variant)] md3-body-medium max-w-[280px] leading-relaxed mb-8">
-              Escolha as opções no menu lateral e clique em gerar para ver o seu produto em um cenário de luxo.
+            <p className="text-[var(--on-surface-variant)]/60 md3-body-medium max-w-[240px] leading-relaxed">
+              Configure as opções e gere sua imagem profissional.
             </p>
-            <button
-              onClick={onGenerate}
-              className="md:hidden flex items-center justify-center gap-3 h-14 px-10 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large elevation-1 transition-all duration-[var(--duration-medium2)] active:scale-[0.96] state-layer"
-            >
-              Começar Agora
-            </button>
           </div>
         )}
       </div>
