@@ -159,8 +159,8 @@ export default function LandingPage() {
             <span className="font-serif text-base font-bold">Neksti Studio</span>
           </div>
           <div className="flex gap-6 text-[var(--on-surface-variant)] md3-body-medium">
-            <a href="#" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Termos</a>
-            <a href="#" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Privacidade</a>
+            <a href="/termos" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Termos</a>
+            <a href="/privacidade" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Privacidade</a>
             <a href="#" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Contato</a>
           </div>
           <p className="text-[var(--outline)] md3-body-small">
