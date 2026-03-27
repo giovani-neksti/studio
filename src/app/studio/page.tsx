@@ -7,9 +7,10 @@ import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
+import { BatchPanel } from '@/components/BatchPanel';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon } from 'lucide-react';
+import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon, Layers } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { isAdmin } from '@/lib/admin';
@@ -36,6 +37,7 @@ function StudioContent() {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showBatch, setShowBatch] = useState(false);
 
   // Auth guard — redirect to /auth if not logged in
   useEffect(() => {
@@ -200,6 +202,10 @@ function StudioContent() {
     }
   };
 
+  const handleBatchCreditSpent = () => {
+    if (!userIsAdmin) setCredits((c) => Math.max(0, (c ?? 0) - 1));
+  };
+
   const switchNiche = (n: NicheKey) => {
     if (n !== 'jewelry') return;
     router.push(`/studio?niche=${n}`);
@@ -298,6 +304,20 @@ function StudioContent() {
             <Gem className="w-3.5 h-3.5" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
           </div>
 
+          {/* Batch Mode Toggle */}
+          <button
+            onClick={() => setShowBatch(!showBatch)}
+            aria-pressed={showBatch}
+            aria-label={showBatch ? 'Desativar modo batch' : 'Ativar geração em batch (até 10 produtos)'}
+            className={`flex items-center gap-1.5 h-8 px-3 rounded-[var(--shape-full)] md3-label-medium transition-all duration-[var(--duration-short4)]
+              ${showBatch
+                ? 'bg-[var(--primary)] text-[var(--on-primary)]'
+                : 'bg-[var(--surface-container-highest)] text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8'}`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Batch</span>
+          </button>
+
           {/* Desktop: My Generations */}
           <button
             onClick={() => router.push('/studio/geracoes')}
@@ -395,31 +415,44 @@ function StudioContent() {
         {/* Main Content */}
         <main className="flex-1 flex flex-col bg-transparent relative min-h-0 overflow-hidden">
 
-          {/* Desktop Generate Button — M3 Filled Button */}
-          <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">
-            <button
-              onClick={handleGenerate}
-              disabled={!canGenerate}
-              className="w-full flex items-center justify-center gap-3 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 state-layer"
-            >
-              {isGenerating ? (
-                <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
-              ) : (
-                <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
-              )}
-            </button>
-          </div>
+          {/* Desktop Generate Button — M3 Filled Button (hidden in batch mode) */}
+          {!showBatch && (
+            <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">
+              <button
+                onClick={handleGenerate}
+                disabled={!canGenerate}
+                className="w-full flex items-center justify-center gap-3 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 state-layer"
+              >
+                {isGenerating ? (
+                  <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
+                ) : (
+                  <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Preview Area */}
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <ImagePreviewCard
-              isGenerating={isGenerating}
-              imageUrl={imageUrl}
-              selections={selections}
-              niche={niche}
-              onGenerate={handleGenerate}
-              livePrompt={currentPrompt}
-            />
+            {showBatch ? (
+              <BatchPanel
+                selections={selections}
+                niche={niche}
+                accessToken={session?.access_token ?? ''}
+                credits={credits}
+                isAdmin={userIsAdmin}
+                onCreditSpent={handleBatchCreditSpent}
+              />
+            ) : (
+              <ImagePreviewCard
+                isGenerating={isGenerating}
+                imageUrl={imageUrl}
+                selections={selections}
+                niche={niche}
+                onGenerate={handleGenerate}
+                livePrompt={currentPrompt}
+              />
+            )}
           </div>
 
           {/* Desktop Gallery Strip — M3 Surface Container */}
