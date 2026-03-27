@@ -407,7 +407,7 @@ function StudioContent() {
           <div className="w-full flex justify-center pt-3.5 pb-2 shrink-0 cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
             <div className="w-8 h-1 bg-[var(--on-surface-variant)]/40 rounded-[var(--shape-full)]" />
           </div>
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex flex-col flex-1 min-h-0">
             <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} />
           </div>
         </div>
