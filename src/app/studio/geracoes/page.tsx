@@ -74,7 +74,7 @@ export default function GeracoesPage() {
   return (
     <div className={`theme-jewelry${isDark ? '' : ' light'} min-h-[100dvh] bg-[var(--background)]`}>
       {/* Header */}
-      <header className="sticky top-0 z-40 h-16 flex items-center gap-3 px-4 md:px-6 bg-[var(--header-bg)] border-b border-[var(--outline-variant)]/20">
+      <header className="theme-jewelry sticky top-0 z-40 h-16 flex items-center gap-3 px-4 md:px-6 bg-[var(--surface-container)] border-b border-[var(--outline-variant)]/20">
         <button
           onClick={() => router.push('/studio')}
           className="flex items-center justify-center w-10 h-10 rounded-[var(--shape-full)] hover:bg-[var(--on-surface-variant)]/8 transition-colors"

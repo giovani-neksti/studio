@@ -15,11 +15,8 @@ export default function LandingPage() {
 
       {/* ── M3 Top App Bar — Small ── */}
       <nav className="h-16 flex items-center justify-between px-4 md:px-6 fixed top-0 w-full z-50 bg-[var(--surface-container-low)]/80 backdrop-blur-lg border-b border-[var(--outline-variant)]/20">
-        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push('/')}>
-          <div className="w-9 h-9 rounded-[var(--shape-medium)] bg-[var(--primary)] flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-[var(--on-primary)]" />
-          </div>
-          <span className="font-serif text-lg font-bold tracking-tight">Neksti Studio</span>
+        <div className="flex items-center cursor-pointer" onClick={() => router.push('/')}>
+          <img src="/logo_neksti.png" alt="Neksti" className="h-8 md:h-9 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
         </div>
         <button
           onClick={() => router.push('/auth')}
