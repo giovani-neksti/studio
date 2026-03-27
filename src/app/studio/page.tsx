@@ -236,7 +236,7 @@ function StudioContent() {
       <NeuralBackground variant="gold" />
 
       {/* ── M3 Small Top App Bar ── */}
-      <header className="h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-[var(--surface-container)] z-40 relative border-b border-[var(--outline-variant)]/20">
+      <header className="h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-[var(--header-bg)] z-40 relative border-b border-[var(--outline-variant)]/20">
         {/* Left: Logo + Niche Selector */}
         <div className="flex items-center gap-3 h-full">
           <div className="flex items-center h-full cursor-pointer py-2" onClick={() => router.push('/')}>

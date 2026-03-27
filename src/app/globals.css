@@ -181,8 +181,14 @@
   --outline-variant: #2A2A2E;
 }
 
+/* JEWELRY — dark header token (default dark mode) */
+.theme-jewelry {
+  --header-bg: var(--surface-container);
+}
+
 /* JEWELRY LIGHT — Warm ivory with deep gold accent */
 .theme-jewelry.light {
+  --header-bg: #111113; /* keeps header black so logo stays visible */
   --background: #FFFDF5;
   --foreground: #1A1500;
   --surface: #FFF8E7;
