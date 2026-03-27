@@ -460,7 +460,7 @@ function StudioContent() {
 
         {/* Mobile Full-Screen Modal — M3 Pattern Adaptation */}
         <div
-          className={`md:hidden fixed inset-0 z-[100] flex flex-col bg-[var(--surface-container-low)] transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
+          className={`md:hidden fixed top-0 inset-x-0 h-[100dvh] z-[100] flex flex-col bg-[var(--surface-container-low)] transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
             ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', paddingTop: 'env(safe-area-inset-top, 0px)' }}
         >
