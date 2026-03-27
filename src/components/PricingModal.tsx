@@ -5,21 +5,23 @@ import { Check, X, Zap } from 'lucide-react';
 interface PricingModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  userEmail?: string;
+  userId?: string;
 }
 
-export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
+export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: PricingModalProps) {
   if (!isOpen) return null;
 
   const plans = [
     {
       name: 'Essentials',
       price: '400',
-      credits: '133',
-      perCredit: 'R$ 3,00',
+      credits: '200',
+      perCredit: 'R$ 2,00',
       description: 'Ideal para validar produtos com imagens profissionais.',
-      features: ['~133 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'R$ 3,00 por foto'],
+      features: ['200 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'R$ 2,00 por foto'],
       popular: false,
-      stripeUrl: '',
+      stripeUrl: 'https://buy.stripe.com/28E9AL0NDck7aiDcRJ6Ri07',
     },
     {
       name: 'Professional',
@@ -29,7 +31,7 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
       description: 'O dobro de fotos por uma fração do preço. O favorito.',
       features: ['400 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'Prioridade na fila de geração', 'R$ 1,50 por foto'],
       popular: true,
-      stripeUrl: '',
+      stripeUrl: 'https://buy.stripe.com/cNi6oz67Xbg34YjeZR6Ri06',
     },
     {
       name: 'Premium',
@@ -39,9 +41,17 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
       description: 'Para alto volume de postagens e franqueados.',
       features: ['1.000 fotos mensais', 'Suporte dedicado via WhatsApp', 'Acesso a todos os nichos', 'Acesso Antecipado a Modelos', 'R$ 1,00 por foto'],
       popular: false,
-      stripeUrl: '',
+      stripeUrl: 'https://buy.stripe.com/28E5kv0ND83R3Ufg3V6Ri08',
     }
   ];
+
+  const buildStripeUrl = (baseUrl: string) => {
+    const params = new URLSearchParams();
+    if (userEmail) params.set('prefilled_email', userEmail);
+    if (userId) params.set('client_reference_id', userId);
+    const qs = params.toString();
+    return qs ? `${baseUrl}?${qs}` : baseUrl;
+  };
 
   return (
     /* M3 Full-screen Dialog (mobile) / Dialog (desktop) */
@@ -117,7 +127,7 @@ export function PricingModal({ isOpen, onOpenChange }: PricingModalProps) {
 
                 {/* M3 Filled / Outlined Button */}
                 <button
-                  onClick={() => plan.stripeUrl ? window.open(plan.stripeUrl, '_blank') : alert(`Link do Stripe ainda não configurado para ${plan.name}`)}
+                  onClick={() => window.open(buildStripeUrl(plan.stripeUrl), '_blank')}
                   className={`w-full md3-label-large h-11 rounded-[var(--shape-full)] transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] state-layer
                     ${plan.popular
                       ? 'bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1'

@@ -451,7 +451,7 @@ function StudioContent() {
       {/* ── Overlays ── */}
       {nicheMenuOpen && <div className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
       <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} themeClass={config.themeClass} />
-      <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} />
+      <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} userEmail={user?.email} userId={user?.id} />
     </div>
   );
 }
