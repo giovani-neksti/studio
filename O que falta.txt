@@ -1,0 +1,17 @@
+Geração em batch — Upload de 10 produtos de uma vez, gera tudo automaticamente. Nenhum concorrente BR faz isso bem.
+
+Templates salvos — Deixar o usuário salvar combinações (fundo + display + props) como presets reutilizáveis.
+
+Comparativo antes/depois — Slider interativo mostrando foto original vs gerada. Ótimo para landing page e para o studio.
+
+API pública — Permitir integração direta com Shopify/WooCommerce. Isso abre o mercado enterprise.
+
+Galeria pública de exemplos — Mostrar na landing page resultados reais (com permissão). Prova social é o que mais converte.
+
+Pode apagar todos os users que não forem os nossos 3 de admin e deixar créditos infinitos para os 3 admins tbm. E para nós apenas, deveria pedir senha tbm ao invés de somente os e-mails. Somente pra nós por enquanto, para todos os outros usuários, manter apenas com o e-mail e o código de validação.
+
+E favor incluir os testes de rota de API que validamos dentro da área administrativa pra gente saber como as rotas estão funcionando em tempo real e um botão para testar, validar se quisermos enviar o teste na hora tbm.
+
+Troque o favicon que ainda está aquele triângulo branco num círculo preto. Pode escolher outro que combine com a Neksti, de preferência usando a nossa identidade visual de cores.
+
+E seria legal com base no custo atual de geração de imagens a gente colocar no painel admin quanto está tendo de custo e quanto estamos tendo de recorrência com os users cadastrados segundo o que eles pagam por mês da gente. Fazer esse confrontamento de uso e dar insights sobre custo e lucro, sobre margem.

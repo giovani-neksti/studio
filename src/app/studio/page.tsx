@@ -370,7 +370,7 @@ function StudioContent() {
         <div className={`hidden md:flex flex-col min-h-0 bg-[var(--surface-container-low)] transition-all duration-[var(--duration-medium4)] ease-[var(--easing-emphasized)] shrink-0
           ${isSidebarOpen ? 'w-[320px] xl:w-[360px] border-r border-[var(--outline-variant)]/20' : 'w-0 overflow-hidden'}`}
         >
-          <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} />
+          <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} />
         </div>
 
         {/* Desktop Sidebar Toggle — M3 Icon Button */}
@@ -408,7 +408,7 @@ function StudioContent() {
             <div className="w-8 h-1 bg-[var(--on-surface-variant)]/40 rounded-[var(--shape-full)]" />
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">
-            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} />
+            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} />
           </div>
         </div>
 
@@ -476,19 +476,7 @@ function StudioContent() {
         </main>
       </div>
 
-      {/* ── Mobile Extended FAB — M3 Pattern ── */}
-      <button
-        onClick={handleGenerate}
-        disabled={!canGenerate}
-        className="md:hidden fixed z-35 right-4 h-14 px-5 rounded-[var(--shape-large)] md3-label-large elevation-3 flex items-center gap-2.5 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] active:scale-[0.96] disabled:opacity-[0.38] disabled:shadow-none bg-[var(--primary-container)] text-[var(--on-primary-container)]"
-        style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px) + 12px)' }}
-      >
-        {isGenerating ? (
-          <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
-        ) : (
-          <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar' : 'Upload'}</span></>
-        )}
-      </button>
+      {/* Mobile FAB removed — generation is now handled inside the wizard footer (Sidebar step 4) */}
 
       {/* ── Mobile Bottom Navigation — M3 Navigation Bar ── */}
       <nav
