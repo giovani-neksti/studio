@@ -46,6 +46,8 @@ import {
   Tag,
   Minus,
   Grip,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -53,6 +55,10 @@ interface SidebarProps {
   niche: string;
   selections: Record<string, any>;
   onSelect: (key: string, value: any) => void;
+  onGenerate?: () => void;
+  canGenerate?: boolean;
+  isGenerating?: boolean;
+  hasUpload?: boolean;
 }
 
 const ICON_CLASS = "w-6 h-6 transition-colors duration-[var(--duration-short4)]";
@@ -151,7 +157,7 @@ function SegmentedButton({ options, value, onChange }: { options: { id: string; 
   );
 }
 
-export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
+export function Sidebar({ config, niche, selections, onSelect, onGenerate, canGenerate, isGenerating, hasUpload }: SidebarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -525,6 +531,23 @@ export function Sidebar({ config, niche, selections, onSelect }: SidebarProps) {
 
         </div>
       </div>
+
+      {/* Mobile Generate Button — sticky at bottom of sidebar */}
+      {onGenerate && (
+        <div className="md:hidden flex-shrink-0 px-4 py-3 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
+          <button
+            onClick={onGenerate}
+            disabled={!canGenerate}
+            className="w-full flex items-center justify-center gap-2.5 h-14 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 active:scale-[0.98] state-layer"
+          >
+            {isGenerating ? (
+              <><Loader2 className="w-5 h-5 animate-spin" /><span>Gerando...</span></>
+            ) : (
+              <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
