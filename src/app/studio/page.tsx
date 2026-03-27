@@ -11,6 +11,7 @@ import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
 import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check } from 'lucide-react';
 import { NeuralBackground } from '@/components/NeuralBackground';
+import { isAdmin } from '@/lib/admin';
 
 function StudioContent() {
   const searchParams = useSearchParams();
@@ -42,9 +43,16 @@ function StudioContent() {
     }
   }, [user, authLoading, router]);
 
-  // Load credits from database
+  const userIsAdmin = isAdmin(user?.email);
+
+  // Load credits from database (admins get infinite)
   useEffect(() => {
     if (!user) return;
+    if (isAdmin(user.email)) {
+      setCredits(999);
+      setCreditsLoading(false);
+      return;
+    }
     setCreditsLoading(true);
     fetch(`/api/credits?userId=${user.id}`)
       .then(res => res.json())
@@ -161,17 +169,19 @@ function StudioContent() {
       setRecentImages(prev => [data.url, ...prev].slice(0, 12));
       setImageIndex((i) => i + 1);
 
-      // Decrement credit in database
-      const creditRes = await fetch('/api/credits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user!.id }),
-      });
-      const creditData = await creditRes.json();
-      if (creditRes.ok) {
-        setCredits(creditData.credits);
-      } else {
-        setCredits((c) => Math.max(0, (c ?? 0) - 1));
+      // Decrement credit in database (skip for admins)
+      if (!userIsAdmin) {
+        const creditRes = await fetch('/api/credits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user!.id }),
+        });
+        const creditData = await creditRes.json();
+        if (creditRes.ok) {
+          setCredits(creditData.credits);
+        } else {
+          setCredits((c) => Math.max(0, (c ?? 0) - 1));
+        }
       }
 
     } catch (e: any) {
@@ -271,9 +281,9 @@ function StudioContent() {
           {/* M3 Badge-style credits */}
           <div
             className="flex items-center gap-1.5 h-8 px-3 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-medium"
-            style={{ color: (credits ?? 0) > 1 ? 'var(--primary)' : 'var(--error)' }}
+            style={{ color: userIsAdmin || (credits ?? 0) > 1 ? 'var(--primary)' : 'var(--error)' }}
           >
-            <Gem className="w-3.5 h-3.5" />{creditsLoading ? '...' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
+            <Gem className="w-3.5 h-3.5" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
           </div>
 
           {/* Desktop: Subscription — M3 Filled Tonal Button */}

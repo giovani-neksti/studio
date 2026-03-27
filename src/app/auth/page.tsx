@@ -6,14 +6,9 @@ import { supabase } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2 } from 'lucide-react';
 import { NeuralBackground } from '@/components/NeuralBackground';
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 const OTP_LENGTH = 8;
-
-const ADMIN_EMAILS = [
-  'giovani@neksti.com.br',
-  'lucas@neksti.com.br',
-  'jefferson@neksti.com.br',
-];
 
 type Step = 'email' | 'otp' | 'check-email';
 
