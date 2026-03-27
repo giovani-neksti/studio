@@ -9,7 +9,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check } from 'lucide-react';
+import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck } from 'lucide-react';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { isAdmin } from '@/lib/admin';
 
@@ -297,6 +297,16 @@ function StudioContent() {
           >
             <CreditCard className="w-3.5 h-3.5" />Assinatura
           </button>
+
+          {/* Desktop: Admin — visible only for admins */}
+          {isAdmin(user?.email) && (
+            <button
+              onClick={() => router.push('/admin')}
+              className="hidden md:flex items-center gap-1.5 h-9 px-3 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /><span className="hidden sm:inline">Admin</span>
+            </button>
+          )}
 
           {/* Desktop: Logout — M3 Text Button */}
           <button
