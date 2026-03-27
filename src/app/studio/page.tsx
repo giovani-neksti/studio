@@ -24,7 +24,8 @@ function StudioContent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [credits, setCredits] = useState(5);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [creditsLoading, setCreditsLoading] = useState(true);
   const [imageIndex, setImageIndex] = useState(0);
   const [recentImages, setRecentImages] = useState<string[]>([]);
 
@@ -40,6 +41,19 @@ function StudioContent() {
       router.replace('/auth');
     }
   }, [user, authLoading, router]);
+
+  // Load credits from database
+  useEffect(() => {
+    if (!user) return;
+    setCreditsLoading(true);
+    fetch(`/api/credits?userId=${user.id}`)
+      .then(res => res.json())
+      .then(data => {
+        setCredits(data.credits ?? 0);
+      })
+      .catch(() => setCredits(0))
+      .finally(() => setCreditsLoading(false));
+  }, [user]);
 
   useEffect(() => {
     setIsSidebarOpen(true);
@@ -106,7 +120,7 @@ function StudioContent() {
   };
 
   const handleGenerate = async () => {
-    if (credits <= 0) return;
+    if (!credits || credits <= 0) return;
     if (!hasUpload) {
       alert("Por favor, selecione uma categoria e faça o upload de pelo menos uma imagem do produto.");
       return;
@@ -146,7 +160,19 @@ function StudioContent() {
       setImageUrl(data.url);
       setRecentImages(prev => [data.url, ...prev].slice(0, 12));
       setImageIndex((i) => i + 1);
-      setCredits((c) => c - 1);
+
+      // Decrement credit in database
+      const creditRes = await fetch('/api/credits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user!.id }),
+      });
+      const creditData = await creditRes.json();
+      if (creditRes.ok) {
+        setCredits(creditData.credits);
+      } else {
+        setCredits((c) => Math.max(0, (c ?? 0) - 1));
+      }
 
     } catch (e: any) {
       console.error(e);
@@ -167,7 +193,7 @@ function StudioContent() {
     setImageUrl(null);
   };
 
-  const canGenerate = !isGenerating && credits > 0 && hasUpload;
+  const canGenerate = !isGenerating && (credits ?? 0) > 0 && hasUpload && !creditsLoading;
 
   const liveSelections = { ...selections };
   const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
@@ -245,9 +271,9 @@ function StudioContent() {
           {/* M3 Badge-style credits */}
           <div
             className="flex items-center gap-1.5 h-8 px-3 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-medium"
-            style={{ color: credits > 2 ? 'var(--primary)' : 'var(--error)' }}
+            style={{ color: (credits ?? 0) > 1 ? 'var(--primary)' : 'var(--error)' }}
           >
-            <Gem className="w-3.5 h-3.5" />{credits} <span className="hidden sm:inline">Créditos</span>
+            <Gem className="w-3.5 h-3.5" />{creditsLoading ? '...' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
           </div>
 
           {/* Desktop: Subscription — M3 Filled Tonal Button */}
