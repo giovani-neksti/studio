@@ -84,7 +84,7 @@ function StudioContent() {
     });
   };
 
-  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_'));
+  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_') && !!selections[k]);
   const hasPreviewContent = isGenerating || !!imageUrl;
 
   const processImageForAI = async (file: File): Promise<File> => {

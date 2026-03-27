@@ -709,6 +709,19 @@ export function Sidebar({
     }
   };
 
+  // Hint text shown when step is not yet complete
+  const getStepHint = (step: number): string => {
+    switch (step) {
+      case 0:
+        if (showBatch) return '';
+        if (!selections.category) return 'Selecione uma categoria acima';
+        return 'Faça upload de uma foto do produto';
+      case 1: return 'Escolha uma cor ou cenário de fundo';
+      case 2: return 'Escolha um tipo de expositor ou modelo';
+      default: return '';
+    }
+  };
+
   const isLastStep = currentStep === 4;
 
   return (
@@ -743,7 +756,8 @@ export function Sidebar({
       {/* Footer Navigation */}
       <div className="flex-shrink-0 px-4 py-3 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
         <div className="flex items-center gap-2">
-          {/* Back button */}
+
+          {/* Back button — only from step 1+ */}
           {currentStep > 0 ? (
             <button
               onClick={goBack}
@@ -756,29 +770,41 @@ export function Sidebar({
             <div className="w-12 flex-shrink-0" aria-hidden="true" />
           )}
 
-          {/* Next / Generate button */}
-          {isLastStep ? (
-            <button
-              onClick={onGenerate}
-              disabled={!canGenerate}
-              className="flex-1 flex items-center justify-center gap-2.5 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 active:scale-[0.98] state-layer"
-            >
-              {isGenerating ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /><span>Gerando...</span></>
+          {/* Action area — button appears ONLY when ready, hint when not */}
+          <div className="flex-1">
+            {isLastStep ? (
+              canGenerate ? (
+                <button
+                  onClick={onGenerate}
+                  className="w-full flex items-center justify-center gap-2.5 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 active:scale-[0.98] state-layer"
+                >
+                  {isGenerating ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /><span>Gerando...</span></>
+                  ) : (
+                    <><Sparkles className="w-5 h-5" /><span>Gerar Imagem</span></>
+                  )}
+                </button>
               ) : (
-                <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
-              )}
-            </button>
-          ) : (
-            <button
-              onClick={goNext}
-              disabled={!canProceed(currentStep)}
-              className="flex-1 flex items-center justify-center gap-2 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed bg-[var(--secondary-container)] text-[var(--on-secondary-container)] hover:elevation-1 active:scale-[0.98] state-layer"
-            >
-              <span>Próximo</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
+                <p className="text-center md3-label-small text-[var(--on-surface-variant)] px-2 leading-relaxed">
+                  {!hasUpload ? '📎 Faça upload de uma imagem para continuar' : 'Selecione o formato de saída acima'}
+                </p>
+              )
+            ) : (
+              canProceed(currentStep) ? (
+                <button
+                  onClick={goNext}
+                  className="w-full flex items-center justify-center gap-2 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] hover:elevation-1 active:scale-[0.98] state-layer"
+                >
+                  <span>Próximo</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <p className="text-center md3-label-small text-[var(--on-surface-variant)] px-2 leading-relaxed">
+                  {getStepHint(currentStep)}
+                </p>
+              )
+            )}
+          </div>
         </div>
       </div>
     </div>
