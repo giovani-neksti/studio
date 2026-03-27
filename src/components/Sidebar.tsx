@@ -221,6 +221,11 @@ export function Sidebar({
   const hasMaterials = !!(config.materialOptions && config.materialOptions.length > 0);
   const hasProps     = !!(config.propOptions  && config.propOptions.length  > 0);
 
+  // Computed locally from selections — always reactive, no prop timing lag
+  const localHasUpload = Object.keys(selections).some(
+    (k) => k.startsWith('upload_') && !!selections[k]
+  );
+
   // Auto-fill text sub-options when text is typed
   useEffect(() => {
     if (selections.text) {
@@ -252,7 +257,7 @@ export function Sidebar({
   // Whether user can advance from a given step
   const canProceed = (step: number): boolean => {
     switch (step) {
-      case 0: return !!(hasUpload || showBatch);
+      case 0: return !!(localHasUpload || showBatch);
       case 1: return !!selections.background;
       case 2: return !!selections.display;
       case 3: return true; // optional step
@@ -715,7 +720,8 @@ export function Sidebar({
       case 0:
         if (showBatch) return '';
         if (!selections.category) return 'Selecione uma categoria acima';
-        return 'Faça upload de uma foto do produto';
+        if (!localHasUpload) return 'Faça upload de uma foto do produto';
+        return '';
       case 1: return 'Escolha uma cor ou cenário de fundo';
       case 2: return 'Escolha um tipo de expositor ou modelo';
       default: return '';
