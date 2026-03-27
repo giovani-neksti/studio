@@ -14,12 +14,13 @@ interface GalleryModalProps {
   onOpenChange: (open: boolean) => void;
   niche: string;
   images: string[];
+  themeClass?: string;
 }
 
-export function GalleryModal({ isOpen, onOpenChange, niche, images }: GalleryModalProps) {
+export function GalleryModal({ isOpen, onOpenChange, niche, images, themeClass }: GalleryModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90dvh] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 p-0 gap-0 overflow-hidden text-[var(--foreground)] rounded-t-[var(--shape-extra-large)] md:rounded-[var(--shape-extra-large)]">
+      <DialogContent className={`${themeClass || ''} max-w-5xl max-h-[90dvh] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 p-0 gap-0 overflow-hidden text-[var(--foreground)] rounded-t-[var(--shape-extra-large)] md:rounded-[var(--shape-extra-large)]`}>
         {/* M3 Dialog Header */}
         <DialogHeader className="p-5 md:p-6 pb-3 md:pb-4 border-b border-[var(--outline-variant)]/20 bg-[var(--surface-container-high)]">
           <div className="flex items-center justify-between">
