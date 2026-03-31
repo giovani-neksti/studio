@@ -7,7 +7,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Download, Maximize2, Image as ImageIcon } from 'lucide-react';
+import { Download, Maximize2, Image as ImageIcon, Share2 } from 'lucide-react';
+import { useShareImage } from '@/hooks/useShareImage';
+import { ShareToast } from './ShareToast';
 
 interface GalleryModalProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ interface GalleryModalProps {
 }
 
 export function GalleryModal({ isOpen, onOpenChange, niche, images, themeClass }: GalleryModalProps) {
+  const { canShare, shareImage, toast, dismissToast } = useShareImage();
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className={`${themeClass || ''} max-w-5xl max-h-[90dvh] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 p-0 gap-0 overflow-hidden text-[var(--foreground)] rounded-t-[var(--shape-extra-large)] md:rounded-[var(--shape-extra-large)]`}>
@@ -75,6 +79,14 @@ export function GalleryModal({ isOpen, onOpenChange, niche, images, themeClass }
                     >
                       <Download className="w-4 h-4" />
                     </button>
+                    {canShare && (
+                      <button
+                        onClick={() => shareImage(url, `neksti_${i}.png`)}
+                        className="w-10 h-10 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white flex items-center justify-center transition-opacity hover:opacity-90"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
 
                   {/* Date label */}
@@ -88,6 +100,7 @@ export function GalleryModal({ isOpen, onOpenChange, niche, images, themeClass }
           <div className="h-6" />
         </ScrollArea>
       </DialogContent>
+      <ShareToast message={toast} onDismiss={dismissToast} />
     </Dialog>
   );
 }

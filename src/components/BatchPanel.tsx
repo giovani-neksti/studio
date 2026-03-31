@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, X, Sparkles, Download, Check, AlertCircle, Loader2, Layers } from 'lucide-react';
+import { Upload, X, Sparkles, Download, Check, AlertCircle, Loader2, Layers, Share2 } from 'lucide-react';
+import { useShareImage } from '@/hooks/useShareImage';
+import { ShareToast } from './ShareToast';
 
 interface BatchItem {
   id: string;
@@ -28,6 +30,7 @@ export function BatchPanel({ selections, niche, accessToken, credits, isAdmin, o
   const [items, setItems] = useState<BatchItem[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { canShare, shareImage, toast, dismissToast } = useShareImage();
 
   const processImage = async (file: File): Promise<File> => {
     return new Promise((resolve) => {
@@ -264,15 +267,26 @@ export function BatchPanel({ selections, niche, accessToken, credits, isAdmin, o
                 </button>
               )}
 
-              {/* Download button — done only */}
+              {/* Action buttons — done only */}
               {item.status === 'done' && item.generatedUrl && (
-                <button
-                  onClick={() => downloadImage(item.generatedUrl!, idx)}
-                  aria-label={`Baixar imagem gerada ${idx + 1}`}
-                  className="absolute top-1 right-1 w-7 h-7 rounded-full bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center hover:opacity-90 transition-opacity"
-                >
-                  <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                </button>
+                <div className="absolute top-1 right-1 flex gap-1">
+                  {canShare && (
+                    <button
+                      onClick={() => shareImage(item.generatedUrl!, `neksti_batch_${idx + 1}.png`)}
+                      aria-label={`Compartilhar imagem ${idx + 1}`}
+                      className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                    >
+                      <Share2 className="w-3.5 h-3.5" aria-hidden="true" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => downloadImage(item.generatedUrl!, idx)}
+                    aria-label={`Baixar imagem gerada ${idx + 1}`}
+                    className="w-7 h-7 rounded-full bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center hover:opacity-90 transition-opacity"
+                  >
+                    <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -355,6 +369,8 @@ export function BatchPanel({ selections, niche, accessToken, credits, isAdmin, o
           Créditos insuficientes: você tem {credits ?? 0} mas precisa de {pendingCount}.
         </p>
       )}
+
+      <ShareToast message={toast} onDismiss={dismissToast} />
 
       {/* Hidden file input */}
       <input

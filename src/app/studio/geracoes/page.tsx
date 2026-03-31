@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Download, Maximize2, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Sparkles, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Download, Maximize2, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Sparkles, Sun, Moon, Share2 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { useShareImage } from '@/hooks/useShareImage';
+import { ShareToast } from '@/components/ShareToast';
 
 interface Generation {
   id: string;
@@ -25,6 +27,7 @@ export default function GeracoesPage() {
   const [total, setTotal] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toggle: toggleTheme, isDark } = useTheme();
+  const { canShare, shareImage, toast, dismissToast } = useShareImage();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -159,6 +162,15 @@ export default function GeracoesPage() {
                     >
                       <Download className="w-4 h-4" aria-hidden="true" />
                     </button>
+                    {canShare && (
+                      <button
+                        onClick={() => shareImage(gen.generated_image_url, `neksti_${gen.id}.png`)}
+                        aria-label="Compartilhar imagem"
+                        className="w-10 h-10 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                      >
+                        <Share2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    )}
                   </div>
 
                   {/* Date */}
@@ -196,6 +208,8 @@ export default function GeracoesPage() {
         )}
       </main>
 
+      <ShareToast message={toast} onDismiss={dismissToast} />
+
       {/* Lightbox */}
       {selectedImage && (
         <div
@@ -213,6 +227,15 @@ export default function GeracoesPage() {
               className="max-w-full max-h-[85vh] object-contain rounded-[var(--shape-large)]"
             />
             <div className="absolute top-3 right-3 flex gap-2">
+              {canShare && (
+                <button
+                  onClick={() => shareImage(selectedImage, `neksti_${Date.now()}.png`)}
+                  aria-label="Compartilhar imagem"
+                  className="w-10 h-10 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                >
+                  <Share2 className="w-4 h-4" aria-hidden="true" />
+                </button>
+              )}
               <button
                 onClick={() => downloadImage(selectedImage, `neksti_${Date.now()}.png`)}
                 aria-label="Baixar imagem"

@@ -2,6 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, Download, RefreshCw } from 'lucide-react';
+import { useShareImage } from '@/hooks/useShareImage';
+import { ShareToast } from './ShareToast';
+
+const InstagramIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="2" y="2" width="20" height="20" rx="5" />
+    <circle cx="12" cy="12" r="5" />
+    <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
+  </svg>
+);
 
 interface ImagePreviewCardProps {
   isGenerating: boolean;
@@ -24,6 +34,7 @@ const loadingMessages = [
 export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, onGenerate, livePrompt }: ImagePreviewCardProps) {
   const [dots, setDots] = useState('');
   const [messageIndex, setMessageIndex] = useState(0);
+  const { canShare, isSharing, shareImage, toast, dismissToast } = useShareImage();
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -108,7 +119,7 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
 
       {/* ACTION BUTTONS — M3 Outlined + Filled */}
       {imageUrl && (
-        <div className="flex gap-3 shrink-0 mb-4 md:mb-8 mt-1 w-full max-w-[500px]">
+        <div className="flex gap-2.5 shrink-0 mb-4 md:mb-8 mt-1 w-full max-w-[500px]">
           <button
             onClick={onGenerate}
             className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:bg-[var(--on-surface-variant)]/8"
@@ -121,8 +132,21 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
           >
             <Download className="w-4 h-4" /> Baixar HD
           </button>
+          {canShare && (
+            <button
+              onClick={() => shareImage(imageUrl, `neksti_${Date.now()}.png`)}
+              disabled={isSharing}
+              aria-label="Compartilhar imagem no Instagram ou outras redes"
+              className="flex items-center justify-center gap-2 h-11 px-5 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
+            >
+              <InstagramIcon className="w-4 h-4" />
+              <span>Postar</span>
+            </button>
+          )}
         </div>
       )}
+
+      <ShareToast message={toast} onDismiss={dismissToast} />
     </div>
   );
 }
