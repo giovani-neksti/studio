@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Sparkles, Camera, Zap, ShieldCheck, ArrowRight, Star, Play, Gem, Shirt, Footprints } from 'lucide-react';
 import { NeuralBackground } from '@/components/NeuralBackground';
+import { ShowcaseCarousel } from '@/components/ShowcaseCarousel';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -77,6 +78,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Showcase — Before & After Carousel ── */}
+      <ShowcaseCarousel />
 
       {/* ── Features Section — M3 Filled Cards ── */}
       <section className="py-16 md:py-24 bg-[var(--surface-container-lowest)]/90 backdrop-blur-sm relative px-6 z-10">
