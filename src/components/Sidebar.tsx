@@ -776,7 +776,7 @@ export function Sidebar({
   const isLastStep = currentStep === 4;
 
   return (
-    <div className="flex flex-col h-full w-full min-h-0 bg-[var(--surface-container-low)]">
+    <div className="flex flex-col h-full w-full min-h-0 overflow-hidden bg-[var(--surface-container-low)]">
 
       {/* Desktop Header */}
       <div className="hidden md:flex px-5 py-4 border-b border-[var(--outline-variant)]/20 shrink-0 items-center gap-3">
@@ -804,25 +804,25 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Footer Navigation */}
-      <div className="flex-shrink-0 w-full z-10 px-4 py-3 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
+      {/* Footer Navigation — pinned at bottom */}
+      <div className="flex-shrink-0 w-full z-10 px-4 py-3 md:py-3 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
         <div className="flex items-center gap-2">
 
           {/* Back button — only from step 1+ */}
           {currentStep > 0 ? (
             <button
               onClick={goBack}
-              className="flex items-center justify-center h-12 w-12 rounded-[var(--shape-full)] border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 flex-shrink-0"
+              className="flex items-center justify-center h-12 w-12 rounded-[var(--shape-full)] border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 flex-shrink-0 active:scale-95"
               aria-label="Passo anterior"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
           ) : (
-            <div className="w-12 flex-shrink-0" aria-hidden="true" />
+            <div className="w-12 flex-shrink-0 md:block hidden" aria-hidden="true" />
           )}
 
           {/* Action area — button appears ONLY when ready, hint when not */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {isLastStep ? (
               canGenerate ? (
                 <button
@@ -837,7 +837,7 @@ export function Sidebar({
                 </button>
               ) : (
                 <p className="text-center md3-label-small text-[var(--on-surface-variant)] px-2 leading-relaxed">
-                  {!hasUpload ? '📎 Faça upload de uma imagem para continuar' : 'Selecione o formato de saída acima'}
+                  {!hasUpload ? 'Faça upload de uma imagem para continuar' : 'Selecione o formato de saída acima'}
                 </p>
               )
             ) : (

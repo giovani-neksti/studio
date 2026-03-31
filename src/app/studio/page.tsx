@@ -449,22 +449,34 @@ function StudioContent() {
           </button>
         </div>
 
-        {/* Mobile Scrim */}
+        {/* Mobile Scrim — behind fullscreen wizard for transition smoothness */}
         {isSidebarOpen && (
           <div
             aria-hidden="true"
-            className="md:hidden fixed inset-0 bg-[var(--on-surface)]/32 z-40 transition-opacity duration-[var(--duration-medium2)]"
-            onClick={() => setIsSidebarOpen(false)}
+            className="md:hidden fixed inset-0 bg-[var(--on-surface)]/32 z-40 pointer-events-none transition-opacity duration-[var(--duration-medium2)]"
           />
         )}
 
         {/* Mobile Full-Screen Modal — M3 Pattern Adaptation */}
         <div
-          className={`md:hidden fixed top-0 inset-x-0 h-[100dvh] z-[100] flex flex-col bg-[var(--surface-container-low)] transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
+          className={`md:hidden fixed inset-0 z-[100] flex flex-col overflow-hidden bg-[var(--surface-container-low)] transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
             ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
-          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', paddingTop: 'env(safe-area-inset-top, 0px)' }}
         >
-          <div className="flex flex-col flex-1 min-h-0">
+          {/* Mobile Wizard Top Bar */}
+          <div className="flex-shrink-0 flex items-center justify-between h-14 px-4 border-b border-[var(--outline-variant)]/20 bg-[var(--surface-container)]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="flex items-center gap-1.5 h-10 px-2 -ml-2 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors hover:bg-[var(--on-surface-variant)]/8"
+              aria-label="Fechar configurações"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              <span className="md3-label-medium">Voltar</span>
+            </button>
+            <span className="md3-title-small text-[var(--foreground)] font-semibold">Configurações</span>
+            <div className="w-16" aria-hidden="true" />
+          </div>
+
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
             <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} />
           </div>
         </div>
