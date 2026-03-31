@@ -534,10 +534,10 @@ function StudioContent() {
 
       {/* Mobile FAB removed — generation is now handled inside the wizard footer (Sidebar step 4) */}
 
-      {/* ── Mobile Bottom Navigation — M3 Navigation Bar ── */}
+      {/* ── Mobile Bottom Navigation — M3 Navigation Bar (hidden when wizard is open) ── */}
       <nav
         aria-label="Navegação principal"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--surface-container)] border-t border-[var(--outline-variant)]/20"
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--surface-container)] border-t border-[var(--outline-variant)]/20 transition-transform duration-[var(--duration-medium2)] ${isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <div className="flex items-center justify-around h-20 px-2">
