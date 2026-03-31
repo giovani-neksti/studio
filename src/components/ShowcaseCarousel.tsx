@@ -83,7 +83,7 @@ export function ShowcaseCarousel() {
 
   return (
     <section className="py-10 md:py-24 px-4 md:px-6 relative z-10">
-      <div className="max-w-md md:max-w-lg mx-auto">
+      <div className="max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6 md:mb-10">
           <div className="inline-flex items-center gap-1.5 h-7 px-3 rounded-[var(--shape-small)] bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] text-xs font-medium mb-4">
@@ -94,7 +94,7 @@ export function ShowcaseCarousel() {
             Antes & Depois
           </h2>
           <p className="text-[var(--on-surface-variant)] text-sm md:text-base max-w-sm mx-auto">
-            Arraste para comparar as transformações reais.
+            Veja as transformações reais lado a lado.
           </p>
         </div>
 
