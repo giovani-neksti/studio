@@ -82,47 +82,47 @@ export function ShowcaseCarousel() {
   const nicheKey = item?.niche?.toLowerCase() || '';
 
   return (
-    <section className="py-16 md:py-24 px-6 relative z-10">
-      <div className="max-w-5xl mx-auto">
+    <section className="py-10 md:py-24 px-4 md:px-6 relative z-10">
+      <div className="max-w-md md:max-w-lg mx-auto">
         {/* Header */}
-        <div className="text-center mb-10 md:mb-14">
-          <div className="inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] md3-label-medium mb-5">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--primary)] fill-[var(--primary)]" />
+        <div className="text-center mb-6 md:mb-10">
+          <div className="inline-flex items-center gap-1.5 h-7 px-3 rounded-[var(--shape-small)] bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] text-xs font-medium mb-4">
+            <Sparkles className="w-3 h-3 text-[var(--primary)] fill-[var(--primary)]" />
             <span>Resultados Reais</span>
           </div>
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 animate-fade-up">
+          <h2 className="font-serif text-2xl md:text-4xl font-bold mb-2 md:mb-4">
             Antes & Depois
           </h2>
-          <p className="text-[var(--on-surface-variant)] md3-body-large max-w-xl mx-auto animate-fade-up stagger-1">
-            Veja transformações reais feitas por nossos usuários. Arraste o slider para comparar.
+          <p className="text-[var(--on-surface-variant)] text-sm md:text-base max-w-sm mx-auto">
+            Arraste para comparar as transformações reais.
           </p>
         </div>
 
         {/* Carousel */}
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="w-10 h-10 rounded-full border-[3px] border-[var(--outline-variant)] border-t-[var(--primary)] animate-spin" />
+          <div className="flex items-center justify-center h-48">
+            <div className="w-8 h-8 rounded-full border-[3px] border-[var(--outline-variant)] border-t-[var(--primary)] animate-spin" />
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-4">
             {/* Slider area */}
-            <div className="w-full max-w-lg mx-auto relative">
+            <div className="w-full relative">
               {/* Navigation arrows — desktop */}
               {items.length > 1 && (
                 <>
                   <button
                     onClick={goPrev}
-                    className="hidden md:flex absolute -left-16 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center rounded-[var(--shape-full)] bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] transition-all hover:bg-[var(--surface-container-highest)] hover:elevation-1 active:scale-95"
+                    className="hidden md:flex absolute -left-14 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] transition-all hover:bg-[var(--surface-container-highest)] active:scale-95"
                     aria-label="Anterior"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={goNext}
-                    className="hidden md:flex absolute -right-16 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center rounded-[var(--shape-full)] bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] transition-all hover:bg-[var(--surface-container-highest)] hover:elevation-1 active:scale-95"
+                    className="hidden md:flex absolute -right-14 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] transition-all hover:bg-[var(--surface-container-highest)] active:scale-95"
                     aria-label="Próximo"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                 </>
               )}
@@ -139,58 +139,51 @@ export function ShowcaseCarousel() {
 
               {/* Niche badge */}
               {item && NICHE_LABELS[nicheKey] && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-1.5 h-7 px-3 rounded-[var(--shape-small)] bg-black/60 backdrop-blur-sm text-white text-xs font-medium pointer-events-none">
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-1 h-6 px-2.5 rounded-[var(--shape-small)] bg-black/60 backdrop-blur-sm text-white text-[10px] md:text-xs font-medium pointer-events-none">
                   {NICHE_ICONS[nicheKey]}
                   <span>{NICHE_LABELS[nicheKey]}</span>
                 </div>
               )}
             </div>
 
-            {/* Mobile nav + dots */}
+            {/* Navigation: arrows + dots + counter */}
             {items.length > 1 && (
-              <div className="flex items-center gap-4">
-                {/* Mobile arrows */}
+              <div className="flex items-center gap-3">
                 <button
                   onClick={goPrev}
-                  className="md:hidden w-10 h-10 flex items-center justify-center rounded-[var(--shape-full)] bg-[var(--surface-container-high)]/80 border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] active:scale-95"
+                  className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-[var(--surface-container-high)]/80 border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] active:scale-95"
                   aria-label="Anterior"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-3.5 h-3.5" />
                 </button>
 
-                {/* Dots */}
-                <div className="flex gap-1.5">
-                  {items.slice(0, 10).map((_, i) => (
+                <div className="flex items-center gap-1">
+                  {items.slice(0, 8).map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setCurrent(i)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
                         i === current
-                          ? 'w-6 bg-[var(--primary)]'
-                          : 'w-2 bg-[var(--outline-variant)]/60 hover:bg-[var(--outline-variant)]'
+                          ? 'w-5 bg-[var(--primary)]'
+                          : 'w-1.5 bg-[var(--outline-variant)]/50'
                       }`}
-                      aria-label={`Ir para exemplo ${i + 1}`}
+                      aria-label={`Exemplo ${i + 1}`}
                     />
                   ))}
-                  {items.length > 10 && (
-                    <span className="text-[var(--outline)] text-xs self-center ml-1">+{items.length - 10}</span>
-                  )}
                 </div>
 
-                {/* Mobile arrows */}
                 <button
                   onClick={goNext}
-                  className="md:hidden w-10 h-10 flex items-center justify-center rounded-[var(--shape-full)] bg-[var(--surface-container-high)]/80 border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] active:scale-95"
+                  className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-[var(--surface-container-high)]/80 border border-[var(--outline-variant)]/30 text-[var(--on-surface-variant)] active:scale-95"
                   aria-label="Próximo"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
 
-            {/* Counter */}
-            <p className="md3-body-small text-[var(--outline)]">
-              {current + 1} de {items.length} transformações
+            <p className="text-[var(--outline)] text-[11px]">
+              {current + 1}/{items.length}
             </p>
           </div>
         )}
