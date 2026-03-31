@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2 } from 'lucide-react';
+import { Sparkles, ArrowLeft, Mail, ShieldCheck, Loader2, Lock } from 'lucide-react';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { ADMIN_EMAILS } from '@/lib/admin';
 
@@ -18,10 +18,13 @@ export default function AuthPage() {
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(0);
+
+  const isAdminEmail = ADMIN_EMAILS.includes(email.toLowerCase());
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -49,11 +52,16 @@ export default function AuthPage() {
   }, [countdown]);
 
   const handleAdminBypass = async () => {
-    // Call API to ensure admin user exists with password
+    if (!password) {
+      setError('Digite a senha de administrador.');
+      return;
+    }
+
+    // Call API to validate password and ensure admin user exists
     const res = await fetch('/api/admin-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.toLowerCase() }),
+      body: JSON.stringify({ email: email.toLowerCase(), password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erro no bypass admin');
@@ -61,7 +69,7 @@ export default function AuthPage() {
     // Sign in with password on the client
     const { error } = await supabase.auth.signInWithPassword({
       email: email.toLowerCase(),
-      password: process.env.NEXT_PUBLIC_ADMIN_BYPASS_PASSWORD || '',
+      password,
     });
     if (error) throw error;
     router.replace('/studio');
@@ -259,28 +267,51 @@ export default function AuthPage() {
                       type="email"
                       placeholder="seu@email.com"
                       value={email}
-                      onChange={(e) => { setEmail(e.target.value); setError(''); }}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
+                      onChange={(e) => { setEmail(e.target.value); setPassword(''); setError(''); }}
+                      onKeyDown={(e) => e.key === 'Enter' && !isAdminEmail && handleSendOtp()}
                       autoFocus
                       className="w-full h-14 pl-12 pr-4 rounded-[var(--shape-medium)] border border-[var(--outline)]/40 bg-[var(--surface-container-low)] text-[var(--foreground)] md3-body-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30 placeholder:text-[var(--on-surface-variant)]/40"
                     />
                   </div>
                 </div>
 
+                {isAdminEmail && (
+                  <div>
+                    <label htmlFor="auth-password" className="md3-label-medium text-[var(--on-surface-variant)] mb-2 block">Senha</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--on-surface-variant)]/60" aria-hidden="true" />
+                      <input
+                        id="auth-password"
+                        type="password"
+                        placeholder="Senha de administrador"
+                        value={password}
+                        onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
+                        autoFocus
+                        className="w-full h-14 pl-12 pr-4 rounded-[var(--shape-medium)] border border-[var(--outline)]/40 bg-[var(--surface-container-low)] text-[var(--foreground)] md3-body-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30 placeholder:text-[var(--on-surface-variant)]/40"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={handleSendOtp}
-                  disabled={loading || !email}
+                  disabled={loading || !email || (isAdminEmail && !password)}
                   className="w-full h-14 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-2.5 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
                 >
                   {loading ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Enviando...</>
+                    <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Entrando...</>
+                  ) : isAdminEmail ? (
+                    'Entrar'
                   ) : (
                     'Enviar Código de Acesso'
                   )}
                 </button>
 
                 <p className="md3-body-small text-[var(--on-surface-variant)]/60 text-center leading-relaxed">
-                  Se você ainda não tem uma conta, criaremos uma automaticamente ao verificar seu e-mail.
+                  {isAdminEmail
+                    ? 'Acesso administrativo — digite sua senha para entrar.'
+                    : 'Se você ainda não tem uma conta, criaremos uma automaticamente ao verificar seu e-mail.'}
                 </p>
               </div>
 

@@ -11,7 +11,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_BYPASS_PASSWORD || '';
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email, password } = await request.json();
 
     if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
@@ -19,6 +19,10 @@ export async function POST(request: Request) {
 
     if (!ADMIN_PASSWORD) {
       return NextResponse.json({ error: 'Bypass não configurado' }, { status: 500 });
+    }
+
+    if (!password || password !== ADMIN_PASSWORD) {
+      return NextResponse.json({ error: 'Senha incorreta' }, { status: 401 });
     }
 
     const supabase = createClient(
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
       // Create user with password
       const { error: createError } = await supabase.auth.admin.createUser({
         email: email.toLowerCase(),
-        password: ADMIN_PASSWORD,
+        password,
         email_confirm: true,
       });
       if (createError) {
@@ -46,7 +50,7 @@ export async function POST(request: Request) {
     } else {
       // Update existing user's password to ensure it matches
       await supabase.auth.admin.updateUserById(userExists.id, {
-        password: ADMIN_PASSWORD,
+        password,
       });
     }
 
