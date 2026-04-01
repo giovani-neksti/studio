@@ -18,7 +18,15 @@ import {
   Bug,
   ChevronDown,
   ChevronUp,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Zap,
+  Share2,
 } from 'lucide-react';
+import { useShareImage } from '@/hooks/useShareImage';
+import { ShareToast } from '@/components/ShareToast';
 
 interface Stats {
   totalUsers: number;
@@ -60,7 +68,35 @@ interface Generation {
   generated_image_url: string;
 }
 
-type Tab = 'overview' | 'users' | 'generations' | 'errors';
+type Tab = 'overview' | 'users' | 'generations' | 'errors' | 'api';
+
+interface RouteTest {
+  id: string;
+  method: 'GET' | 'POST';
+  path: string;
+  description: string;
+  needsAuth: boolean;
+  safe: boolean; // safe to test without side effects
+}
+
+interface RouteResult {
+  status: number;
+  ok: boolean;
+  ms: number;
+  body: string;
+  testedAt: string;
+}
+
+const API_ROUTES: RouteTest[] = [
+  { id: 'showcase', method: 'GET', path: '/api/showcase', description: 'Showcase público (antes/depois)', needsAuth: false, safe: true },
+  { id: 'admin-stats', method: 'GET', path: '/api/admin/stats', description: 'Estatísticas do painel admin', needsAuth: true, safe: true },
+  { id: 'credits-get', method: 'GET', path: '/api/credits', description: 'Consultar créditos do usuário', needsAuth: false, safe: true },
+  { id: 'generations', method: 'GET', path: '/api/generations', description: 'Listar gerações do usuário', needsAuth: true, safe: true },
+  { id: 'errors-post', method: 'POST', path: '/api/errors', description: 'Registrar erro (log)', needsAuth: false, safe: true },
+  { id: 'admin-login', method: 'POST', path: '/api/admin-login', description: 'Bypass login admin', needsAuth: false, safe: false },
+  { id: 'generate', method: 'POST', path: '/api/generate', description: 'Gerar imagem com IA (consome crédito)', needsAuth: true, safe: false },
+  { id: 'stripe-webhook', method: 'POST', path: '/api/webhooks/stripe', description: 'Webhook do Stripe (pagamentos)', needsAuth: false, safe: false },
+];
 
 export default function AdminPage() {
   const router = useRouter();
@@ -75,6 +111,9 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [tab, setTab] = useState<Tab>('overview');
   const [search, setSearch] = useState('');
+  const [routeResults, setRouteResults] = useState<Record<string, RouteResult>>({});
+  const [testingRoute, setTestingRoute] = useState<string | null>(null);
+  const { canShare, shareImage, toast, dismissToast } = useShareImage();
 
   // Auth gate
   useEffect(() => {
@@ -107,6 +146,75 @@ export default function AdminPage() {
 
     fetchData();
   }, [session, user]);
+
+  const testRoute = async (route: RouteTest) => {
+    if (testingRoute) return;
+    setTestingRoute(route.id);
+
+    const start = performance.now();
+    try {
+      const headers: Record<string, string> = {};
+      if (route.needsAuth && session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      let url = route.path;
+      let fetchOpts: RequestInit = { method: route.method, headers };
+
+      // Custom payloads for safe POST tests
+      if (route.id === 'errors-post') {
+        headers['Content-Type'] = 'application/json';
+        fetchOpts.body = JSON.stringify({ message: '[Admin Test] Ping de teste do painel', source: 'admin-panel-test' });
+      }
+
+      // Append userId for credits GET
+      if (route.id === 'credits-get' && user) {
+        url += `?userId=${user.id}`;
+      }
+
+      const res = await fetch(url, fetchOpts);
+      const ms = Math.round(performance.now() - start);
+      let body: string;
+      try {
+        const json = await res.json();
+        body = JSON.stringify(json, null, 2);
+      } catch {
+        body = await res.text().catch(() => '(sem corpo)');
+      }
+
+      setRouteResults((prev) => ({
+        ...prev,
+        [route.id]: {
+          status: res.status,
+          ok: res.ok,
+          ms,
+          body: body.slice(0, 3000),
+          testedAt: new Date().toLocaleTimeString('pt-BR'),
+        },
+      }));
+    } catch (err: any) {
+      const ms = Math.round(performance.now() - start);
+      setRouteResults((prev) => ({
+        ...prev,
+        [route.id]: {
+          status: 0,
+          ok: false,
+          ms,
+          body: `Erro de rede: ${err.message}`,
+          testedAt: new Date().toLocaleTimeString('pt-BR'),
+        },
+      }));
+    } finally {
+      setTestingRoute(null);
+    }
+  };
+
+  const testAllSafe = async () => {
+    const safeRoutes = API_ROUTES.filter((r) => r.safe);
+    for (const route of safeRoutes) {
+      await testRoute(route);
+    }
+  };
 
   if (authLoading || (!user && loading)) {
     return (
@@ -151,8 +259,9 @@ export default function AdminPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'overview', label: 'Visão Geral' },
     { key: 'users', label: 'Usuários' },
-    { key: 'generations', label: 'Gerações Recentes' },
+    { key: 'generations', label: 'Gerações' },
     { key: 'errors', label: 'Erros' },
+    { key: 'api', label: 'API Routes' },
   ];
 
   return (
@@ -405,9 +514,20 @@ export default function AdminPage() {
                         <span className="md3-label-medium text-[var(--on-surface-variant)] capitalize">
                           {g.niche || '—'}
                         </span>
-                        <span className="md3-label-small text-[var(--outline)]">
-                          {formatDate(g.created_at)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {canShare && (
+                            <button
+                              onClick={() => shareImage(g.generated_image_url, `neksti_${g.id}.png`)}
+                              aria-label="Compartilhar imagem"
+                              className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <span className="md3-label-small text-[var(--outline)]">
+                            {formatDate(g.created_at)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -419,9 +539,158 @@ export default function AdminPage() {
                 )}
               </div>
             )}
+
+            {/* API Routes Tab */}
+            {tab === 'api' && (
+              <div>
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                  <div>
+                    <h2 className="md3-title-medium font-semibold text-[var(--foreground)] flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-[var(--primary)]" />
+                      Monitoramento de API Routes
+                    </h2>
+                    <p className="md3-body-small text-[var(--on-surface-variant)] mt-1">
+                      Teste e valide as rotas em tempo real. Rotas seguras podem ser testadas sem efeitos colaterais.
+                    </p>
+                  </div>
+                  <button
+                    onClick={testAllSafe}
+                    disabled={!!testingRoute}
+                    className="flex items-center gap-2 h-10 px-5 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large hover:elevation-1 transition-all disabled:opacity-50"
+                  >
+                    {testingRoute ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Play className="w-4 h-4" />
+                    )}
+                    Testar Todas (seguras)
+                  </button>
+                </div>
+
+                {/* Route Cards */}
+                <div className="space-y-3">
+                  {API_ROUTES.map((route) => {
+                    const result = routeResults[route.id];
+                    const isTesting = testingRoute === route.id;
+
+                    return (
+                      <div
+                        key={route.id}
+                        className="rounded-[var(--shape-large)] border border-[var(--outline-variant)]/20 bg-[var(--surface-container)] overflow-hidden"
+                      >
+                        {/* Route Header */}
+                        <div className="px-4 py-3 flex items-center gap-3">
+                          {/* Method badge */}
+                          <span
+                            className={`shrink-0 px-2.5 py-1 rounded-[var(--shape-small)] md3-label-medium font-mono font-bold
+                              ${route.method === 'GET'
+                                ? 'bg-emerald-500/15 text-emerald-600'
+                                : 'bg-amber-500/15 text-amber-600'
+                              }`}
+                          >
+                            {route.method}
+                          </span>
+
+                          {/* Path + Description */}
+                          <div className="flex-1 min-w-0">
+                            <p className="md3-body-medium text-[var(--foreground)] font-mono text-sm truncate">
+                              {route.path}
+                            </p>
+                            <p className="md3-label-small text-[var(--on-surface-variant)] mt-0.5">
+                              {route.description}
+                              {route.needsAuth && (
+                                <span className="ml-2 px-1.5 py-0.5 rounded bg-[var(--primary)]/10 text-[var(--primary)] md3-label-small">
+                                  Auth
+                                </span>
+                              )}
+                              {!route.safe && (
+                                <span className="ml-1 px-1.5 py-0.5 rounded bg-[var(--error)]/10 text-[var(--error)] md3-label-small">
+                                  Side-effect
+                                </span>
+                              )}
+                            </p>
+                          </div>
+
+                          {/* Status indicator */}
+                          <div className="shrink-0 flex items-center gap-2">
+                            {result && (
+                              <div className="flex items-center gap-1.5 mr-2">
+                                {result.ok ? (
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                ) : (
+                                  <XCircle className="w-4 h-4 text-[var(--error)]" />
+                                )}
+                                <span className={`md3-label-medium font-mono ${result.ok ? 'text-emerald-500' : 'text-[var(--error)]'}`}>
+                                  {result.status}
+                                </span>
+                                <div className="flex items-center gap-0.5 text-[var(--on-surface-variant)]">
+                                  <Clock className="w-3 h-3" />
+                                  <span className="md3-label-small">{result.ms}ms</span>
+                                </div>
+                              </div>
+                            )}
+                            <button
+                              onClick={() => testRoute(route)}
+                              disabled={!!testingRoute}
+                              className="flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-medium hover:bg-[var(--on-surface-variant)]/8 transition-all disabled:opacity-40"
+                            >
+                              {isTesting ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Play className="w-3.5 h-3.5" />
+                              )}
+                              Testar
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Response body (expandable) */}
+                        {result && (
+                          <div className="border-t border-[var(--outline-variant)]/10 px-4 py-3 bg-[var(--surface-container-low)]">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="md3-label-small text-[var(--outline)]">
+                                Resposta — {result.testedAt}
+                              </span>
+                              <span className={`md3-label-small font-mono px-2 py-0.5 rounded ${
+                                result.ok
+                                  ? 'bg-emerald-500/10 text-emerald-600'
+                                  : 'bg-[var(--error)]/10 text-[var(--error)]'
+                              }`}>
+                                HTTP {result.status} · {result.ms}ms
+                              </span>
+                            </div>
+                            <pre className="text-xs p-3 rounded-[var(--shape-medium)] bg-[var(--surface-container-highest)] text-[var(--on-surface-variant)] overflow-x-auto whitespace-pre-wrap break-words max-h-48 overflow-y-auto font-mono">
+                              {result.body}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Legend */}
+                <div className="mt-6 p-4 rounded-[var(--shape-large)] bg-[var(--surface-container-low)] border border-[var(--outline-variant)]/10">
+                  <p className="md3-label-medium text-[var(--on-surface-variant)] mb-2">Legenda</p>
+                  <div className="flex flex-wrap gap-4 md3-label-small text-[var(--on-surface-variant)]">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /> GET — Leitura segura</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> POST — Escrita/ação</span>
+                    <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> 2xx — Sucesso</span>
+                    <span className="flex items-center gap-1"><XCircle className="w-3 h-3 text-[var(--error)]" /> 4xx/5xx — Erro</span>
+                    <span className="px-1.5 py-0.5 rounded bg-[var(--primary)]/10 text-[var(--primary)]">Auth</span>
+                    <span>= Requer autenticação</span>
+                    <span className="px-1.5 py-0.5 rounded bg-[var(--error)]/10 text-[var(--error)]">Side-effect</span>
+                    <span>= Causa efeito colateral</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
+
+      <ShareToast message={toast} onDismiss={dismissToast} />
     </div>
   );
 }
