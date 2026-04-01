@@ -24,6 +24,14 @@ import {
   Clock,
   Zap,
   Share2,
+  DollarSign,
+  BarChart3,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  RefreshCw,
+  Settings2,
 } from 'lucide-react';
 import { useShareImage } from '@/hooks/useShareImage';
 import { ShareToast } from '@/components/ShareToast';
@@ -68,7 +76,43 @@ interface Generation {
   generated_image_url: string;
 }
 
-type Tab = 'overview' | 'users' | 'generations' | 'errors' | 'api';
+interface FinanceiroData {
+  revenue: {
+    total: number;
+    month: number;
+    today: number;
+    planBreakdown: Record<string, { count: number; revenue: number }>;
+    monthlyTrend: { month: string; revenue: number; payments: number }[];
+  };
+  usage: {
+    totalGenerations: number;
+    totalCreditsRemaining: number;
+    totalCreditsPurchased: number;
+    freeCreditsUsed: number;
+  };
+  payments: Array<{
+    id: string;
+    user_id: string;
+    email: string;
+    stripe_session_id: string;
+    amount_cents: number;
+    credits: number;
+    plan: string;
+    created_at: string;
+  }>;
+  userBreakdown: Array<{
+    id: string;
+    email: string;
+    revenue: number;
+    creditsPurchased: number;
+    creditsRemaining: number;
+    totalGenerations: number;
+    plans: string[];
+    createdAt: string;
+  }>;
+}
+
+type Tab = 'overview' | 'users' | 'generations' | 'errors' | 'api' | 'financeiro';
 
 interface RouteTest {
   id: string;
@@ -92,6 +136,7 @@ const API_ROUTES: RouteTest[] = [
   { id: 'admin-stats', method: 'GET', path: '/api/admin/stats', description: 'Estatísticas do painel admin', needsAuth: true, safe: true },
   { id: 'credits-get', method: 'GET', path: '/api/credits', description: 'Consultar créditos do usuário', needsAuth: false, safe: true },
   { id: 'generations', method: 'GET', path: '/api/generations', description: 'Listar gerações do usuário', needsAuth: true, safe: true },
+  { id: 'financeiro', method: 'GET', path: '/api/admin/financeiro', description: 'Dados financeiros (receita, custo, margem)', needsAuth: true, safe: true },
   { id: 'errors-post', method: 'POST', path: '/api/errors', description: 'Registrar erro (log)', needsAuth: false, safe: true },
   { id: 'admin-login', method: 'POST', path: '/api/admin-login', description: 'Bypass login admin', needsAuth: false, safe: false },
   { id: 'generate', method: 'POST', path: '/api/generate', description: 'Gerar imagem com IA (consome crédito)', needsAuth: true, safe: false },
@@ -113,6 +158,9 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [routeResults, setRouteResults] = useState<Record<string, RouteResult>>({});
   const [testingRoute, setTestingRoute] = useState<string | null>(null);
+  const [financeiro, setFinanceiro] = useState<FinanceiroData | null>(null);
+  const [finLoading, setFinLoading] = useState(false);
+  const [costPerGeneration, setCostPerGeneration] = useState(0.15); // R$ custo estimado por geração
   const { canShare, shareImage, toast, dismissToast } = useShareImage();
 
   // Auth gate
@@ -146,6 +194,36 @@ export default function AdminPage() {
 
     fetchData();
   }, [session, user]);
+
+  // Fetch financeiro data when tab is selected
+  useEffect(() => {
+    if (tab !== 'financeiro' || !session?.access_token || financeiro) return;
+    setFinLoading(true);
+    fetch('/api/admin/financeiro', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setFinanceiro(data);
+      })
+      .catch(() => {})
+      .finally(() => setFinLoading(false));
+  }, [tab, session?.access_token, financeiro]);
+
+  const refreshFinanceiro = () => {
+    if (!session?.access_token) return;
+    setFinanceiro(null);
+    setFinLoading(true);
+    fetch('/api/admin/financeiro', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setFinanceiro(data);
+      })
+      .catch(() => {})
+      .finally(() => setFinLoading(false));
+  };
 
   const testRoute = async (route: RouteTest) => {
     if (testingRoute) return;
@@ -262,6 +340,7 @@ export default function AdminPage() {
     { key: 'generations', label: 'Gerações' },
     { key: 'errors', label: 'Erros' },
     { key: 'api', label: 'API Routes' },
+    { key: 'financeiro', label: 'Financeiro' },
   ];
 
   return (
@@ -535,6 +614,373 @@ export default function AdminPage() {
                 {generations.length === 0 && (
                   <div className="text-center py-10 text-[var(--on-surface-variant)] md3-body-medium">
                     Nenhuma geração encontrada.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Financeiro Tab */}
+            {tab === 'financeiro' && (
+              <div>
+                {finLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 animate-spin text-[var(--primary)]" />
+                  </div>
+                ) : financeiro ? (() => {
+                  const rev = financeiro.revenue;
+                  const usg = financeiro.usage;
+                  const totalCostCents = Math.round(usg.totalGenerations * costPerGeneration * 100);
+                  const marginCents = rev.total - totalCostCents;
+                  const marginPercent = rev.total > 0 ? ((marginCents / rev.total) * 100).toFixed(1) : '0';
+
+                  const monthCostCents = Math.round(
+                    (financeiro.userBreakdown.reduce((s, u) => s + u.totalGenerations, 0)) * costPerGeneration * 100
+                  );
+
+                  const fmtBRL = (cents: number) =>
+                    `R$ ${(cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+                  return (
+                    <>
+                      {/* Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                        <div>
+                          <h2 className="md3-title-medium font-semibold text-[var(--foreground)] flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-[var(--primary)]" />
+                            Painel Financeiro
+                          </h2>
+                          <p className="md3-body-small text-[var(--on-surface-variant)] mt-1">
+                            Receita × Custo × Margem — Visão consolidada
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {/* Cost per generation input */}
+                          <div className="flex items-center gap-1.5 h-10 px-3 rounded-[var(--shape-full)] border border-[var(--outline)]/40 bg-[var(--surface-container-low)]">
+                            <Settings2 className="w-3.5 h-3.5 text-[var(--on-surface-variant)]" />
+                            <span className="md3-label-small text-[var(--on-surface-variant)] whitespace-nowrap">Custo/gen:</span>
+                            <span className="md3-label-small text-[var(--on-surface-variant)]">R$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={costPerGeneration}
+                              onChange={e => setCostPerGeneration(parseFloat(e.target.value) || 0)}
+                              className="w-16 bg-transparent text-[var(--foreground)] md3-label-medium outline-none text-center"
+                            />
+                          </div>
+                          <button
+                            onClick={refreshFinanceiro}
+                            className="flex items-center gap-2 h-10 px-4 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-medium hover:bg-[var(--on-surface-variant)]/8 transition-all"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                            Atualizar
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* KPI Cards Row */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                        {/* Receita Total */}
+                        <div className="p-4 md:p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Receita Total</span>
+                            <DollarSign className="w-4 h-4 text-emerald-500" />
+                          </div>
+                          <span className="text-2xl md:text-3xl font-bold text-emerald-500">{fmtBRL(rev.total)}</span>
+                          <p className="md3-label-small text-[var(--on-surface-variant)] mt-1">
+                            {financeiro.payments.length} pagamentos
+                          </p>
+                        </div>
+
+                        {/* Custo Estimado */}
+                        <div className="p-4 md:p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Custo Estimado</span>
+                            <TrendingUp className="w-4 h-4 text-amber-500" />
+                          </div>
+                          <span className="text-2xl md:text-3xl font-bold text-amber-500">{fmtBRL(totalCostCents)}</span>
+                          <p className="md3-label-small text-[var(--on-surface-variant)] mt-1">
+                            {usg.totalGenerations} gerações × R$ {costPerGeneration.toFixed(2).replace('.', ',')}
+                          </p>
+                        </div>
+
+                        {/* Margem */}
+                        <div className="p-4 md:p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Margem</span>
+                            {marginCents > 0 ? (
+                              <ArrowUpRight className="w-4 h-4 text-emerald-500" />
+                            ) : marginCents < 0 ? (
+                              <ArrowDownRight className="w-4 h-4 text-red-500" />
+                            ) : (
+                              <Minus className="w-4 h-4 text-[var(--on-surface-variant)]" />
+                            )}
+                          </div>
+                          <span className={`text-2xl md:text-3xl font-bold ${marginCents >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                            {fmtBRL(marginCents)}
+                          </span>
+                          <p className="md3-label-small text-[var(--on-surface-variant)] mt-1">
+                            {marginPercent}% de margem
+                          </p>
+                        </div>
+
+                        {/* Receita Mês */}
+                        <div className="p-4 md:p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Receita no Mês</span>
+                            <CreditCard className="w-4 h-4 text-[var(--primary)]" />
+                          </div>
+                          <span className="text-2xl md:text-3xl font-bold text-[var(--primary)]">{fmtBRL(rev.month)}</span>
+                          <p className="md3-label-small text-[var(--on-surface-variant)] mt-1">
+                            Hoje: {fmtBRL(rev.today)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Second Row: Plan Breakdown + Usage Stats */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        {/* Plan Breakdown */}
+                        <div className="p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
+                          <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2 mb-4">
+                            <PieChart className="w-4 h-4 text-[var(--primary)]" />
+                            Receita por Plano
+                          </h3>
+                          {Object.keys(rev.planBreakdown).length === 0 ? (
+                            <p className="md3-body-medium text-[var(--on-surface-variant)]">Nenhum pagamento registrado.</p>
+                          ) : (
+                            <div className="space-y-3">
+                              {Object.entries(rev.planBreakdown).map(([plan, data]) => {
+                                const pct = rev.total > 0 ? (data.revenue / rev.total) * 100 : 0;
+                                const planColors: Record<string, string> = {
+                                  Essentials: '#1565c0',
+                                  Professional: '#7c5cbf',
+                                  Premium: '#e65100',
+                                };
+                                const color = planColors[plan] || 'var(--primary)';
+                                return (
+                                  <div key={plan}>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="md3-label-medium text-[var(--foreground)]">{plan}</span>
+                                      <div className="flex items-center gap-3">
+                                        <span className="md3-label-small text-[var(--on-surface-variant)]">{data.count}x</span>
+                                        <span className="md3-label-medium font-semibold" style={{ color }}>
+                                          {fmtBRL(data.revenue)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="w-full h-2 bg-[var(--surface-container-highest)] rounded-full overflow-hidden">
+                                      <div
+                                        className="h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${pct}%`, backgroundColor: color }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Usage Stats */}
+                        <div className="p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
+                          <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2 mb-4">
+                            <Zap className="w-4 h-4 text-amber-500" />
+                            Uso de Créditos
+                          </h3>
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Créditos comprados</span>
+                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{usg.totalCreditsPurchased.toLocaleString('pt-BR')}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Gerações realizadas</span>
+                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{usg.totalGenerations.toLocaleString('pt-BR')}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Créditos restantes</span>
+                              <span className="md3-title-medium font-bold text-[var(--primary)]">{usg.totalCreditsRemaining.toLocaleString('pt-BR')}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Gerações grátis (3 iniciais)</span>
+                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{usg.freeCreditsUsed.toLocaleString('pt-BR')}</span>
+                            </div>
+                            <hr className="border-[var(--outline-variant)]/20" />
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Receita média por crédito</span>
+                              <span className="md3-title-medium font-bold text-emerald-500">
+                                {usg.totalCreditsPurchased > 0
+                                  ? fmtBRL(Math.round(rev.total / usg.totalCreditsPurchased))
+                                  : '—'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Margem por crédito usado</span>
+                              <span className={`md3-title-medium font-bold ${marginCents >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                {usg.totalGenerations > 0
+                                  ? fmtBRL(Math.round(marginCents / usg.totalGenerations))
+                                  : '—'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Monthly Trend */}
+                      {rev.monthlyTrend.length > 0 && (
+                        <div className="p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 mb-6">
+                          <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2 mb-4">
+                            <BarChart3 className="w-4 h-4 text-[var(--primary)]" />
+                            Tendência Mensal de Receita
+                          </h3>
+                          <div className="flex items-end gap-2 h-32">
+                            {rev.monthlyTrend.map((m) => {
+                              const maxRev = Math.max(...rev.monthlyTrend.map(t => t.revenue), 1);
+                              const height = m.revenue > 0 ? Math.max((m.revenue / maxRev) * 100, 4) : 4;
+                              return (
+                                <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                                  <span className="md3-label-small text-[var(--on-surface-variant)] text-center">
+                                    {m.revenue > 0 ? fmtBRL(m.revenue) : '—'}
+                                  </span>
+                                  <div
+                                    className={`w-full rounded-t-[var(--shape-small)] transition-all duration-500 ${
+                                      m.revenue > 0 ? 'bg-[var(--primary)]' : 'bg-[var(--surface-container-highest)]'
+                                    }`}
+                                    style={{ height: `${height}%` }}
+                                  />
+                                  <span className="md3-label-small text-[var(--on-surface-variant)] text-center whitespace-nowrap">
+                                    {m.month}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Per-User Breakdown */}
+                      <div className="rounded-[var(--shape-large)] border border-[var(--outline-variant)]/20 overflow-hidden">
+                        <div className="px-4 py-3 bg-[var(--surface-container-high)] border-b border-[var(--outline-variant)]/20">
+                          <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2">
+                            <Users className="w-4 h-4 text-[var(--primary)]" />
+                            Breakdown por Usuário
+                          </h3>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="bg-[var(--surface-container)] border-b border-[var(--outline-variant)]/20">
+                                <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Usuário</th>
+                                <th className="text-center px-3 py-3 md3-label-medium text-[var(--on-surface-variant)]">Plano</th>
+                                <th className="text-right px-3 py-3 md3-label-medium text-emerald-500">Receita</th>
+                                <th className="text-center px-3 py-3 md3-label-medium text-[var(--on-surface-variant)]">Gerações</th>
+                                <th className="text-right px-3 py-3 md3-label-medium text-amber-500">Custo Est.</th>
+                                <th className="text-right px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Margem</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {financeiro.userBreakdown.map((u) => {
+                                const uCost = Math.round(u.totalGenerations * costPerGeneration * 100);
+                                const uMargin = u.revenue - uCost;
+                                return (
+                                  <tr key={u.id} className="border-b border-[var(--outline-variant)]/10 hover:bg-[var(--surface-container-high)]/50 transition-colors">
+                                    <td className="px-4 py-3">
+                                      <div className="md3-body-medium text-[var(--foreground)]">{u.email || '—'}</div>
+                                      <div className="md3-label-small text-[var(--outline)]">
+                                        {u.creditsRemaining} créditos restantes
+                                      </div>
+                                    </td>
+                                    <td className="text-center px-3 py-3">
+                                      {u.plans.length > 0 ? (
+                                        <div className="flex flex-wrap justify-center gap-1">
+                                          {u.plans.map(p => (
+                                            <span key={p} className="px-2 py-0.5 rounded-[var(--shape-full)] bg-[var(--primary)]/10 text-[var(--primary)] md3-label-small">
+                                              {p}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <span className="md3-label-small text-[var(--outline)]">Free</span>
+                                      )}
+                                    </td>
+                                    <td className="text-right px-3 py-3 md3-body-medium font-semibold text-emerald-500">
+                                      {u.revenue > 0 ? fmtBRL(u.revenue) : '—'}
+                                    </td>
+                                    <td className="text-center px-3 py-3 md3-body-medium text-[var(--on-surface-variant)]">
+                                      {u.totalGenerations}
+                                    </td>
+                                    <td className="text-right px-3 py-3 md3-body-medium text-amber-500">
+                                      {fmtBRL(uCost)}
+                                    </td>
+                                    <td className="text-right px-4 py-3">
+                                      <span className={`md3-body-medium font-semibold ${uMargin >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                        {fmtBRL(uMargin)}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                          {financeiro.userBreakdown.length === 0 && (
+                            <div className="text-center py-10 text-[var(--on-surface-variant)] md3-body-medium">
+                              Nenhum usuário com atividade ou pagamento.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Recent Payments */}
+                      {financeiro.payments.length > 0 && (
+                        <div className="mt-6 rounded-[var(--shape-large)] border border-[var(--outline-variant)]/20 overflow-hidden">
+                          <div className="px-4 py-3 bg-[var(--surface-container-high)] border-b border-[var(--outline-variant)]/20">
+                            <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2">
+                              <CreditCard className="w-4 h-4 text-emerald-500" />
+                              Últimos Pagamentos
+                            </h3>
+                          </div>
+                          <div className="divide-y divide-[var(--outline-variant)]/10">
+                            {financeiro.payments.slice(0, 20).map((p) => (
+                              <div key={p.id} className="px-4 py-3 flex items-center justify-between hover:bg-[var(--surface-container-high)]/50 transition-colors">
+                                <div>
+                                  <div className="md3-body-medium text-[var(--foreground)]">{p.email || '—'}</div>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="px-2 py-0.5 rounded-[var(--shape-full)] bg-[var(--primary)]/10 text-[var(--primary)] md3-label-small">
+                                      {p.plan}
+                                    </span>
+                                    <span className="md3-label-small text-[var(--outline)]">
+                                      {p.credits} créditos
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="md3-body-medium font-semibold text-emerald-500">
+                                    {fmtBRL(p.amount_cents)}
+                                  </div>
+                                  <div className="md3-label-small text-[var(--outline)]">
+                                    {new Date(p.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Info Footer */}
+                      <div className="mt-6 p-4 rounded-[var(--shape-large)] bg-[var(--surface-container-low)] border border-[var(--outline-variant)]/10">
+                        <p className="md3-label-medium text-[var(--on-surface-variant)] mb-2">Sobre os cálculos</p>
+                        <div className="md3-body-small text-[var(--on-surface-variant)] space-y-1">
+                          <p>• <strong>Custo estimado</strong> = nº de gerações × R$ {costPerGeneration.toFixed(2).replace('.', ',')} (ajustável acima). Inclui custo de API Vertex AI (Gemini).</p>
+                          <p>• <strong>Receita</strong> = soma de todos os pagamentos Stripe processados e registrados.</p>
+                          <p>• <strong>Margem</strong> = Receita − Custo Estimado. Não inclui custos fixos (servidor, domínio, etc).</p>
+                          <p>• Pagamentos anteriores à criação da tabela <code>payments</code> não aparecem aqui. Consulte o dashboard do Stripe para histórico completo.</p>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })() : (
+                  <div className="text-center py-10 text-[var(--on-surface-variant)] md3-body-medium">
+                    Erro ao carregar dados financeiros. Verifique se a tabela <code>payments</code> existe no Supabase.
                   </div>
                 )}
               </div>

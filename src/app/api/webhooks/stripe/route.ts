@@ -89,6 +89,22 @@ export async function POST(req: Request) {
 
     if (resolvedId) {
       console.log(`Stripe: +${credits} credits (${plan}) -> user ${resolvedId}`);
+
+      // Log payment to payments table
+      await supabaseAdmin
+        .from('payments')
+        .upsert({
+          user_id: resolvedId,
+          email: email || '',
+          stripe_session_id: session.id,
+          amount_cents: session.amount_total || 0,
+          credits,
+          plan,
+        }, { onConflict: 'stripe_session_id' })
+        .then(({ error: payErr }) => {
+          if (payErr) console.error('Failed to log payment:', payErr.message);
+        });
+
       // Send purchase confirmation email
       const buyerEmail = email;
       if (buyerEmail) {
