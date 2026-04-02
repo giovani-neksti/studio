@@ -66,7 +66,10 @@ function StudioContent() {
   }, [user]);
 
   useEffect(() => {
-    setIsSidebarOpen(true);
+    // Auto-open wizard only on desktop — on mobile, show bottom nav first
+    if (window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
     if (!selections.bgTab) {
       setSelections(prev => ({ ...prev, bgTab: 'solid', displayTab: 'expositor' }));
     }
