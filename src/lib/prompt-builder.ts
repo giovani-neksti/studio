@@ -10,10 +10,10 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Bracelete Pandora": "a premium charm bracelet loaded with intricate silver and glass charms, Pandora style"
     },
     material: {
-        "gold_yellow": "with warm golden-toned studio lighting optimized to enhance warm metal reflections and golden highlights on the original piece without altering its actual color",
-        "gold_white": "with cool bright studio lighting optimized to enhance silver and white metal reflections and crisp highlights on the original piece without altering its actual color",
-        "gold_rose": "with soft warm-pink studio lighting optimized to enhance rose-toned metal reflections on the original piece without altering its actual color",
-        "gemstone": "with precise focused lighting optimized to maximize gemstone refractions, internal light scattering, and diamond-like caustics on the original stones without altering their actual colors"
+        "gold_yellow": "gold_yellow",
+        "gold_white": "gold_white",
+        "gold_rose": "gold_rose",
+        "gemstone": "gemstone"
     },
     props: {
         "water_drops": "with delicate cinematic water droplets scattered elegantly on the surface",
@@ -101,18 +101,120 @@ export function getAspectRatioInfo(formatRatio: string): { geminiRatio: string; 
     }
 }
 
+// ── Human model names for quick checks ──
+const HUMAN_MODELS = ['Helena', 'Zara', 'Lin', 'Maya', 'Valentina'];
+const CLOSE_UP_DISPLAYS = ['Close Pescoço', 'Mão / Manicure', 'Pulso', 'Perfil / Orelha'];
+
+// ── Smart lighting based on material + background synergy ──
+function buildLightingInstruction(materialKey: string, bgName: string): string {
+    const isDarkBg = ['Preto Veludo', 'Caoba Profundo', 'Verde Musgo', 'Vermelho Bordô',
+        'Azul Petróleo', 'Verde Esmeralda', 'Azul Safira', 'Roxo Berinjela',
+        'Cinza Chumbo', 'Marrom Chocolate', 'Lavanda Escuro', 'Verde Oliva'].includes(bgName);
+
+    const isLightBg = ['Branco Neve', 'Rosa Pó', 'Nude Areia', 'Azul Gelo', 'Champagne'].includes(bgName);
+
+    let lighting = '';
+
+    switch (materialKey) {
+        case 'gold_yellow':
+            lighting = isDarkBg
+                ? 'Use warm directional key light with subtle golden fill light to bring out the natural warm reflections of the metal against the dark background. Add a rim light to separate the piece from the backdrop.'
+                : 'Use soft warm-toned diffused lighting to gently enhance the natural golden tones of the metal. Avoid harsh highlights that wash out on light backgrounds.';
+            break;
+        case 'gold_white':
+            lighting = isDarkBg
+                ? 'Use cool-toned crisp directional lighting with silver rim accents to enhance the bright metallic reflections against the dark background.'
+                : 'Use neutral cool-white soft-box lighting to bring out the pristine silver reflections cleanly against the light surface.';
+            break;
+        case 'gold_rose':
+            lighting = isDarkBg
+                ? 'Use soft warm pink-tinted key light with gentle fill to enhance the natural rose-gold luster against the dark backdrop. Add subtle rim light for edge definition.'
+                : 'Use delicate warm-toned diffused lighting with a hint of pink to complement the rose-gold tones without overexposing on the light background.';
+            break;
+        case 'gemstone':
+            lighting = isDarkBg
+                ? 'Use precise focused spot lighting to maximize internal refractions and fire within the gemstones. Add secondary point lights at different angles to create spectacular caustics and light scattering against the dark backdrop.'
+                : 'Use clean focused lighting with multiple small point sources to activate gemstone brilliance, fire and scintillation. Control highlights carefully to avoid washout on the light surface.';
+            break;
+        default:
+            lighting = 'Use professional soft studio rim lighting.';
+    }
+
+    return `LIGHTING: ${lighting} CRITICAL: The lighting must ONLY enhance how the piece is illuminated — it must NEVER alter, tint, or change the actual color or material of the jewelry piece itself.`;
+}
+
+// ── Earring-specific intelligence ──
+function buildEarringInstruction(displaySelection: string, isHumanModel: boolean, isEarProfile: boolean): string {
+    if (isHumanModel) {
+        return `
+
+EARRING PLACEMENT RULES (CRITICAL — follow exactly):
+- Show the model's FULL FACE from a FRONT or SLIGHT 3/4 ANGLE so BOTH ears are visible.
+- Place exactly ONE earring on the LEFT ear and ONE identical earring on the RIGHT ear.
+- NEVER put two earrings on the same ear.
+- Each earring must be the EXACT same design, size, and color as the uploaded reference image.
+- PROPORTION: The earring must be realistically sized relative to the model's ear — a small stud should look like a small stud (roughly the size of the earlobe), a medium drop earring should hang about 2-3cm below the earlobe, and a large statement earring should hang proportionally but never larger than the ear-to-jaw distance. Match the proportions visible in the uploaded reference photo.
+- The earring must sit naturally on the earlobe or ear hook position, with realistic weight and gravity.
+- Frame the composition so the earrings are prominent but the model's face provides elegant context.`;
+    }
+
+    if (isEarProfile) {
+        return `
+
+EARRING PLACEMENT RULES (CRITICAL — follow exactly):
+- This is a SIDE PROFILE close-up showing ONE ear only.
+- Place exactly ONE single earring on the visible ear. The other ear is not visible.
+- NEVER show two earrings on the same ear.
+- The earring must be the EXACT same design, size, and color as the uploaded reference image.
+- PROPORTION: The earring must be realistically sized relative to the ear. Use the uploaded image to judge whether it is a stud, drop, hoop, or statement piece, and size it accordingly on the ear. It should look like a real photograph, not oversized or miniaturized.
+- The earring must sit naturally on the earlobe with realistic attachment point and natural gravity/drape.
+- Hair should be pulled back or tucked behind the ear to fully showcase the earring.`;
+    }
+
+    return '';
+}
+
+// ── Category-aware display instructions for human models ──
+function buildCategoryDisplaySynergy(category: string, displaySelection: string, isHumanModel: boolean): string {
+    if (!isHumanModel && !CLOSE_UP_DISPLAYS.includes(displaySelection)) return '';
+
+    const synergy: Record<string, string> = {
+        'Colar': isHumanModel
+            ? 'Frame from shoulders up, ensuring the necklace is fully visible resting naturally on the model\'s chest/collarbone. The necklace should drape with realistic gravity and chain physics.'
+            : '',
+        'Anel': isHumanModel
+            ? 'Include the model\'s hand positioned elegantly near her face or resting naturally, with the ring clearly visible on her finger. The ring should fit naturally on the finger with correct proportions.'
+            : '',
+        'Pulseira': isHumanModel
+            ? 'Ensure the model\'s wrist is visible in an elegant pose, with the bracelet sitting naturally at the wrist bone with realistic fit and weight.'
+            : '',
+        'Tiara': isHumanModel
+            ? 'Show the tiara placed correctly on the crown of the model\'s head, sitting naturally in her styled hair. Frame from chest up to show the full tiara.'
+            : '',
+        'Pingente': isHumanModel
+            ? 'Frame from shoulders up showing the pendant hanging naturally from its chain on the model\'s chest. The pendant should rest at a realistic position on the sternum area.'
+            : '',
+        'Broche': isHumanModel
+            ? 'Show the brooch pinned naturally on the model\'s clothing at the upper chest or lapel area with realistic attachment.'
+            : '',
+    };
+
+    const instruction = synergy[category];
+    if (instruction) return `\nFRAMING: ${instruction}`;
+    return '';
+}
+
 export function buildEnglishPrompt(niche: string, selections: any) {
     const dict = jewelryDictionary;
 
-    // LÓGICA INTELIGENTE DE MÚLTIPLAS PEÇAS
+    // ── Product detection ──
     let productText = "a luxury jewelry piece";
     let isMultiple = false;
+    const primaryCategory = selections.category || (selections.uploadedCategories?.[0]) || '';
 
-    // Se houver mais de uma categoria, juntamos os textos (Ex: Colar E Brinco)
     if (selections.uploadedCategories && selections.uploadedCategories.length > 1) {
         isMultiple = true;
         const items = selections.uploadedCategories.map((cat: string) => dict.produto[cat] || cat);
-
         if (items.length === 2) {
             productText = `a matching set featuring ${items[0]} AND ${items[1]}`;
         } else {
@@ -120,63 +222,95 @@ export function buildEnglishPrompt(niche: string, selections: any) {
             productText = `a matching jewelry set featuring ${items.join(', ')}, AND ${lastItem}`;
         }
     } else {
-        // Fallback: Apenas 1 peça normal
-        const productCat = selections.category || (selections.uploadedCategories?.[0]) || '';
-        productText = dict.produto[productCat] || "a luxury jewelry piece";
+        productText = dict.produto[primaryCategory] || "a luxury jewelry piece";
     }
 
-    const materialSelection = selections.material || '';
-    const materialText = dict.material[materialSelection] ? `, ${dict.material[materialSelection]}` : "";
+    // ── Display ──
+    const displaySelection = selections.display || '';
+    const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
+    const isHumanModel = HUMAN_MODELS.includes(displaySelection);
+    const isCloseUp = CLOSE_UP_DISPLAYS.includes(displaySelection);
+    const isEarProfile = displaySelection === 'Perfil / Orelha';
 
+    // ── Background ──
     const bgSelection = selections.background || '';
     const backgroundText = dict.fundo[bgSelection] || "on a neutral studio background";
 
-    const displaySelection = selections.display || '';
-    let displayText = dict.exibicao[displaySelection] || "elegantly displayed";
+    // ── Smart lighting (material × background synergy) ──
+    const materialSelection = selections.material || '';
+    const lightingInstruction = materialSelection
+        ? buildLightingInstruction(materialSelection, bgSelection)
+        : 'Use professional soft studio rim lighting optimized for jewelry photography.';
 
-    // EARRING-SPECIFIC: Instruct the AI on correct earring placement when using human models
-    const productCatSingle = selections.category || (selections.uploadedCategories?.[0]) || '';
-    const isEarring = productCatSingle === 'Brinco' || (selections.uploadedCategories && selections.uploadedCategories.includes('Brinco'));
-    const isHumanModel = ['Helena', 'Zara', 'Lin', 'Maya', 'Valentina'].includes(displaySelection);
-    const isEarProfile = displaySelection === 'Perfil / Orelha';
-
-    if (isEarring && isHumanModel) {
-        displayText += ". IMPORTANT: Show the model's FULL FACE from the front, with ONE earring visible on EACH ear (left and right). Do NOT place both earrings on the same ear";
-    } else if (isEarring && isEarProfile) {
-        displayText += ". IMPORTANT: Show only ONE single earring on the visible ear in this side profile shot. Do NOT place two earrings on the same ear";
-    }
-
+    // ── Props ──
     const propSelection = selections.prop || 'none';
     const propText = propSelection !== 'none' && dict.props[propSelection] ? `, ${dict.props[propSelection]}` : "";
 
+    // ── Earring intelligence ──
+    const isEarring = primaryCategory === 'Brinco' || (selections.uploadedCategories?.includes('Brinco'));
+    const earringInstruction = isEarring
+        ? buildEarringInstruction(displaySelection, isHumanModel, isEarProfile)
+        : '';
+
+    // ── Category × display synergy ──
+    const categoryDisplayInstruction = !isEarring
+        ? buildCategoryDisplaySynergy(primaryCategory, displaySelection, isHumanModel)
+        : '';
+
+    // ── Text overlay ──
     let textPrompt = "";
     if (selections.text) {
         const typoSelection = selections.typography || '';
         const typoText = dict.tipografia[typoSelection] || "written in a clean font";
-
         const colorSelection = selections.textColor || 'white';
         const colorText = dict.corTexto[colorSelection] || dict.corTexto['white'];
-
         const sizeSelection = selections.textSize || 'medium';
         const sizeText = dict.tamanhoTexto[sizeSelection] || dict.tamanhoTexto['medium'];
-
         const posSelection = selections.textPosition || 'bottom';
         const positionText = dict.posicaoTexto[posSelection] || dict.posicaoTexto['bottom'];
-
         textPrompt = `TEXT OVERLAY: There is a prominent text graphic overlay on the image that exactly says "${selections.text}". The text is ${typoText}, ${colorText}, ${sizeText}, and is ${positionText}.`;
     }
 
-    // A FRASE FINAL: Exige explicitamente "ALL the exact uploaded jewelry pieces together" quando no plural
+    // ── Piece description (singular vs plural) ──
     const pieceDescription = isMultiple
         ? `ALL the exact uploaded jewelry pieces together in the same composition (${productText})`
         : `the exact uploaded jewelry piece (${productText})`;
 
-    // Format / aspect ratio instruction
+    // ── Format / aspect ratio ──
     const formatRatio = selections.format || '1:1';
     const { orientation } = getAspectRatioInfo(formatRatio);
     const formatInstruction = `The image MUST be composed in a ${orientation} format (aspect ratio ${formatRatio}). Frame the composition accordingly.`;
 
-    const finalEnglishPrompt = `${formatInstruction} A hyper-realistic commercial macro photograph of ${pieceDescription}, STRICTLY maintaining the original colors, material, designs, shapes, and every detail of the uploaded jewelry piece exactly as they are — do NOT change, recolor, or alter the piece in any way${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
+    // ── Lens choice based on display type ──
+    const lensInstruction = isCloseUp
+        ? 'Shot with 100mm macro lens, f/2.8, extreme close-up, shallow depth of field, focus stacking on the jewelry piece'
+        : isHumanModel
+            ? 'Shot with 85mm portrait lens, f/1.8, natural shallow depth of field with the jewelry in sharp focus'
+            : 'Shot with 100mm macro lens, f/2.8, focus stacking for maximum sharpness on the jewelry piece';
+
+    // ══════════════════════════════════════════
+    // FINAL PROMPT ASSEMBLY
+    // ══════════════════════════════════════════
+    const finalEnglishPrompt = [
+        formatInstruction,
+        `A hyper-realistic commercial photograph of ${pieceDescription}, ${displayText}, ${backgroundText}${propText}.`,
+
+        // CORE RULE: Color & design fidelity
+        `ABSOLUTE RULE — COLOR & DESIGN FIDELITY: Reproduce the uploaded jewelry piece with 100% fidelity to the original. The exact colors, materials, textures, gemstone hues, metal finish, shape, proportions, and every design detail must match the reference image EXACTLY. Do NOT recolor, tint, change material, add stones, remove details, or alter the piece in ANY way. If the original is silver, it stays silver. If it has blue stones, they stay blue. The piece in the output must be indistinguishable from the uploaded reference.`,
+
+        // Smart lighting
+        lightingInstruction,
+
+        // Category-specific intelligence
+        earringInstruction,
+        categoryDisplayInstruction,
+
+        // Text overlay
+        textPrompt,
+
+        // Technical quality
+        `${lensInstruction}, 8k resolution, ray-traced reflections, caustics, hyper-photorealistic commercial jewelry photography.`
+    ].filter(Boolean).join('\n\n');
 
     return finalEnglishPrompt;
 }
