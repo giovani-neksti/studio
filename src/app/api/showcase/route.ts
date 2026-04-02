@@ -5,6 +5,31 @@ export const revalidate = 60; // ISR — revalida a cada 60s
 
 export async function GET() {
   try {
+    // First: try curated showcase items (admin-selected)
+    const { data: curated, error: curatedErr } = await supabaseAdmin
+      .from('generations')
+      .select('id, original_image_url, generated_image_url, niche, created_at')
+      .eq('showcase', true)
+      .not('original_image_url', 'is', null)
+      .not('generated_image_url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    // If we have curated items, use them
+    if (!curatedErr && curated && curated.length > 0) {
+      const items = curated.map((g) => ({
+        id: g.id,
+        before: g.original_image_url,
+        after: g.generated_image_url,
+        niche: g.niche,
+      }));
+
+      return NextResponse.json({ items }, {
+        headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+      });
+    }
+
+    // Fallback: latest 20 generations (when no curated items exist yet)
     const { data, error } = await supabaseAdmin
       .from('generations')
       .select('id, original_image_url, generated_image_url, niche, created_at')
@@ -17,7 +42,6 @@ export async function GET() {
       return NextResponse.json({ items: [] }, { status: 200 });
     }
 
-    // Return only image URLs — no user data (anonymous)
     const items = (data || []).map((g) => ({
       id: g.id,
       before: g.original_image_url,

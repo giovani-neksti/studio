@@ -32,6 +32,8 @@ import {
   Minus,
   RefreshCw,
   Settings2,
+  Star,
+  Eye,
 } from 'lucide-react';
 import { useShareImage } from '@/hooks/useShareImage';
 import { ShareToast } from '@/components/ShareToast';
@@ -74,6 +76,7 @@ interface Generation {
   created_at: string;
   original_image_url: string;
   generated_image_url: string;
+  showcase?: boolean;
 }
 
 interface FinanceiroData {
@@ -161,7 +164,36 @@ export default function AdminPage() {
   const [financeiro, setFinanceiro] = useState<FinanceiroData | null>(null);
   const [finLoading, setFinLoading] = useState(false);
   const [costPerGeneration, setCostPerGeneration] = useState(0.15); // R$ custo estimado por geração
+  const [togglingShowcase, setTogglingShowcase] = useState<string | null>(null);
+  const [showcaseFilter, setShowcaseFilter] = useState<'all' | 'showcase' | 'not_showcase'>('all');
   const { canShare, shareImage, toast, dismissToast } = useShareImage();
+
+  const showcaseCount = generations.filter(g => g.showcase).length;
+
+  const toggleShowcase = async (genId: string, currentValue: boolean) => {
+    if (!session?.access_token) return;
+    setTogglingShowcase(genId);
+    try {
+      const res = await fetch('/api/admin/showcase', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ generationId: genId, showcase: !currentValue }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGenerations(prev => prev.map(g => g.id === genId ? { ...g, showcase: !currentValue } : g));
+      } else {
+        alert(data.error || 'Erro ao atualizar showcase');
+      }
+    } catch {
+      alert('Erro de rede');
+    } finally {
+      setTogglingShowcase(null);
+    }
+  };
 
   // Auth gate
   useEffect(() => {
@@ -558,16 +590,51 @@ export default function AdminPage() {
             {/* Generations Tab */}
             {tab === 'generations' && (
               <div>
-                <p className="md3-label-medium text-[var(--on-surface-variant)] mb-4">
-                  Últimas 50 gerações
-                </p>
+                {/* Header with showcase counter and filter */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <p className="md3-label-medium text-[var(--on-surface-variant)]">
+                      Últimas 50 gerações
+                    </p>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${showcaseCount >= 20 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20'}`}>
+                      <Star className="w-3 h-3" />
+                      {showcaseCount}/20 no Showcase
+                    </span>
+                  </div>
+                  <div className="flex gap-1 bg-[var(--surface-container-highest)]/50 rounded-[var(--shape-small)] p-0.5">
+                    {([['all', 'Todas'], ['showcase', 'Showcase'], ['not_showcase', 'Sem showcase']] as const).map(([key, label]) => (
+                      <button
+                        key={key}
+                        onClick={() => setShowcaseFilter(key)}
+                        className={`px-3 py-1.5 rounded-[var(--shape-small)] text-xs font-medium transition-all ${showcaseFilter === key ? 'bg-[var(--primary)] text-[var(--on-primary)]' : 'text-[var(--on-surface-variant)] hover:text-[var(--foreground)]'}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Info banner */}
+                <div className="flex items-start gap-2.5 p-3 mb-4 rounded-[var(--shape-medium)] bg-[var(--primary)]/5 border border-[var(--primary)]/15">
+                  <Eye className="w-4 h-4 text-[var(--primary)] mt-0.5 flex-shrink-0" />
+                  <p className="md3-label-small text-[var(--on-surface-variant)]">
+                    Clique na estrela para selecionar até <strong>20 imagens</strong> que aparecerão no carrossel da landing page. Enquanto nenhuma for selecionada, as 20 mais recentes serão exibidas automaticamente.
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {generations.map((g) => (
+                  {generations
+                    .filter(g => {
+                      if (showcaseFilter === 'showcase') return g.showcase;
+                      if (showcaseFilter === 'not_showcase') return !g.showcase;
+                      return true;
+                    })
+                    .map((g) => (
                     <div
                       key={g.id}
-                      className="rounded-[var(--shape-large)] border border-[var(--outline-variant)]/20 bg-[var(--surface-container)] overflow-hidden"
+                      className={`rounded-[var(--shape-large)] border overflow-hidden transition-all ${g.showcase ? 'border-amber-500/40 bg-[var(--surface-container)] ring-1 ring-amber-500/20' : 'border-[var(--outline-variant)]/20 bg-[var(--surface-container)]'}`}
                     >
-                      <div className="flex h-40">
+                      <div className="flex h-40 relative">
                         <div className="w-1/2 relative">
                           <img
                             src={g.original_image_url}
@@ -588,11 +655,35 @@ export default function AdminPage() {
                             IA
                           </span>
                         </div>
+                        {/* Showcase star toggle */}
+                        <button
+                          onClick={() => toggleShowcase(g.id, !!g.showcase)}
+                          disabled={togglingShowcase === g.id}
+                          className={`absolute top-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg ${
+                            g.showcase
+                              ? 'bg-amber-500 text-white hover:bg-amber-600'
+                              : 'bg-black/50 text-white/70 hover:bg-black/70 hover:text-amber-400'
+                          } ${togglingShowcase === g.id ? 'opacity-50 cursor-wait' : ''}`}
+                          title={g.showcase ? 'Remover do showcase' : 'Adicionar ao showcase'}
+                        >
+                          {togglingShowcase === g.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Star className={`w-4 h-4 ${g.showcase ? 'fill-current' : ''}`} />
+                          )}
+                        </button>
                       </div>
                       <div className="p-3 flex items-center justify-between">
-                        <span className="md3-label-medium text-[var(--on-surface-variant)] capitalize">
-                          {g.niche || '—'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="md3-label-medium text-[var(--on-surface-variant)] capitalize">
+                            {g.niche || '—'}
+                          </span>
+                          {g.showcase && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                              SHOWCASE
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
                           {canShare && (
                             <button

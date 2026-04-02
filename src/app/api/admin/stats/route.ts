@@ -28,7 +28,7 @@ export async function GET(req: Request) {
     // Fetch recent generations (last 50)
     const { data: generations, error: genError } = await supabaseAdmin
       .from('generations')
-      .select('id, niche, created_at, original_image_url, generated_image_url')
+      .select('id, niche, created_at, original_image_url, generated_image_url, showcase')
       .order('created_at', { ascending: false })
       .limit(50);
 
