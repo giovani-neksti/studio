@@ -10,10 +10,10 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Bracelete Pandora": "a premium charm bracelet loaded with intricate silver and glass charms, Pandora style"
     },
     material: {
-        "gold_yellow": "featuring rich warm golden reflections and highly polished yellow gold material properties",
-        "gold_white": "featuring cool pristine silver highlights, bright white gold material, and sharp metallic reflections",
-        "gold_rose": "featuring soft pinkish-gold reflections, elegant rose gold material, and warm metallic luster",
-        "gemstone": "focusing on brilliant gemstone refractions, internal light scattering, and sharp diamond-like caustics"
+        "gold_yellow": "with warm golden-toned studio lighting optimized to enhance warm metal reflections and golden highlights on the original piece without altering its actual color",
+        "gold_white": "with cool bright studio lighting optimized to enhance silver and white metal reflections and crisp highlights on the original piece without altering its actual color",
+        "gold_rose": "with soft warm-pink studio lighting optimized to enhance rose-toned metal reflections on the original piece without altering its actual color",
+        "gemstone": "with precise focused lighting optimized to maximize gemstone refractions, internal light scattering, and diamond-like caustics on the original stones without altering their actual colors"
     },
     props: {
         "water_drops": "with delicate cinematic water droplets scattered elegantly on the surface",
@@ -126,13 +126,25 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     }
 
     const materialSelection = selections.material || '';
-    const materialText = dict.material[materialSelection] ? ` ${dict.material[materialSelection]}` : "";
+    const materialText = dict.material[materialSelection] ? `, ${dict.material[materialSelection]}` : "";
 
     const bgSelection = selections.background || '';
     const backgroundText = dict.fundo[bgSelection] || "on a neutral studio background";
 
     const displaySelection = selections.display || '';
-    const displayText = dict.exibicao[displaySelection] || "elegantly displayed";
+    let displayText = dict.exibicao[displaySelection] || "elegantly displayed";
+
+    // EARRING-SPECIFIC: Instruct the AI on correct earring placement when using human models
+    const productCatSingle = selections.category || (selections.uploadedCategories?.[0]) || '';
+    const isEarring = productCatSingle === 'Brinco' || (selections.uploadedCategories && selections.uploadedCategories.includes('Brinco'));
+    const isHumanModel = ['Helena', 'Zara', 'Lin', 'Maya', 'Valentina'].includes(displaySelection);
+    const isEarProfile = displaySelection === 'Perfil / Orelha';
+
+    if (isEarring && isHumanModel) {
+        displayText += ". IMPORTANT: Show the model's FULL FACE from the front, with ONE earring visible on EACH ear (left and right). Do NOT place both earrings on the same ear";
+    } else if (isEarring && isEarProfile) {
+        displayText += ". IMPORTANT: Show only ONE single earring on the visible ear in this side profile shot. Do NOT place two earrings on the same ear";
+    }
 
     const propSelection = selections.prop || 'none';
     const propText = propSelection !== 'none' && dict.props[propSelection] ? `, ${dict.props[propSelection]}` : "";
@@ -164,7 +176,7 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const { orientation } = getAspectRatioInfo(formatRatio);
     const formatInstruction = `The image MUST be composed in a ${orientation} format (aspect ratio ${formatRatio}). Frame the composition accordingly.`;
 
-    const finalEnglishPrompt = `${formatInstruction} A hyper-realistic commercial macro photograph of ${pieceDescription}, maintaining original designs, shapes, and details perfectly,${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
+    const finalEnglishPrompt = `${formatInstruction} A hyper-realistic commercial macro photograph of ${pieceDescription}, STRICTLY maintaining the original colors, material, designs, shapes, and every detail of the uploaded jewelry piece exactly as they are — do NOT change, recolor, or alter the piece in any way${materialText}, ${displayText}, ${backgroundText}${propText}. ${textPrompt} Shot with 100mm macro lens, f/2.8, 8k resolution, ray-traced reflections, caustics, soft studio rim lighting, focus stacking, hyper-photorealistic.`;
 
     return finalEnglishPrompt;
 }
