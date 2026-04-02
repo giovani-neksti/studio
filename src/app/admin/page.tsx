@@ -87,6 +87,15 @@ interface FinanceiroData {
     planBreakdown: Record<string, { count: number; revenue: number }>;
     monthlyTrend: { month: string; revenue: number; payments: number }[];
   };
+  cost: {
+    totalUsd: number;
+    monthUsd: number;
+    todayUsd: number;
+    totalInputTokens: number;
+    totalOutputTokens: number;
+    avgCostPerGenUsd: number;
+    monthlyCostTrend: { month: string; costUsd: number; generations: number }[];
+  };
   usage: {
     totalGenerations: number;
     totalCreditsRemaining: number;
@@ -112,6 +121,7 @@ interface FinanceiroData {
     totalGenerations: number;
     plans: string[];
     createdAt: string;
+    costUsd: number;
   }>;
 }
 
@@ -163,7 +173,7 @@ export default function AdminPage() {
   const [testingRoute, setTestingRoute] = useState<string | null>(null);
   const [financeiro, setFinanceiro] = useState<FinanceiroData | null>(null);
   const [finLoading, setFinLoading] = useState(false);
-  const [costPerGeneration, setCostPerGeneration] = useState(0.15); // R$ custo estimado por geração
+  const [usdToBrl, setUsdToBrl] = useState(5.70); // Câmbio USD→BRL
   const [togglingShowcase, setTogglingShowcase] = useState<string | null>(null);
   const [showcaseFilter, setShowcaseFilter] = useState<'all' | 'showcase' | 'not_showcase'>('all');
   const { canShare, shareImage, toast, dismissToast } = useShareImage();
@@ -720,16 +730,19 @@ export default function AdminPage() {
                 ) : financeiro ? (() => {
                   const rev = financeiro.revenue;
                   const usg = financeiro.usage;
-                  const totalCostCents = Math.round(usg.totalGenerations * costPerGeneration * 100);
-                  const marginCents = rev.total - totalCostCents;
-                  const marginPercent = rev.total > 0 ? ((marginCents / rev.total) * 100).toFixed(1) : '0';
+                  const cst = financeiro.cost;
 
-                  const monthCostCents = Math.round(
-                    (financeiro.userBreakdown.reduce((s, u) => s + u.totalGenerations, 0)) * costPerGeneration * 100
-                  );
+                  // Real cost in BRL cents
+                  const totalCostBrlCents = Math.round(cst.totalUsd * usdToBrl * 100);
+                  const monthCostBrlCents = Math.round(cst.monthUsd * usdToBrl * 100);
+                  const todayCostBrlCents = Math.round(cst.todayUsd * usdToBrl * 100);
+                  const marginCents = rev.total - totalCostBrlCents;
+                  const marginPercent = rev.total > 0 ? ((marginCents / rev.total) * 100).toFixed(1) : '0';
 
                   const fmtBRL = (cents: number) =>
                     `R$ ${(cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  const fmtUSD = (usd: number) =>
+                    `$ ${usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
 
                   return (
                     <>
@@ -741,21 +754,19 @@ export default function AdminPage() {
                             Painel Financeiro
                           </h2>
                           <p className="md3-body-small text-[var(--on-surface-variant)] mt-1">
-                            Receita × Custo × Margem — Visão consolidada
+                            Receita × Custo Real (Vertex AI) × Margem
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          {/* Cost per generation input */}
                           <div className="flex items-center gap-1.5 h-10 px-3 rounded-[var(--shape-full)] border border-[var(--outline)]/40 bg-[var(--surface-container-low)]">
                             <Settings2 className="w-3.5 h-3.5 text-[var(--on-surface-variant)]" />
-                            <span className="md3-label-small text-[var(--on-surface-variant)] whitespace-nowrap">Custo/gen:</span>
-                            <span className="md3-label-small text-[var(--on-surface-variant)]">R$</span>
+                            <span className="md3-label-small text-[var(--on-surface-variant)] whitespace-nowrap">USD→BRL:</span>
                             <input
                               type="number"
                               step="0.01"
                               min="0"
-                              value={costPerGeneration}
-                              onChange={e => setCostPerGeneration(parseFloat(e.target.value) || 0)}
+                              value={usdToBrl}
+                              onChange={e => setUsdToBrl(parseFloat(e.target.value) || 0)}
                               className="w-16 bg-transparent text-[var(--foreground)] md3-label-medium outline-none text-center"
                             />
                           </div>
@@ -783,15 +794,15 @@ export default function AdminPage() {
                           </p>
                         </div>
 
-                        {/* Custo Estimado */}
+                        {/* Custo Real Vertex AI */}
                         <div className="p-4 md:p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Custo Estimado</span>
+                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Custo Real (API)</span>
                             <TrendingUp className="w-4 h-4 text-amber-500" />
                           </div>
-                          <span className="text-2xl md:text-3xl font-bold text-amber-500">{fmtBRL(totalCostCents)}</span>
+                          <span className="text-2xl md:text-3xl font-bold text-amber-500">{fmtBRL(totalCostBrlCents)}</span>
                           <p className="md3-label-small text-[var(--on-surface-variant)] mt-1">
-                            {usg.totalGenerations} gerações × R$ {costPerGeneration.toFixed(2).replace('.', ',')}
+                            {fmtUSD(cst.totalUsd)} USD
                           </p>
                         </div>
 
@@ -815,68 +826,62 @@ export default function AdminPage() {
                           </p>
                         </div>
 
-                        {/* Receita Mês */}
+                        {/* Custo Mês */}
                         <div className="p-4 md:p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Receita no Mês</span>
+                            <span className="md3-label-medium text-[var(--on-surface-variant)]">Custo no Mês</span>
                             <CreditCard className="w-4 h-4 text-[var(--primary)]" />
                           </div>
-                          <span className="text-2xl md:text-3xl font-bold text-[var(--primary)]">{fmtBRL(rev.month)}</span>
+                          <span className="text-2xl md:text-3xl font-bold text-[var(--primary)]">{fmtBRL(monthCostBrlCents)}</span>
                           <p className="md3-label-small text-[var(--on-surface-variant)] mt-1">
-                            Hoje: {fmtBRL(rev.today)}
+                            Hoje: {fmtBRL(todayCostBrlCents)}
                           </p>
                         </div>
                       </div>
 
-                      {/* Second Row: Plan Breakdown + Usage Stats */}
+                      {/* Second Row: Cost Breakdown + Usage Stats */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        {/* Plan Breakdown */}
+                        {/* Vertex AI Cost Details */}
                         <div className="p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
                           <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2 mb-4">
-                            <PieChart className="w-4 h-4 text-[var(--primary)]" />
-                            Receita por Plano
+                            <Zap className="w-4 h-4 text-amber-500" />
+                            Custos Vertex AI (Gemini)
                           </h3>
-                          {Object.keys(rev.planBreakdown).length === 0 ? (
-                            <p className="md3-body-medium text-[var(--on-surface-variant)]">Nenhum pagamento registrado.</p>
-                          ) : (
-                            <div className="space-y-3">
-                              {Object.entries(rev.planBreakdown).map(([plan, data]) => {
-                                const pct = rev.total > 0 ? (data.revenue / rev.total) * 100 : 0;
-                                const planColors: Record<string, string> = {
-                                  Essentials: '#1565c0',
-                                  Professional: '#7c5cbf',
-                                  Premium: '#e65100',
-                                };
-                                const color = planColors[plan] || 'var(--primary)';
-                                return (
-                                  <div key={plan}>
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="md3-label-medium text-[var(--foreground)]">{plan}</span>
-                                      <div className="flex items-center gap-3">
-                                        <span className="md3-label-small text-[var(--on-surface-variant)]">{data.count}x</span>
-                                        <span className="md3-label-medium font-semibold" style={{ color }}>
-                                          {fmtBRL(data.revenue)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div className="w-full h-2 bg-[var(--surface-container-highest)] rounded-full overflow-hidden">
-                                      <div
-                                        className="h-full rounded-full transition-all duration-500"
-                                        style={{ width: `${pct}%`, backgroundColor: color }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Total gerações</span>
+                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{usg.totalGenerations.toLocaleString('pt-BR')}</span>
                             </div>
-                          )}
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Custo total (USD)</span>
+                              <span className="md3-title-medium font-bold text-amber-500">{fmtUSD(cst.totalUsd)}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Custo médio/geração</span>
+                              <span className="md3-title-medium font-bold text-amber-500">{fmtUSD(cst.avgCostPerGenUsd)}</span>
+                            </div>
+                            <hr className="border-[var(--outline-variant)]/20" />
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Tokens de entrada</span>
+                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{cst.totalInputTokens.toLocaleString('pt-BR')}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Tokens de saída</span>
+                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{cst.totalOutputTokens.toLocaleString('pt-BR')}</span>
+                            </div>
+                            <hr className="border-[var(--outline-variant)]/20" />
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Custo total (BRL)</span>
+                              <span className="md3-title-medium font-bold text-amber-500">{fmtBRL(totalCostBrlCents)}</span>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Usage Stats */}
                         <div className="p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
                           <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2 mb-4">
-                            <Zap className="w-4 h-4 text-amber-500" />
-                            Uso de Créditos
+                            <PieChart className="w-4 h-4 text-[var(--primary)]" />
+                            Receita × Custo
                           </h3>
                           <div className="space-y-4">
                             <div className="flex justify-between items-center">
@@ -884,28 +889,32 @@ export default function AdminPage() {
                               <span className="md3-title-medium font-bold text-[var(--foreground)]">{usg.totalCreditsPurchased.toLocaleString('pt-BR')}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Gerações realizadas</span>
-                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{usg.totalGenerations.toLocaleString('pt-BR')}</span>
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Gerações grátis (3 iniciais)</span>
+                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{usg.freeCreditsUsed.toLocaleString('pt-BR')}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Créditos restantes</span>
                               <span className="md3-title-medium font-bold text-[var(--primary)]">{usg.totalCreditsRemaining.toLocaleString('pt-BR')}</span>
                             </div>
-                            <div className="flex justify-between items-center">
-                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Gerações grátis (3 iniciais)</span>
-                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{usg.freeCreditsUsed.toLocaleString('pt-BR')}</span>
-                            </div>
                             <hr className="border-[var(--outline-variant)]/20" />
                             <div className="flex justify-between items-center">
-                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Receita média por crédito</span>
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Receita por geração</span>
                               <span className="md3-title-medium font-bold text-emerald-500">
-                                {usg.totalCreditsPurchased > 0
-                                  ? fmtBRL(Math.round(rev.total / usg.totalCreditsPurchased))
+                                {usg.totalGenerations > 0
+                                  ? fmtBRL(Math.round(rev.total / usg.totalGenerations))
                                   : '—'}
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Margem por crédito usado</span>
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Custo real por geração</span>
+                              <span className="md3-title-medium font-bold text-amber-500">
+                                {usg.totalGenerations > 0
+                                  ? fmtBRL(Math.round(totalCostBrlCents / usg.totalGenerations))
+                                  : '—'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="md3-body-medium text-[var(--on-surface-variant)]">Margem por geração</span>
                               <span className={`md3-title-medium font-bold ${marginCents >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                                 {usg.totalGenerations > 0
                                   ? fmtBRL(Math.round(marginCents / usg.totalGenerations))
@@ -916,12 +925,48 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      {/* Monthly Trend */}
+                      {/* Monthly Cost Trend */}
+                      {cst.monthlyCostTrend.length > 0 && (
+                        <div className="p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 mb-6">
+                          <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2 mb-4">
+                            <BarChart3 className="w-4 h-4 text-amber-500" />
+                            Custo Mensal (Vertex AI)
+                          </h3>
+                          <div className="flex items-end gap-2 h-32">
+                            {cst.monthlyCostTrend.map((m) => {
+                              const maxCost = Math.max(...cst.monthlyCostTrend.map(t => t.costUsd), 0.01);
+                              const height = m.costUsd > 0 ? Math.max((m.costUsd / maxCost) * 100, 4) : 4;
+                              const costBrl = Math.round(m.costUsd * usdToBrl * 100);
+                              return (
+                                <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                                  <span className="md3-label-small text-[var(--on-surface-variant)] text-center">
+                                    {m.costUsd > 0 ? fmtBRL(costBrl) : '—'}
+                                  </span>
+                                  <div
+                                    className={`w-full rounded-t-[var(--shape-small)] transition-all duration-500 ${
+                                      m.costUsd > 0 ? 'bg-amber-500' : 'bg-[var(--surface-container-highest)]'
+                                    }`}
+                                    style={{ height: `${height}%` }}
+                                  />
+                                  <span className="md3-label-small text-[var(--on-surface-variant)] text-center whitespace-nowrap">
+                                    {m.month}
+                                  </span>
+                                  <span className="md3-label-small text-[var(--outline)] text-center">
+                                    {m.generations}x
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Revenue Trend */}
                       {rev.monthlyTrend.length > 0 && (
                         <div className="p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 mb-6">
                           <h3 className="md3-title-small font-semibold text-[var(--foreground)] flex items-center gap-2 mb-4">
-                            <BarChart3 className="w-4 h-4 text-[var(--primary)]" />
-                            Tendência Mensal de Receita
+                            <BarChart3 className="w-4 h-4 text-emerald-500" />
+                            Receita Mensal
                           </h3>
                           <div className="flex items-end gap-2 h-32">
                             {rev.monthlyTrend.map((m) => {
@@ -934,7 +979,7 @@ export default function AdminPage() {
                                   </span>
                                   <div
                                     className={`w-full rounded-t-[var(--shape-small)] transition-all duration-500 ${
-                                      m.revenue > 0 ? 'bg-[var(--primary)]' : 'bg-[var(--surface-container-highest)]'
+                                      m.revenue > 0 ? 'bg-emerald-500' : 'bg-[var(--surface-container-highest)]'
                                     }`}
                                     style={{ height: `${height}%` }}
                                   />
@@ -964,14 +1009,14 @@ export default function AdminPage() {
                                 <th className="text-center px-3 py-3 md3-label-medium text-[var(--on-surface-variant)]">Plano</th>
                                 <th className="text-right px-3 py-3 md3-label-medium text-emerald-500">Receita</th>
                                 <th className="text-center px-3 py-3 md3-label-medium text-[var(--on-surface-variant)]">Gerações</th>
-                                <th className="text-right px-3 py-3 md3-label-medium text-amber-500">Custo Est.</th>
+                                <th className="text-right px-3 py-3 md3-label-medium text-amber-500">Custo Real</th>
                                 <th className="text-right px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Margem</th>
                               </tr>
                             </thead>
                             <tbody>
                               {financeiro.userBreakdown.map((u) => {
-                                const uCost = Math.round(u.totalGenerations * costPerGeneration * 100);
-                                const uMargin = u.revenue - uCost;
+                                const uCostBrl = Math.round(u.costUsd * usdToBrl * 100);
+                                const uMargin = u.revenue - uCostBrl;
                                 return (
                                   <tr key={u.id} className="border-b border-[var(--outline-variant)]/10 hover:bg-[var(--surface-container-high)]/50 transition-colors">
                                     <td className="px-4 py-3">
@@ -1000,7 +1045,7 @@ export default function AdminPage() {
                                       {u.totalGenerations}
                                     </td>
                                     <td className="text-right px-3 py-3 md3-body-medium text-amber-500">
-                                      {fmtBRL(uCost)}
+                                      {fmtBRL(uCostBrl)}
                                     </td>
                                     <td className="text-right px-4 py-3">
                                       <span className={`md3-body-medium font-semibold ${uMargin >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -1061,10 +1106,10 @@ export default function AdminPage() {
                       <div className="mt-6 p-4 rounded-[var(--shape-large)] bg-[var(--surface-container-low)] border border-[var(--outline-variant)]/10">
                         <p className="md3-label-medium text-[var(--on-surface-variant)] mb-2">Sobre os cálculos</p>
                         <div className="md3-body-small text-[var(--on-surface-variant)] space-y-1">
-                          <p>• <strong>Custo estimado</strong> = nº de gerações × R$ {costPerGeneration.toFixed(2).replace('.', ',')} (ajustável acima). Inclui custo de API Vertex AI (Gemini).</p>
-                          <p>• <strong>Receita</strong> = soma de todos os pagamentos Stripe processados e registrados.</p>
-                          <p>• <strong>Margem</strong> = Receita − Custo Estimado. Não inclui custos fixos (servidor, domínio, etc).</p>
-                          <p>• Pagamentos anteriores à criação da tabela <code>payments</code> não aparecem aqui. Consulte o dashboard do Stripe para histórico completo.</p>
+                          <p>• <strong>Custo Real</strong> = rastreado direto da API Vertex AI (tokens de entrada + custo fixo por imagem gerada). Armazenado por geração no banco.</p>
+                          <p>• <strong>Conversão</strong> = USD → BRL usando câmbio de R$ {usdToBrl.toFixed(2).replace('.', ',')} (ajustável acima).</p>
+                          <p>• <strong>Margem</strong> = Receita (Stripe) − Custo Real (API). Não inclui custos fixos (servidor, domínio, Supabase, etc).</p>
+                          <p>• Gerações anteriores ao rastreamento usam custo estimado de $0.04/geração (backfill da migration).</p>
                         </div>
                       </div>
                     </>

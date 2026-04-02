@@ -180,6 +180,18 @@ export async function POST(req: Request) {
 
     if (!generatedBase64) throw new Error("A IA Pro não retornou a imagem. Verifique os filtros de segurança.");
 
+    // ── Extract usage metadata and calculate real cost ──
+    const usageMetadata = aiData.usageMetadata || {};
+    const inputTokens = usageMetadata.promptTokenCount || 0;
+    const outputTokens = usageMetadata.candidatesTokenCount || 0;
+
+    // Vertex AI Gemini pricing (USD):
+    // Input: $1.25 / 1M tokens (Gemini Pro)
+    // Output image: ~$0.04 per generated image
+    const inputCostUsd = (inputTokens / 1_000_000) * 1.25;
+    const outputImageCostUsd = 0.04; // fixed cost per generated image
+    const totalCostUsd = inputCostUsd + outputImageCostUsd;
+
     // 5. Salvar imagem gerada (comprimida para WebP)
     const generatedBuffer = Buffer.from(generatedBase64, 'base64');
     const optimizedBuffer = await sharp(generatedBuffer).webp({ quality: 82 }).toBuffer();
@@ -187,14 +199,17 @@ export async function POST(req: Request) {
     await supabaseAdmin.storage.from('compositions').upload(genFileName, optimizedBuffer, { contentType: 'image/webp' });
     const generatedUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/compositions/${genFileName}`;
 
-    // 6. Registro no banco de dados
+    // 6. Registro no banco de dados (com custo real rastreado)
     await supabaseAdmin.from('generations').insert({
       user_id: user.id,
       niche,
       original_image_url: originalUrl,
       generated_image_url: generatedUrl,
       prompt: finalPrompt,
-      selections
+      selections,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      cost_usd: parseFloat(totalCostUsd.toFixed(6)),
     });
 
     return NextResponse.json({ url: generatedUrl });

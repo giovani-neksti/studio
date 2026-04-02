@@ -33,10 +33,17 @@ export async function GET(req: Request) {
 
     if (profilesError) throw profilesError;
 
-    // Fetch total generation count from generations table (more accurate)
+    // Fetch total generation count and real costs from generations table
     const { count: totalGenCount } = await supabaseAdmin
       .from('generations')
       .select('id', { count: 'exact', head: true });
+
+    // Fetch all generations with cost data for accurate cost tracking
+    const { data: allGenerations } = await supabaseAdmin
+      .from('generations')
+      .select('id, cost_usd, input_tokens, output_tokens, created_at, user_id');
+
+    const generationsList = allGenerations ?? [];
 
     // Date boundaries
     const now = new Date();
@@ -62,6 +69,43 @@ export async function GET(req: Request) {
       planCounts[p.plan].revenue += p.amount_cents;
     }
 
+    // === REAL COST FROM VERTEX AI ===
+    const totalCostUsd = generationsList.reduce((s, g) => s + (g.cost_usd || 0), 0);
+    const monthCostUsd = generationsList
+      .filter(g => new Date(g.created_at) >= monthStart)
+      .reduce((s, g) => s + (g.cost_usd || 0), 0);
+    const todayCostUsd = generationsList
+      .filter(g => new Date(g.created_at) >= todayStart)
+      .reduce((s, g) => s + (g.cost_usd || 0), 0);
+    const totalInputTokens = generationsList.reduce((s, g) => s + (g.input_tokens || 0), 0);
+    const totalOutputTokens = generationsList.reduce((s, g) => s + (g.output_tokens || 0), 0);
+
+    // Per-user cost breakdown
+    const userCosts: Record<string, { costUsd: number; generations: number }> = {};
+    for (const g of generationsList) {
+      if (!g.user_id) continue;
+      if (!userCosts[g.user_id]) userCosts[g.user_id] = { costUsd: 0, generations: 0 };
+      userCosts[g.user_id].costUsd += g.cost_usd || 0;
+      userCosts[g.user_id].generations++;
+    }
+
+    // Monthly cost trend
+    const monthlyCost: { month: string; costUsd: number; generations: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const nextMonth = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      const label = d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+      const mGens = generationsList.filter(g => {
+        const gd = new Date(g.created_at);
+        return gd >= d && gd < nextMonth;
+      });
+      monthlyCost.push({
+        month: label,
+        costUsd: mGens.reduce((s, g) => s + (g.cost_usd || 0), 0),
+        generations: mGens.length,
+      });
+    }
+
     // === USAGE / COST ===
     const allProfiles = profiles ?? [];
     const totalGenerations = totalGenCount ?? allProfiles.reduce((s, p) => s + p.total_generations, 0);
@@ -79,6 +123,7 @@ export async function GET(req: Request) {
 
     const userBreakdown = allProfiles.map(profile => {
       const payData = userPayments[profile.id] || { revenue: 0, credits: 0, plans: [] };
+      const costData = userCosts[profile.id] || { costUsd: 0, generations: 0 };
       return {
         id: profile.id,
         email: profile.email,
@@ -88,6 +133,7 @@ export async function GET(req: Request) {
         totalGenerations: profile.total_generations,
         plans: payData.plans,
         createdAt: profile.created_at,
+        costUsd: costData.costUsd,
       };
     });
 
@@ -121,6 +167,15 @@ export async function GET(req: Request) {
         today: revenueToday,
         planBreakdown: planCounts,
         monthlyTrend: monthlyRevenue,
+      },
+      cost: {
+        totalUsd: totalCostUsd,
+        monthUsd: monthCostUsd,
+        todayUsd: todayCostUsd,
+        totalInputTokens,
+        totalOutputTokens,
+        avgCostPerGenUsd: totalGenerations > 0 ? totalCostUsd / totalGenerations : 0,
+        monthlyCostTrend: monthlyCost,
       },
       usage: {
         totalGenerations,
