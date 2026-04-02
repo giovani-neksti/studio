@@ -729,31 +729,104 @@ export function Sidebar({
         );
 
       /* ── STEP 4: Formato de Saída ── */
-      case 4:
+      case 4: {
+        const formatMeta: Record<string, { icon: ReactNode; platforms: { name: string; color: string }[]; use: string }> = {
+          'square': {
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>,
+            platforms: [
+              { name: 'Instagram', color: '#E1306C' },
+              { name: 'Facebook', color: '#1877F2' },
+            ],
+            use: 'Post no Feed',
+          },
+          'portrait': {
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><rect x="5" y="2" width="14" height="20" rx="2" /></svg>,
+            platforms: [
+              { name: 'Instagram', color: '#E1306C' },
+            ],
+            use: 'Post no Feed (destaque)',
+          },
+          'story': {
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><rect x="7" y="1" width="10" height="22" rx="2" /><line x1="12" y1="18" x2="12" y2="18.01" strokeWidth="3" strokeLinecap="round" /></svg>,
+            platforms: [
+              { name: 'Stories', color: '#E1306C' },
+              { name: 'Reels', color: '#FF0050' },
+              { name: 'TikTok', color: '#000000' },
+            ],
+            use: 'Vídeo vertical / Stories',
+          },
+          'landscape': {
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><rect x="1" y="5" width="22" height="14" rx="2" /></svg>,
+            platforms: [
+              { name: 'LinkedIn', color: '#0A66C2' },
+              { name: 'Site', color: '#4CAF50' },
+              { name: 'Facebook', color: '#1877F2' },
+            ],
+            use: 'Banner / Capa',
+          },
+        };
+
         return (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2.5">
               {config.formats.map((fmt) => {
                 const isActive = selections.format === fmt.ratio;
+                const meta = formatMeta[fmt.id];
                 return (
                   <button
                     key={fmt.id}
                     onClick={() => onSelect('format', fmt.ratio)}
                     aria-pressed={isActive}
-                    className={`flex flex-col items-center justify-center p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-center
+                    className={`flex items-center gap-3 p-3 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-left
                       ${isActive
-                        ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
-                        : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/8'
+                        : 'border-[var(--outline-variant)]/40 hover:bg-[var(--on-surface-variant)]/8'}`}
                   >
-                    <span className="md3-label-large mb-0.5">{fmt.ratio}</span>
-                    <span className="md3-label-small mb-1">{fmt.label}</span>
-                    <span className="text-[8px] md:text-[9px] text-[var(--outline)] hidden md:block">{fmt.pixels}</span>
+                    {/* Aspect ratio visual */}
+                    <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-lg ${isActive ? 'text-[var(--primary)]' : 'text-[var(--on-surface-variant)]'}`}>
+                      {meta?.icon}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className={`md3-label-large font-semibold ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>{fmt.ratio}</span>
+                        <span className={`md3-label-small ${isActive ? 'text-[var(--primary)]/70' : 'text-[var(--on-surface-variant)]'}`}>{fmt.pixels}</span>
+                      </div>
+                      <div className={`md3-label-medium mb-1 ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                        {meta?.use || fmt.label}
+                      </div>
+                      {/* Platform badges */}
+                      <div className="flex flex-wrap gap-1">
+                        {meta?.platforms.map((p) => (
+                          <span
+                            key={p.name}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium"
+                            style={{
+                              backgroundColor: `${p.color}18`,
+                              color: isActive ? 'var(--primary)' : p.color,
+                              border: `1px solid ${p.color}30`,
+                            }}
+                          >
+                            {p.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Check */}
+                    {isActive && (
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center">
+                        <Check className="w-3 h-3 text-[var(--on-primary)]" />
+                      </div>
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
         );
+      }
 
       default:
         return null;
