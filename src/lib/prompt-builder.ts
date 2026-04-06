@@ -9,12 +9,6 @@ export const jewelryDictionary: Record<string, Record<string, string>> = {
         "Pingente": "a beautiful delicate pendant",
         "Bracelete Pandora": "a premium charm bracelet loaded with intricate silver and glass charms, Pandora style"
     },
-    material: {
-        "gold_yellow": "gold_yellow",
-        "gold_white": "gold_white",
-        "gold_rose": "gold_rose",
-        "gemstone": "gemstone"
-    },
     props: {
         "water_drops": "with delicate cinematic water droplets scattered elegantly on the surface",
         "orchid_petal": "with a single pure white orchid petal resting softly in the background",
@@ -104,44 +98,6 @@ export function getAspectRatioInfo(formatRatio: string): { geminiRatio: string; 
 // ── Human model names for quick checks ──
 const HUMAN_MODELS = ['Helena', 'Zara', 'Lin', 'Maya', 'Valentina'];
 const CLOSE_UP_DISPLAYS = ['Close Pescoço', 'Mão / Manicure', 'Pulso', 'Perfil / Orelha'];
-
-// ── Smart lighting based on material + background synergy ──
-function buildLightingInstruction(materialKey: string, bgName: string): string {
-    const isDarkBg = ['Preto Veludo', 'Caoba Profundo', 'Verde Musgo', 'Vermelho Bordô',
-        'Azul Petróleo', 'Verde Esmeralda', 'Azul Safira', 'Roxo Berinjela',
-        'Cinza Chumbo', 'Marrom Chocolate', 'Lavanda Escuro', 'Verde Oliva'].includes(bgName);
-
-    const isLightBg = ['Branco Neve', 'Rosa Pó', 'Nude Areia', 'Azul Gelo', 'Champagne'].includes(bgName);
-
-    let lighting = '';
-
-    switch (materialKey) {
-        case 'gold_yellow':
-            lighting = isDarkBg
-                ? 'Use warm directional key light with subtle golden fill light to bring out the natural warm reflections of the metal against the dark background. Add a rim light to separate the piece from the backdrop.'
-                : 'Use soft warm-toned diffused lighting to gently enhance the natural golden tones of the metal. Avoid harsh highlights that wash out on light backgrounds.';
-            break;
-        case 'gold_white':
-            lighting = isDarkBg
-                ? 'Use cool-toned crisp directional lighting with silver rim accents to enhance the bright metallic reflections against the dark background.'
-                : 'Use neutral cool-white soft-box lighting to bring out the pristine silver reflections cleanly against the light surface.';
-            break;
-        case 'gold_rose':
-            lighting = isDarkBg
-                ? 'Use soft warm pink-tinted key light with gentle fill to enhance the natural rose-gold luster against the dark backdrop. Add subtle rim light for edge definition.'
-                : 'Use delicate warm-toned diffused lighting with a hint of pink to complement the rose-gold tones without overexposing on the light background.';
-            break;
-        case 'gemstone':
-            lighting = isDarkBg
-                ? 'Use precise focused spot lighting to maximize internal refractions and fire within the gemstones. Add secondary point lights at different angles to create spectacular caustics and light scattering against the dark backdrop.'
-                : 'Use clean focused lighting with multiple small point sources to activate gemstone brilliance, fire and scintillation. Control highlights carefully to avoid washout on the light surface.';
-            break;
-        default:
-            lighting = 'Use professional soft studio rim lighting.';
-    }
-
-    return `LIGHTING: ${lighting} CRITICAL: The lighting must ONLY enhance how the piece is illuminated — it must NEVER alter, tint, or change the actual color or material of the jewelry piece itself.`;
-}
 
 // ── Earring-specific intelligence ──
 function buildEarringInstruction(displaySelection: string, isHumanModel: boolean, isEarProfile: boolean): string {
@@ -236,11 +192,8 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const bgSelection = selections.background || '';
     const backgroundText = dict.fundo[bgSelection] || "on a neutral studio background";
 
-    // ── Smart lighting (material × background synergy) ──
-    const materialSelection = selections.material || '';
-    const lightingInstruction = materialSelection
-        ? buildLightingInstruction(materialSelection, bgSelection)
-        : 'Use professional soft studio rim lighting optimized for jewelry photography.';
+    // ── Lighting ──
+    const lightingInstruction = 'Use professional soft studio rim lighting optimized for jewelry photography.';
 
     // ── Props ──
     const propSelection = selections.prop || 'none';

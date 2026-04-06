@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Download, RefreshCw, Check, Camera, Sun, Layers, Maximize, Palette, Box } from 'lucide-react';
+import { Sparkles, Download, RefreshCw, Check, Camera, Layers, Maximize, Palette, Box } from 'lucide-react';
 import { useShareImage } from '@/hooks/useShareImage';
 import { ShareToast } from './ShareToast';
 
@@ -105,14 +105,6 @@ function buildQualityChecks(selections: Record<string, string>, niche: string): 
     });
   }
 
-  // Material da peça
-  if (selections.material) {
-    checks.push({
-      icon: <Sun className={iconClass} />,
-      label: "Iluminação por material",
-      detail: "Rim light, caustics e brilho calibrados para o metal"
-    });
-  }
 
   // Props / Adereços
   if (selections.prop && selections.prop !== 'none') {

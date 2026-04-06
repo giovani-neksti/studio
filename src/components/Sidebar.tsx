@@ -230,7 +230,6 @@ export function Sidebar({
   const activeUploadKey = activeCategory ? `upload_${activeCategory}` : null;
 
   const hasScenarios = !!(config.scenarios   && config.scenarios.length   > 0);
-  const hasMaterials = !!(config.materialOptions && config.materialOptions.length > 0);
   const hasProps     = !!(config.propOptions  && config.propOptions.length  > 0);
 
   // Computed locally from selections — always reactive, no prop timing lag
@@ -362,25 +361,6 @@ export function Sidebar({
               </div>
             </div>
 
-            {/* Material — M3 Outlined Select */}
-            {hasMaterials && (
-              <div>
-                <label htmlFor="select-material" className="md3-label-medium text-[var(--on-surface-variant)] mb-2.5 block tracking-wide">
-                  Material Predominante
-                </label>
-                <select
-                  id="select-material"
-                  value={selections.material || ''}
-                  onChange={(e) => onSelect('material', e.target.value)}
-                  className="w-full h-14 px-4 rounded-[var(--shape-extra-small)] md3-body-large border border-[var(--outline)] bg-transparent text-[var(--foreground)] focus:border-[var(--primary)] focus:border-2 transition-colors duration-[var(--duration-short4)] outline-none m3-touch-target"
-                >
-                  <option value="" disabled>Selecione o Material</option>
-                  {config.materialOptions?.map((mat) => (
-                    <option key={mat.id} value={mat.id}>{mat.label}</option>
-                  ))}
-                </select>
-              </div>
-            )}
           </div>
         );
 

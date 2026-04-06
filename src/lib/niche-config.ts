@@ -39,11 +39,6 @@ export interface TextSizeOption {
   label: string;
 }
 
-export interface MaterialOption {
-  id: string;
-  label: string;
-}
-
 export interface PropOption {
   id: string;
   label: string;
@@ -55,7 +50,6 @@ export interface NicheConfig {
   icon: string;
   tagline: string;
   categories: string[];
-  materialOptions?: MaterialOption[];
   propOptions?: PropOption[];
   solidColors: { name: string; hex: string }[];
   scenarios: { title: string; desc: string }[];
@@ -113,13 +107,6 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
     icon: '💎',
     tagline: 'Componha cenários de luxo ao redor das suas joias',
     categories: ['Colar', 'Brinco', 'Anel', 'Pulseira', 'Tiara', 'Broche', 'Pingente', 'Bracelete Pandora'],
-
-    materialOptions: [
-      { id: 'gold_yellow', label: 'Ouro Amarelo' },
-      { id: 'gold_white', label: 'Ouro Branco / Prata' },
-      { id: 'gold_rose', label: 'Ouro Rosa' },
-      { id: 'gemstone', label: 'Pedraria Predominante' },
-    ],
 
     propOptions: [
       { id: 'none', label: 'Sem Adereços (Apenas Fundo)' },
