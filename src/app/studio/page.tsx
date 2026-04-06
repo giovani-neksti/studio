@@ -172,13 +172,15 @@ function StudioContent() {
       setIsSidebarOpen(false);
     }
 
-    // Recovery: if request fails (timeout/network), check if the image was generated anyway
+    // Recovery: if request fails (timeout/network), poll until the image appears
+    // Covers up to ~3min total generation time even when nginx cuts the connection early
     const recoverFromTimeout = async (): Promise<string | null> => {
       // Wait a bit for the server to finish saving
-      await new Promise(r => setTimeout(r, 5000));
+      await new Promise(r => setTimeout(r, 3000));
 
-      // Poll up to 6 times (30s total) checking if a new generation appeared
-      for (let attempt = 0; attempt < 6; attempt++) {
+      // Poll up to 30 times × 4s = 120s of polling (+ 3s initial = ~2min of recovery)
+      // Combined with ~60s nginx timeout = covers up to ~3min total generation
+      for (let attempt = 0; attempt < 30; attempt++) {
         try {
           const res = await fetch('/api/generations?page=1', {
             headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
@@ -190,7 +192,7 @@ function StudioContent() {
             return latest.generated_image_url;
           }
         } catch { /* ignore */ }
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(r => setTimeout(r, 4000));
       }
       return null;
     };
