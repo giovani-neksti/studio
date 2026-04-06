@@ -5,6 +5,9 @@ import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { sendCreditsExhaustedEmail } from '@/lib/resend';
 import sharp from 'sharp';
 
+export const maxDuration = 120; // seconds
+export const dynamic = 'force-dynamic';
+
 // ── Rate Limiter (in-memory, per-user) ──
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minuto
 const RATE_LIMIT_MAX = 10; // max 10 gerações por minuto

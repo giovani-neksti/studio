@@ -92,6 +92,7 @@ function StudioContent() {
 
   const processImageForAI = async (file: File): Promise<File> => {
     try {
+      // Read file as data URL (compatible with all mobile browsers)
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
@@ -103,7 +104,8 @@ function StudioContent() {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_SIZE = 1024;
+          // Max 1536px — good quality for AI, small enough for fast mobile upload
+          const MAX_SIZE = 1536;
           let width = img.width;
           let height = img.height;
 
@@ -115,31 +117,31 @@ function StudioContent() {
             height = MAX_SIZE;
           }
 
-          canvas.width = width;
-          canvas.height = height;
+          canvas.width = Math.round(width);
+          canvas.height = Math.round(height);
           const ctx = canvas.getContext('2d');
           if (!ctx) return resolve(file);
 
           ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, width, height);
-          ctx.drawImage(img, 0, 0, width, height);
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
           canvas.toBlob((blob) => {
             if (blob) {
-              const newFile = new File([blob], "imagem_processada.jpg", {
+              resolve(new File([blob], "imagem_processada.jpg", {
                 type: 'image/jpeg',
                 lastModified: Date.now(),
-              });
-              resolve(newFile);
+              }));
             } else {
               resolve(file);
             }
-          }, 'image/jpeg', 0.85);
+          }, 'image/jpeg', 0.82);
         };
         img.onerror = () => resolve(file);
         img.src = dataUrl;
       });
     } catch {
+      // Fallback: return original file if anything fails
       return file;
     }
   };
@@ -195,8 +197,17 @@ function StudioContent() {
             headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
             body: formData,
           });
-          const data = await res.json();
-          
+
+          let data: any;
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            data = await res.json();
+          } else {
+            const text = await res.text();
+            console.error('Resposta não-JSON do servidor (batch):', res.status, text.substring(0, 200));
+            data = { error: 'Erro interno do servidor. Tente novamente.' };
+          }
+
           if (res.ok && data.url) {
             setRecentImages(prev => [data.url, ...prev].slice(0, 12));
             if (i === 0) setImageUrl(data.url);
@@ -250,7 +261,16 @@ function StudioContent() {
           headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
           body: formData,
         });
-        const data = await res.json();
+
+        let data: any;
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          console.error('Resposta não-JSON do servidor:', res.status, text.substring(0, 200));
+          throw new Error('Erro interno do servidor. Tente novamente com uma imagem menor.');
+        }
 
         if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');
 
