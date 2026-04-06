@@ -219,6 +219,7 @@ export function Sidebar({
 }: SidebarProps) {
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const uploadTargetRef = useRef<string | null>(null);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [animDir, setAnimDir]         = useState<'fwd' | 'bck'>('fwd');
@@ -228,6 +229,24 @@ export function Sidebar({
 
   const activeCategory  = selections.category;
   const activeUploadKey = activeCategory ? `upload_${activeCategory}` : null;
+  const selectedCategories: string[] = selections.categories || (activeCategory ? [activeCategory] : []);
+
+  const toggleCategory = (cat: string) => {
+    const current = [...selectedCategories];
+    let next: string[];
+    if (current.includes(cat)) {
+      next = current.filter((c: string) => c !== cat);
+      onSelect(`upload_${cat}`, null);
+    } else {
+      if (current.length >= 5) return;
+      next = [...current, cat];
+    }
+    onSelect('categories', next.length > 0 ? next : null);
+    const newPrimary = next[0] || null;
+    if (newPrimary !== activeCategory) {
+      onSelect('category', newPrimary);
+    }
+  };
 
   const hasScenarios = !!(config.scenarios   && config.scenarios.length   > 0);
   const hasProps     = !!(config.propOptions  && config.propOptions.length  > 0);
@@ -247,7 +266,9 @@ export function Sidebar({
   }, [selections.text]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0] && activeUploadKey) {
+    const targetKey = uploadTargetRef.current ? `upload_${uploadTargetRef.current}` : activeUploadKey;
+    uploadTargetRef.current = null;
+    if (e.target.files && e.target.files[0] && targetKey) {
       const file = e.target.files[0];
       const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
       if (!ALLOWED_TYPES.includes(file.type)) {
@@ -255,9 +276,10 @@ export function Sidebar({
         e.target.value = '';
         return;
       }
-      onSelect(activeUploadKey, file);
+      onSelect(targetKey, file);
       setUploadError(false);
     }
+    e.target.value = '';
   };
 
   const handleBatchFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,8 +315,11 @@ export function Sidebar({
   // Whether user can advance from a given step
   const canProceed = (step: number): boolean => {
     switch (step) {
-      case 0: return !!selections.category; // must pick a category
-      case 1: return !!localHasUpload; // MUST upload image
+      case 0: return selectedCategories.length > 0; // must pick at least one category
+      case 1: {
+        if (showBatch) return !!localHasUpload;
+        return selectedCategories.length > 0 && selectedCategories.every(cat => !!selections[`upload_${cat}`]);
+      }
       case 2: return !!selections.background;
       case 3: return !!selections.display;
       case 4: return true; // optional step
@@ -303,8 +328,8 @@ export function Sidebar({
   };
 
   const goNext = () => {
-    // Block step 1 (Foto) if no image uploaded — show error
-    if (currentStep === 1 && !localHasUpload) {
+    // Block step 1 (Foto) if not all uploads are present
+    if (currentStep === 1 && !canProceed(1)) {
       setUploadError(true);
       return;
     }
@@ -327,19 +352,24 @@ export function Sidebar({
         return (
           <div className="space-y-5">
             <p className="md3-body-large text-[var(--on-surface-variant)]">
-              Selecione a categoria do produto que você vai fotografar.
+              Selecione uma ou mais categorias para compor a foto.
             </p>
 
-            {/* Categories — M3 Filter Chip Grid */}
+            {/* Categories — M3 Filter Chip Grid (multi-select) */}
             <div>
-              <p className="md3-title-small text-[var(--on-surface-variant)] mb-3 tracking-wide">Categoria do Produto</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="md3-title-small text-[var(--on-surface-variant)] tracking-wide">Categoria do Produto</p>
+                {selectedCategories.length > 1 && (
+                  <span className="md3-label-medium text-[var(--primary)]">{selectedCategories.length} selecionadas</span>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 {config.categories.map((cat) => {
-                  const isActive = selections.category === cat;
+                  const isActive = selectedCategories.includes(cat);
                   return (
                     <button
                       key={cat}
-                      onClick={() => onSelect('category', cat)}
+                      onClick={() => toggleCategory(cat)}
                       aria-pressed={isActive}
                       className={`group/cat relative flex items-center gap-3 p-3.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] min-h-[56px] m3-touch-target
                         ${isActive
@@ -369,7 +399,10 @@ export function Sidebar({
         return (
           <div className="space-y-5">
             <p className="md3-body-large text-[var(--on-surface-variant)]">
-              Anexe a foto do seu produto. <strong className="text-[var(--error)]">Obrigatório</strong> para continuar.
+              {selectedCategories.length > 1
+                ? <>Anexe uma foto para cada peça selecionada. <strong className="text-[var(--error)]">Obrigatório</strong></>
+                : <>Anexe a foto do seu produto. <strong className="text-[var(--error)]">Obrigatório</strong> para continuar.</>
+              }
             </p>
 
             {/* Normal / Batch toggle */}
@@ -444,66 +477,82 @@ export function Sidebar({
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onChange={handleBatchFileUpload} tabIndex={-1} aria-hidden="true" />
                 </div>
               ) : (
-                activeUploadKey && selections[activeUploadKey] ? (
-                  <div className="p-4 border border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-[var(--shape-medium)] flex items-center justify-between min-h-[56px]">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="w-7 h-7 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-4 h-4 text-white" />
+                <div className="space-y-3">
+                  {selectedCategories.map(cat => {
+                    const uploadKey = `upload_${cat}`;
+                    const hasFile = !!selections[uploadKey];
+                    return (
+                      <div key={cat}>
+                        {selectedCategories.length > 1 && (
+                          <p className="md3-label-large text-[var(--on-surface-variant)] tracking-wider mb-2 flex items-center gap-2">
+                            <span className="text-[var(--primary)]">{getCategoryIcon(cat)}</span> Foto: {cat}
+                          </p>
+                        )}
+                        {hasFile ? (
+                          <div className="p-4 border border-[var(--primary)]/30 bg-[var(--primary)]/5 rounded-[var(--shape-medium)] flex items-center justify-between min-h-[56px]">
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              <div className="w-7 h-7 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center flex-shrink-0">
+                                <Check className="w-4 h-4 text-white" />
+                              </div>
+                              <span className="md3-body-large font-medium text-[var(--foreground)] truncate">
+                                {selections[uploadKey].name}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => onSelect(uploadKey, null)}
+                              className="md3-label-large text-[var(--error)] ml-2 px-3 py-1.5 rounded-[var(--shape-full)] hover:bg-[var(--error)]/10 transition-colors duration-[var(--duration-short4)] shrink-0"
+                            >
+                              Remover
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-3">
+                            <button
+                              type="button"
+                              onClick={() => { uploadTargetRef.current = cat; cameraInputRef.current?.click(); }}
+                              aria-label={`Tirar foto: ${cat}`}
+                              className={`p-5 border-2 border-dashed rounded-[var(--shape-large)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[100px] m3-touch-target
+                                ${uploadError ? 'border-[var(--error)] bg-[var(--error)]/5' : 'border-[var(--outline-variant)]/50'}`}
+                            >
+                              <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
+                                <Camera className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
+                              </div>
+                              <span className="md3-title-small text-[var(--primary)]">Câmera</span>
+                              <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Tirar foto agora</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { uploadTargetRef.current = cat; fileInputRef.current?.click(); }}
+                              aria-label={`Selecionar imagem: ${cat}`}
+                              className={`p-5 border-2 border-dashed rounded-[var(--shape-large)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[100px] m3-touch-target
+                                ${uploadError ? 'border-[var(--error)] bg-[var(--error)]/5' : 'border-[var(--outline-variant)]/50'}`}
+                            >
+                              <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
+                                <UploadCloud className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
+                              </div>
+                              <span className="md3-title-small text-[var(--primary)]">Galeria</span>
+                              <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Escolher imagem</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <span className="md3-body-large font-medium text-[var(--foreground)] truncate">
-                        {selections[activeUploadKey].name}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => onSelect(activeUploadKey, null)}
-                      className="md3-label-large text-[var(--error)] ml-2 px-3 py-1.5 rounded-[var(--shape-full)] hover:bg-[var(--error)]/10 transition-colors duration-[var(--duration-short4)] shrink-0"
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => cameraInputRef.current?.click()}
-                        aria-label="Tirar foto com câmera"
-                        className={`p-5 border-2 border-dashed rounded-[var(--shape-large)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[100px] m3-touch-target
-                          ${uploadError ? 'border-[var(--error)] bg-[var(--error)]/5' : 'border-[var(--outline-variant)]/50'}`}
-                      >
-                        <input type="file" ref={cameraInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
-                        <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
-                          <Camera className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
-                        </div>
-                        <span className="md3-title-small text-[var(--primary)]">Câmera</span>
-                        <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Tirar foto agora</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        aria-label="Selecionar imagem da galeria"
-                        className={`p-5 border-2 border-dashed rounded-[var(--shape-large)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[100px] m3-touch-target
-                          ${uploadError ? 'border-[var(--error)] bg-[var(--error)]/5' : 'border-[var(--outline-variant)]/50'}`}
-                      >
-                        <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
-                        <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
-                          <UploadCloud className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
-                        </div>
-                        <span className="md3-title-small text-[var(--primary)]">Galeria</span>
-                        <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Escolher imagem</span>
-                      </button>
-                    </div>
-                  </div>
-                )
+                    );
+                  })}
+                  {/* Hidden file inputs (shared across categories) */}
+                  <input type="file" ref={cameraInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
+                </div>
               )}
             </div>
 
             {/* Error message when trying to proceed without image */}
-            {uploadError && !localHasUpload && (
+            {uploadError && !canProceed(1) && (
               <div className="flex items-center gap-2.5 px-4 py-3 rounded-[var(--shape-small)] bg-[var(--error)]/10 border border-[var(--error)]/30">
                 <X className="w-5 h-5 text-[var(--error)] flex-shrink-0" />
                 <span className="md3-body-large text-[var(--error)] font-medium">
-                  Anexe pelo menos uma foto do produto para continuar.
+                  {selectedCategories.length > 1
+                    ? 'Anexe uma foto para cada categoria selecionada.'
+                    : 'Anexe pelo menos uma foto do produto para continuar.'}
                 </span>
               </div>
             )}
@@ -882,10 +931,10 @@ export function Sidebar({
   const getStepHint = (step: number): string => {
     switch (step) {
       case 0:
-        if (!selections.category) return 'Selecione uma categoria acima';
+        if (selectedCategories.length === 0) return 'Selecione pelo menos uma categoria';
         return '';
       case 1:
-        if (!localHasUpload) return 'Anexe pelo menos uma foto do produto';
+        if (!canProceed(1)) return selectedCategories.length > 1 ? 'Anexe uma foto para cada peça' : 'Anexe pelo menos uma foto do produto';
         return '';
       case 2: return 'Escolha uma cor ou cenário de fundo';
       case 3: return 'Escolha um tipo de expositor ou modelo';

@@ -280,9 +280,10 @@ function StudioContent() {
         const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
         if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
 
-        // Remove file references
+        // Remove file references and UI-only keys
         uploadKeys.forEach(k => delete cleanSelections[k]);
         if (cleanSelections.batchFiles) delete cleanSelections.batchFiles;
+        delete cleanSelections.categories;
         cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
 
         const formData = new FormData();
