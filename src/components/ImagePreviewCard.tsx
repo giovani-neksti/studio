@@ -23,12 +23,21 @@ interface ImagePreviewCardProps {
 }
 
 const loadingMessages = [
+  "Enviando imagem para o motor de IA...",
   "Analisando formato e escala da peça...",
+  "Detectando contornos e materiais...",
+  "Preparando iluminação de estúdio...",
   "Ajustando luzes de estúdio (Rim Lighting)...",
   "Calculando refrações e caustics (Ray-Tracing)...",
+  "Configurando cenário e composição...",
   "Renderizando texturas e materiais 8K...",
+  "Processando sombras e reflexos...",
   "Integrando sombras orgânicas no cenário...",
-  "Aplicando assinatura visual e refinamentos finais..."
+  "Refinando detalhes da superfície...",
+  "Otimizando cores e contraste...",
+  "Aplicando correção de pele e brilho...",
+  "Finalizando composição profissional...",
+  "Quase lá, ajustes finais...",
 ];
 
 // Quality checks que aparecem conforme o usuário seleciona opções
@@ -153,12 +162,20 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
       setMessageIndex(0);
       return;
     }
-    const messageInterval = setInterval(() => {
-      setMessageIndex((prevIndex) =>
-        prevIndex < loadingMessages.length - 1 ? prevIndex + 1 : prevIndex
-      );
-    }, 4000);
-    return () => clearInterval(messageInterval);
+    // First messages cycle faster, then slow down to cover up to ~2min
+    // 0-5: every 5s (25s), 6-10: every 8s (40s), 11+: every 12s (48s) = ~113s total
+    const getDelay = (idx: number) => idx < 5 ? 5000 : idx < 10 ? 8000 : 12000;
+
+    let timeout: ReturnType<typeof setTimeout>;
+    const advance = () => {
+      setMessageIndex((prev) => {
+        const next = prev < loadingMessages.length - 1 ? prev + 1 : prev;
+        timeout = setTimeout(advance, getDelay(next));
+        return next;
+      });
+    };
+    timeout = setTimeout(advance, getDelay(0));
+    return () => clearTimeout(timeout);
   }, [isGenerating]);
 
   const format = selections.format || '1:1';
@@ -183,18 +200,18 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
               </p>
             </div>
 
-            {/* M3 Linear Progress Indicator */}
+            {/* M3 Linear Progress Indicator — caps at 92% so it never looks "done" prematurely */}
             <div
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-valuenow={Math.round(((messageIndex + 1) / loadingMessages.length) * 100)}
+              aria-valuenow={Math.min(92, Math.round(((messageIndex + 1) / loadingMessages.length) * 92))}
               aria-label="Progresso da geração"
               className="w-full max-w-[220px] h-1 bg-[var(--surface-container-highest)] rounded-[var(--shape-full)] overflow-hidden"
             >
               <div
-                className="h-full rounded-[var(--shape-full)] bg-[var(--primary)] transition-all duration-1000 ease-out"
-                style={{ width: `${((messageIndex + 1) / loadingMessages.length) * 100}%` }}
+                className={`h-full rounded-[var(--shape-full)] bg-[var(--primary)] transition-all duration-1000 ease-out ${messageIndex >= loadingMessages.length - 1 ? 'animate-pulse' : ''}`}
+                style={{ width: `${Math.min(92, ((messageIndex + 1) / loadingMessages.length) * 92)}%` }}
               />
             </div>
           </div>

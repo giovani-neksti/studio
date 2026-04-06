@@ -5,7 +5,7 @@ import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { sendCreditsExhaustedEmail } from '@/lib/resend';
 import sharp from 'sharp';
 
-export const maxDuration = 120; // seconds
+export const maxDuration = 300; // 5 minutos — imagem IA pode demorar
 export const dynamic = 'force-dynamic';
 
 // ── Rate Limiter (in-memory, per-user) ──
@@ -42,7 +42,7 @@ async function callVertexAI(
   body: object,
   retries = 2
 ): Promise<any> {
-  const TIMEOUT_MS = 90_000; // 90s per attempt
+  const TIMEOUT_MS = 150_000; // 2.5min per attempt — image generation is slow
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
@@ -199,11 +199,16 @@ export async function POST(req: Request) {
 
     const selections = JSON.parse(selectionsStr);
 
-    // ── 2. Upload original para o Supabase (comprimido para WebP) ──
+    // ── 2. Read all file buffers once (reuse for upload + AI) ──
+    const fileBuffers: Buffer[] = [];
+    for (const file of files) {
+      fileBuffers.push(Buffer.from(await file.arrayBuffer()));
+    }
+
+    // ── 3. Upload original para o Supabase (comprimido para WebP) ──
     let originalUrl: string;
     try {
-      const firstFileBuffer = Buffer.from(await files[0].arrayBuffer());
-      const originalWebp = await sharp(firstFileBuffer).webp({ quality: 80 }).toBuffer();
+      const originalWebp = await sharp(fileBuffers[0]).webp({ quality: 80 }).toBuffer();
       const fileName = `${Date.now()}_original.webp`;
       const { error: uploadError } = await supabaseAdmin.storage
         .from('uploads')
@@ -223,18 +228,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── 3. Construção do Prompt ──
+    // ── 4. Construção do Prompt ──
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // Prepara a matriz de imagens para a IA
+    // Prepara a matriz de imagens para a IA (reusa buffers já lidos)
     const parts: any[] = [{ text: finalPrompt }];
-    for (const file of files) {
-      const fileBuffer = Buffer.from(await file.arrayBuffer());
-      const base64Image = fileBuffer.toString('base64');
+    for (let i = 0; i < files.length; i++) {
       parts.push({
         inlineData: {
-          mimeType: file.type,
-          data: base64Image
+          mimeType: files[i].type,
+          data: fileBuffers[i].toString('base64')
         }
       });
     }
