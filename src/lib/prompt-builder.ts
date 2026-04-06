@@ -172,10 +172,10 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         isMultiple = true;
         const items = selections.uploadedCategories.map((cat: string) => dict.produto[cat] || cat);
         if (items.length === 2) {
-            productText = `a matching set featuring ${items[0]} AND ${items[1]}`;
+            productText = `a coordinated set: ${items[0]} AND ${items[1]} worn together`;
         } else {
             const lastItem = items.pop();
-            productText = `a matching jewelry set featuring ${items.join(', ')}, AND ${lastItem}`;
+            productText = `a coordinated jewelry set: ${items.join(', ')}, AND ${lastItem}, all worn together`;
         }
     } else {
         productText = dict.produto[primaryCategory] || "a luxury jewelry piece";
@@ -206,7 +206,8 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         : '';
 
     // ── Category × display synergy ──
-    const categoryDisplayInstruction = !isEarring
+    // For multi-piece, skip single-category synergy (the multiPieceInstruction handles framing)
+    const categoryDisplayInstruction = (!isMultiple && !isEarring)
         ? buildCategoryDisplaySynergy(primaryCategory, displaySelection, isHumanModel)
         : '';
 
@@ -226,8 +227,17 @@ export function buildEnglishPrompt(niche: string, selections: any) {
 
     // ── Piece description (singular vs plural) ──
     const pieceDescription = isMultiple
-        ? `ALL the exact uploaded jewelry pieces together in the same composition (${productText})`
+        ? `${productText}, ALL visible on the SAME model/scene in ONE single unified photograph`
         : `the exact uploaded jewelry piece (${productText})`;
+
+    // ── Multi-piece anti-collage instruction ──
+    const multiPieceInstruction = isMultiple
+        ? `CRITICAL MULTI-PIECE RULE: This image contains MULTIPLE jewelry pieces that MUST ALL appear together in ONE single unified photograph. DO NOT split into panels, collages, side-by-side frames, grids, or separate sections. There must be exactly ONE continuous image showing ONE scene where ALL pieces are visible simultaneously. ${
+            isHumanModel
+                ? `The SAME single model must wear ALL pieces at once — for example, a necklace on her neck AND a ring on her finger AND a bracelet on her wrist, all in the same photo with a pose that naturally showcases every piece. Choose a pose and framing that makes ALL pieces clearly visible (e.g., a 3/4 body shot, or shoulders-up with hand near face to show both necklace and ring).`
+                : `ALL pieces must be arranged together in the SAME continuous scene — placed near each other on the same surface/display, NOT in separate frames or panels.`
+        }`
+        : '';
 
     // ── Format / aspect ratio ──
     const formatRatio = selections.format || '1:1';
@@ -235,11 +245,13 @@ export function buildEnglishPrompt(niche: string, selections: any) {
     const formatInstruction = `The image MUST be composed in a ${orientation} format (aspect ratio ${formatRatio}). Frame the composition accordingly.`;
 
     // ── Lens choice based on display type ──
-    const lensInstruction = isCloseUp
-        ? 'Shot with 100mm macro lens, f/2.8, extreme close-up, shallow depth of field, focus stacking on the jewelry piece'
-        : isHumanModel
-            ? 'Shot with 85mm portrait lens, f/1.8, natural shallow depth of field with the jewelry in sharp focus'
-            : 'Shot with 100mm macro lens, f/2.8, focus stacking for maximum sharpness on the jewelry piece';
+    const lensInstruction = isMultiple && isHumanModel
+        ? 'Shot with 50mm standard lens, f/2.8, medium shot framing to capture the full pose showing all jewelry pieces in sharp focus'
+        : isCloseUp
+            ? 'Shot with 100mm macro lens, f/2.8, extreme close-up, shallow depth of field, focus stacking on the jewelry piece'
+            : isHumanModel
+                ? 'Shot with 85mm portrait lens, f/1.8, natural shallow depth of field with the jewelry in sharp focus'
+                : 'Shot with 100mm macro lens, f/2.8, focus stacking for maximum sharpness on the jewelry piece';
 
     // ══════════════════════════════════════════
     // FINAL PROMPT ASSEMBLY
@@ -248,8 +260,11 @@ export function buildEnglishPrompt(niche: string, selections: any) {
         formatInstruction,
         `A hyper-realistic commercial photograph of ${pieceDescription}, ${displayText}, ${backgroundText}${propText}.`,
 
+        // Multi-piece anti-collage (must come early to set the tone)
+        multiPieceInstruction,
+
         // CORE RULE: Color & design fidelity
-        `ABSOLUTE RULE — COLOR & DESIGN FIDELITY: Reproduce the uploaded jewelry piece with 100% fidelity to the original. The exact colors, materials, textures, gemstone hues, metal finish, shape, proportions, and every design detail must match the reference image EXACTLY. Do NOT recolor, tint, change material, add stones, remove details, or alter the piece in ANY way. If the original is silver, it stays silver. If it has blue stones, they stay blue. The piece in the output must be indistinguishable from the uploaded reference.`,
+        `ABSOLUTE RULE — COLOR & DESIGN FIDELITY: Reproduce ${isMultiple ? 'each uploaded jewelry piece' : 'the uploaded jewelry piece'} with 100% fidelity to the original. The exact colors, materials, textures, gemstone hues, metal finish, shape, proportions, and every design detail must match the reference image${isMultiple ? 's' : ''} EXACTLY. Do NOT recolor, tint, change material, add stones, remove details, or alter the piece in ANY way. If the original is silver, it stays silver. If it has blue stones, they stay blue. ${isMultiple ? 'Each piece' : 'The piece'} in the output must be indistinguishable from the uploaded reference.`,
 
         // Smart lighting
         lightingInstruction,

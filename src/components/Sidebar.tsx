@@ -238,7 +238,7 @@ export function Sidebar({
       next = current.filter((c: string) => c !== cat);
       onSelect(`upload_${cat}`, null);
     } else {
-      if (current.length >= 5) return;
+      if (current.length >= 3) return;
       next = [...current, cat];
     }
     onSelect('categories', next.length > 0 ? next : null);
@@ -360,7 +360,7 @@ export function Sidebar({
               <div className="flex items-center justify-between mb-3">
                 <p className="md3-title-small text-[var(--on-surface-variant)] tracking-wide">Categoria do Produto</p>
                 {selectedCategories.length > 1 && (
-                  <span className="md3-label-medium text-[var(--primary)]">{selectedCategories.length} selecionadas</span>
+                  <span className="md3-label-medium text-[var(--primary)]">{selectedCategories.length}/3 selecionadas</span>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3">
