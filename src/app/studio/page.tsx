@@ -204,8 +204,8 @@ function StudioContent() {
             data = await res.json();
           } else {
             const text = await res.text();
-            console.error('Resposta não-JSON do servidor (batch):', res.status, text.substring(0, 200));
-            data = { error: 'Erro interno do servidor. Tente novamente.' };
+            console.error('[Batch] Resposta não-JSON:', res.status, text.substring(0, 300));
+            data = { error: res.status === 504 ? 'Timeout — a geração demorou demais.' : 'Erro no servidor. Tente novamente.' };
           }
 
           if (res.ok && data.url) {
@@ -268,11 +268,15 @@ function StudioContent() {
           data = await res.json();
         } else {
           const text = await res.text();
-          console.error('Resposta não-JSON do servidor:', res.status, text.substring(0, 200));
-          throw new Error('Erro interno do servidor. Tente novamente em alguns instantes.');
+          console.error('[Single] Resposta não-JSON:', res.status, text.substring(0, 300));
+          throw new Error(
+            res.status === 504
+              ? 'Timeout — a geração demorou demais. Tente novamente.'
+              : 'Erro no servidor. Tente novamente em alguns instantes.'
+          );
         }
 
-        if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');
+        if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA.');
 
         setImageUrl(data.url);
         setRecentImages(prev => [data.url, ...prev].slice(0, 12));
