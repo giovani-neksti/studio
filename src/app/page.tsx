@@ -157,7 +157,7 @@ export default function LandingPage() {
             <div className="w-8 h-8 rounded-[var(--shape-small)] bg-[var(--primary)] flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-[var(--on-primary)]" />
             </div>
-            <span className="md3-title-medium font-medium">Neksti Studio</span>
+            <span className="md3-title-medium font-medium">JoIAs by Neksti</span>
           </div>
           <div className="flex gap-6 text-[var(--on-surface-variant)] md3-body-medium">
             <a href="/termos" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Termos</a>

@@ -65,6 +65,17 @@ interface SidebarProps {
   onToggleBatch?: () => void;
 }
 
+// Font preview mapping for typography selector
+const FONT_PREVIEW_MAP: Record<string, { family: string; italic?: boolean; weight?: number }> = {
+  'Playfair (Elegante)': { family: "'Playfair Display', serif" },
+  'Didot (Alta Costura)': { family: "'Bodoni Moda', serif" },
+  'Cinzel (Clássica)': { family: "'Cinzel', serif" },
+  'Montserrat (Minimalista)': { family: "'Montserrat', sans-serif" },
+  'Inter (Moderna)': { family: "'Inter', sans-serif" },
+  'Cormorant (Script)': { family: "'Cormorant Garamond', serif", italic: true },
+  'Impact (Display)': { family: "Impact, sans-serif", weight: 900 },
+};
+
 const ICON_CLASS = 'w-6 h-6 transition-colors duration-[var(--duration-short4)]';
 
 const getCategoryIcon = (cat: string): ReactNode => {
@@ -635,17 +646,17 @@ export function Sidebar({
                       key={opt.id}
                       onClick={() => onSelect('display', opt.name)}
                       aria-pressed={isActive}
-                      className={`relative flex flex-col items-center justify-center p-2.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-center h-16 md:h-20
+                      className={`relative flex flex-col items-center justify-center p-2.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] text-center h-20 md:h-24
                         ${isActive
                           ? 'border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]'
                           : 'border-[var(--outline-variant)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
                     >
-                      {isActive && <Check className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 text-[var(--primary)]" aria-hidden="true" />}
-                      <span className={`md3-label-small font-semibold leading-tight mb-0.5 ${isActive ? 'text-[var(--primary)]' : ''}`}>
+                      {isActive && <Check className="absolute top-1 right-1 w-3 h-3 text-[var(--primary)]" aria-hidden="true" />}
+                      <span className={`md3-label-medium font-semibold leading-tight mb-1 ${isActive ? 'text-[var(--primary)]' : ''}`}>
                         {opt.name}
                       </span>
                       {opt.type && (
-                        <span className="text-[8px] md:text-[9px] text-[var(--outline)] leading-tight line-clamp-2">
+                        <span className="text-[10px] md:text-[11px] text-[var(--outline)] leading-tight line-clamp-2">
                           {opt.type}
                         </span>
                       )}
@@ -673,17 +684,38 @@ export function Sidebar({
               className="bg-transparent text-[var(--foreground)] h-14 px-4 border border-[var(--outline)] rounded-[var(--shape-extra-small)] md3-body-large focus:border-[var(--primary)] focus:border-2 transition-colors m3-touch-target"
             />
 
-            <select
-              aria-label="Escolher fonte tipográfica"
-              value={selections.typography || ''}
-              onChange={(e) => onSelect('typography', e.target.value)}
-              className="w-full h-14 px-4 rounded-[var(--shape-extra-small)] md3-body-large border border-[var(--outline)] bg-transparent text-[var(--foreground)] focus:border-[var(--primary)] focus:border-2 transition-colors duration-[var(--duration-short4)] outline-none m3-touch-target"
-            >
-              <option value="" disabled>Escolha a Fonte</option>
-              {config.typographyOptions.map((font) => (
-                <option key={font.label} value={font.label}>{font.label}</option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto no-scrollbar">
+              {config.typographyOptions.map((font) => {
+                const isActive = selections.typography === font.label;
+                const preview = FONT_PREVIEW_MAP[font.label];
+                return (
+                  <button
+                    key={font.label}
+                    onClick={() => onSelect('typography', font.label)}
+                    aria-pressed={isActive}
+                    className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] text-left m3-touch-target
+                      ${isActive
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/8'
+                        : 'border-[var(--outline-variant)]/40 hover:bg-[var(--on-surface-variant)]/8'}`}
+                  >
+                    {preview ? (
+                      <span
+                        className="w-10 text-center text-xl shrink-0"
+                        style={{ fontFamily: preview.family, fontStyle: preview.italic ? 'italic' : 'normal', fontWeight: preview.weight || 400 }}
+                      >
+                        Aa
+                      </span>
+                    ) : (
+                      <span className="w-10 text-center text-lg shrink-0 text-[var(--outline)]">—</span>
+                    )}
+                    <span className={`md3-label-large flex-1 ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>
+                      {font.label}
+                    </span>
+                    {isActive && <Check className="w-4 h-4 text-[var(--primary)] shrink-0" aria-hidden="true" />}
+                  </button>
+                );
+              })}
+            </div>
 
             {selections.text && (
               <div className="pt-2 flex flex-col gap-3">

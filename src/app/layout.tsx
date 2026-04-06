@@ -41,11 +41,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Studio AI by Neksti – Transforme Fotos de Celular em Estúdio Profissional",
+  title: "JoIAs by Neksti – Transforme Fotos de Celular em Estúdio Profissional",
   description: "Plataforma de IA especializada em fotografia de produto para joalheria, moda e calçados. Componha cenários de luxo em segundos.",
   keywords: ["IA", "fotografia de produto", "e-commerce", "joias", "moda", "calçados", "neksti"],
+  icons: {
+    icon: '/logo_neksti.png',
+    apple: '/logo_neksti.png',
+  },
   openGraph: {
-    title: "Studio AI by Neksti",
+    title: "JoIAs by Neksti",
     description: "Fotos de estúdio profissionais geradas por IA a partir do seu celular.",
     type: "website",
     url: "https://studio.neksti.com.br",
@@ -60,6 +64,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="h-full">
       <head>
+        {/* Preview fonts for typography selector */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda&family=Cinzel&family=Cormorant+Garamond:ital@1&family=Montserrat&family=Playfair+Display&display=swap" rel="stylesheet" />
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">
           {`
