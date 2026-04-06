@@ -91,46 +91,57 @@ function StudioContent() {
   const hasPreviewContent = isGenerating || !!imageUrl;
 
   const processImageForAI = async (file: File): Promise<File> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_SIZE = 1024;
-        let width = img.width;
-        let height = img.height;
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
 
-        if (width > height && width > MAX_SIZE) {
-          height *= MAX_SIZE / width;
-          width = MAX_SIZE;
-        } else if (height > MAX_SIZE) {
-          width *= MAX_SIZE / height;
-          height = MAX_SIZE;
-        }
+      return await new Promise<File>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 1024;
+          let width = img.width;
+          let height = img.height;
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return resolve(file);
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const newFile = new File([blob], "imagem_processada.jpg", {
-              type: 'image/jpeg',
-              lastModified: Date.now(),
-            });
-            resolve(newFile);
-          } else {
-            resolve(file);
+          if (width > height && width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          } else if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
           }
-        }, 'image/jpeg', 0.85);
-      };
-      img.onerror = () => resolve(file);
-      img.src = URL.createObjectURL(file);
-    });
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return resolve(file);
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const newFile = new File([blob], "imagem_processada.jpg", {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(newFile);
+            } else {
+              resolve(file);
+            }
+          }, 'image/jpeg', 0.85);
+        };
+        img.onerror = () => resolve(file);
+        img.src = dataUrl;
+      });
+    } catch {
+      return file;
+    }
   };
 
   const handleGenerate = async () => {
@@ -156,6 +167,7 @@ function StudioContent() {
       setIsSidebarOpen(false);
     }
 
+    let generatedSuccessfully = false;
     try {
       const cleanSelections = { ...selections };
       
@@ -187,22 +199,21 @@ function StudioContent() {
           
           if (res.ok && data.url) {
             setRecentImages(prev => [data.url, ...prev].slice(0, 12));
-            if (i === 0) setImageUrl(data.url); // Mostra a primeira que gerar
+            if (i === 0) setImageUrl(data.url);
             setImageIndex((idx) => idx + 1);
             successCount++;
 
+            // Credits already deducted server-side in /api/generate — just refresh display
             if (!userIsAdmin) {
-              const creditRes = await fetch('/api/credits', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user!.id }),
-              });
-              if (creditRes.ok) {
-                const creditData = await creditRes.json();
-                setCredits(creditData.credits);
-              } else {
-                setCredits((c) => Math.max(0, (c ?? 0) - 1));
-              }
+              try {
+                const creditRes = await fetch(`/api/credits?userId=${user!.id}`);
+                if (creditRes.ok) {
+                  const creditData = await creditRes.json();
+                  setCredits(creditData.credits);
+                } else {
+                  setCredits((c) => Math.max(0, (c ?? 0) - 1));
+                }
+              } catch { setCredits((c) => Math.max(0, (c ?? 0) - 1)); }
             }
           } else {
              console.error(`Falha ao gerar o item ${i+1}: ${data.error}`);
@@ -212,6 +223,7 @@ function StudioContent() {
         if (successCount === 0) {
           throw new Error("Nenhuma imagem em lote pôde ser gerada com sucesso.");
         }
+        generatedSuccessfully = successCount > 0;
       } else {
         // --- MODO SINGLE ORIGINAL ---
         const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
@@ -245,26 +257,28 @@ function StudioContent() {
         setImageUrl(data.url);
         setRecentImages(prev => [data.url, ...prev].slice(0, 12));
         setImageIndex((i) => i + 1);
+        generatedSuccessfully = true;
 
+        // Credits already deducted server-side in /api/generate — just refresh display
         if (!userIsAdmin) {
-          const creditRes = await fetch('/api/credits', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user!.id }),
-          });
-          if (creditRes.ok) {
-             const creditData = await creditRes.json();
-             setCredits(creditData.credits);
-          } else {
-             setCredits((c) => Math.max(0, (c ?? 0) - 1));
-          }
+          try {
+            const creditRes = await fetch(`/api/credits?userId=${user!.id}`);
+            if (creditRes.ok) {
+              const creditData = await creditRes.json();
+              setCredits(creditData.credits);
+            } else {
+              setCredits((c) => Math.max(0, (c ?? 0) - 1));
+            }
+          } catch { setCredits((c) => Math.max(0, (c ?? 0) - 1)); }
         }
       }
 
     } catch (e: any) {
-      console.error(e);
-      alert("Houve um erro ao gerar a imagem: " + e.message);
-      if (window.innerWidth < 768) setIsSidebarOpen(true);
+      console.error('Erro na geração:', e);
+      if (!generatedSuccessfully) {
+        alert("Houve um erro ao gerar a imagem: " + e.message);
+        if (window.innerWidth < 768) setIsSidebarOpen(true);
+      }
     } finally {
       setIsGenerating(false);
     }
