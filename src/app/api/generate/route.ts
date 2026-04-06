@@ -35,85 +35,66 @@ setInterval(() => {
   }
 }, 5 * 60_000);
 
-// ── Vertex AI fetch with retry + timeout ──
+// ── Model Cascade — tenta modelos rápidos primeiro, fallback para mais lentos ──
+interface ModelConfig {
+  modelId: string;
+  location: string;
+  timeoutMs: number;
+  label: string;
+}
+
+const MODEL_CASCADE: ModelConfig[] = [
+  // Flash: ~3x mais rápido, boa qualidade para foto de produto
+  { modelId: 'gemini-2.0-flash-exp', location: 'us-central1', timeoutMs: 50_000, label: 'Flash' },
+  // Pro: qualidade máxima — fallback quando Flash falha ou não retorna imagem
+  { modelId: 'gemini-3-pro-image-preview', location: 'global', timeoutMs: 90_000, label: 'Pro' },
+];
+
+// ── Vertex AI fetch (single attempt per model — cascade substitui retries) ──
 async function callVertexAI(
   endpoint: string,
   accessToken: string | null | undefined,
   body: object,
-  retries = 1
+  timeoutMs: number
 ): Promise<any> {
-  const TIMEOUT_MS = 90_000; // 90s per attempt — if it takes longer, something is wrong
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
 
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
+    clearTimeout(timer);
 
-      clearTimeout(timeout);
-
-      if (response.ok) {
-        return await response.json();
-      }
-
-      // Parse error from Vertex AI
-      let errorBody: any;
-      try {
-        errorBody = await response.json();
-      } catch {
-        errorBody = { message: await response.text().catch(() => 'Resposta ilegível') };
-      }
-
-      const status = response.status;
-      const errorMsg = errorBody?.error?.message || errorBody?.message || JSON.stringify(errorBody);
-
-      // Don't retry on 4xx (client errors) except 429 (rate limit)
-      if (status >= 400 && status < 500 && status !== 429) {
-        throw new Error(`[VertexAI ${status}] ${errorMsg}`);
-      }
-
-      // Retryable: 429, 500, 502, 503, 504
-      if (attempt < retries) {
-        const backoff = (attempt + 1) * 2000; // 2s, 4s
-        console.warn(`[VertexAI] Tentativa ${attempt + 1} falhou (${status}). Retry em ${backoff}ms...`);
-        await new Promise(r => setTimeout(r, backoff));
-        continue;
-      }
-
-      throw new Error(`[VertexAI ${status}] ${errorMsg}`);
-
-    } catch (err: any) {
-      clearTimeout(timeout);
-
-      if (err.name === 'AbortError') {
-        if (attempt < retries) {
-          console.warn(`[VertexAI] Timeout na tentativa ${attempt + 1}. Retrying...`);
-          continue;
-        }
-        throw new Error('A geração demorou demais (timeout). Tente novamente.');
-      }
-
-      // If it's already our formatted error, rethrow
-      if (err.message?.startsWith('[VertexAI')) throw err;
-
-      // Unknown fetch error — retry
-      if (attempt < retries) {
-        console.warn(`[VertexAI] Erro na tentativa ${attempt + 1}: ${err.message}. Retrying...`);
-        await new Promise(r => setTimeout(r, 2000));
-        continue;
-      }
-
-      throw new Error(`Falha na comunicação com a IA: ${err.message}`);
+    if (response.ok) {
+      return await response.json();
     }
+
+    // Parse error from Vertex AI
+    let errorBody: any;
+    try {
+      errorBody = await response.json();
+    } catch {
+      errorBody = { message: await response.text().catch(() => 'Resposta ilegível') };
+    }
+
+    const status = response.status;
+    const errorMsg = errorBody?.error?.message || errorBody?.message || JSON.stringify(errorBody);
+    throw new Error(`[VertexAI ${status}] ${errorMsg}`);
+  } catch (err: any) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') {
+      throw new Error(`Timeout (${Math.round(timeoutMs / 1000)}s)`);
+    }
+    if (err.message?.startsWith('[VertexAI')) throw err;
+    throw new Error(`Erro de rede: ${err.message}`);
   }
 }
 
@@ -293,29 +274,59 @@ export async function POST(req: Request) {
       );
     }
 
-    const projectId = process.env.GOOGLE_PROJECT_ID;
-    const location = 'global';
-    const modelId = 'gemini-3-pro-image-preview';
-    const endpoint = `https://aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
+    const projectId = process.env.GOOGLE_PROJECT_ID!;
 
     lap('vertex auth');
 
-    // ── 5. Chamada Multimodal com retry ──
-    const aiData = await callVertexAI(endpoint, accessToken, {
-      contents: [
-        {
-          role: "user",
-          parts: parts
-        }
-      ],
+    // ── 5. Cascade: tenta modelos em ordem de velocidade ──
+    const requestBody = {
+      contents: [{ role: "user", parts }],
       generationConfig: {
         responseModalities: ["IMAGE"],
         candidateCount: 1,
         temperature: 0.4
       }
-    });
+    };
 
-    lap('vertex AI responded');
+    let aiData: any = null;
+    let usedModel = '';
+
+    for (const model of MODEL_CASCADE) {
+      const host = model.location === 'global'
+        ? 'aiplatform.googleapis.com'
+        : `${model.location}-aiplatform.googleapis.com`;
+      const endpoint = `https://${host}/v1beta1/projects/${projectId}/locations/${model.location}/publishers/google/models/${model.modelId}:generateContent`;
+
+      try {
+        lap(`tentando ${model.label} (${model.modelId})`);
+        aiData = await callVertexAI(endpoint, accessToken, requestBody, model.timeoutMs);
+
+        // Verifica se retornou imagem
+        const hasImage = aiData.candidates?.[0]?.content?.parts?.some((p: any) => p.inlineData);
+        if (hasImage) {
+          usedModel = model.label;
+          lap(`${model.label} respondeu com imagem`);
+          break;
+        }
+
+        // Modelo respondeu mas sem imagem
+        const reason = aiData.candidates?.[0]?.finishReason || 'sem motivo';
+        console.warn(`[Generate] ${model.label} respondeu sem imagem (${reason}). Tentando próximo...`);
+        aiData = null;
+      } catch (err: any) {
+        console.warn(`[Generate] ${model.label} falhou: ${err.message}. Tentando próximo...`);
+        aiData = null;
+      }
+    }
+
+    if (!aiData) {
+      return NextResponse.json(
+        { error: 'Todos os modelos de IA falharam. Tente novamente em alguns instantes.' },
+        { status: 502 }
+      );
+    }
+
+    lap('vertex AI responded (' + usedModel + ')');
 
     const generatedPart = aiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     const generatedBase64 = generatedPart?.inlineData?.data;
@@ -392,7 +403,7 @@ export async function POST(req: Request) {
       console.error('[Generate] Erro ao registrar no banco:', dbError);
     }
 
-    lap('DONE — total');
+    lap(`DONE (${usedModel}) — total`);
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error: any) {
