@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Inter } from "next/font/google";
+import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -8,17 +8,27 @@ import "./globals.css";
 
 const GA_ID = "G-5S3354R4FJ";
 
-const montserrat = Montserrat({
-  variable: "--font-serif",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700", "900"],
-  display: "swap",
-});
-
+// M3 Typography: Inter for body (most readable sans-serif on screens)
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin", "latin-ext"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+// Space Grotesk for headings — geometric, techy, Silicon Valley feel
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-serif",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+// JetBrains Mono for technical/AI data display
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -60,7 +70,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${inter.variable} ${montserrat.variable} antialiased h-full`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased h-full`}>
         <ErrorBoundary>
           <GlobalErrorCatcher />
           <AuthProvider>{children}</AuthProvider>

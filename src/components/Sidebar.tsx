@@ -242,7 +242,7 @@ export function Sidebar({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && activeUploadKey) {
       const file = e.target.files[0];
-      const MAX_SIZE      = 10 * 1024 * 1024;
+      const MAX_SIZE      = 100 * 1024 * 1024;
       const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
       if (!ALLOWED_TYPES.includes(file.type)) {
         alert('Formato não suportado. Use JPG, PNG ou WebP.');
@@ -250,7 +250,7 @@ export function Sidebar({
         return;
       }
       if (file.size > MAX_SIZE) {
-        alert('Arquivo muito grande. O limite é 10 MB.');
+        alert('Arquivo muito grande. O limite é 100 MB.');
         e.target.value = '';
         return;
       }
@@ -262,12 +262,12 @@ export function Sidebar({
   const handleBatchFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const files = Array.from(e.target.files);
-    const MAX_SIZE = 10 * 1024 * 1024;
+    const MAX_SIZE = 100 * 1024 * 1024;
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
     const validFiles = files.filter(f => ALLOWED_TYPES.includes(f.type) && f.size <= MAX_SIZE);
     if (validFiles.length < files.length) {
-      alert('Alguns arquivos foram ignorados por tamanho (máx 10MB) ou formato inválido.');
+      alert('Alguns arquivos foram ignorados por tamanho (máx 100MB) ou formato inválido.');
     }
 
     const currentBatch = (selections.batchFiles as File[]) || [];
