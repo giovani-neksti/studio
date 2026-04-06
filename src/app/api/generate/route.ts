@@ -5,7 +5,7 @@ import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { sendCreditsExhaustedEmail } from '@/lib/resend';
 import sharp from 'sharp';
 
-export const maxDuration = 300; // 5 minutos — imagem IA pode demorar
+export const maxDuration = 120; // 2 min máx — com imagens otimizadas, IA responde em <60s
 export const dynamic = 'force-dynamic';
 
 // ── Rate Limiter (in-memory, per-user) ──
@@ -40,9 +40,9 @@ async function callVertexAI(
   endpoint: string,
   accessToken: string | null | undefined,
   body: object,
-  retries = 2
+  retries = 1
 ): Promise<any> {
-  const TIMEOUT_MS = 150_000; // 2.5min per attempt — image generation is slow
+  const TIMEOUT_MS = 90_000; // 90s per attempt — if it takes longer, something is wrong
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
@@ -120,6 +120,8 @@ async function callVertexAI(
 export async function POST(req: Request) {
   let creditDeducted = false;
   let userId: string | null = null;
+  const t0 = Date.now();
+  const lap = (label: string) => console.log(`[Generate] ${label}: ${Date.now() - t0}ms`);
 
   try {
     // ── 0. Autenticação — verificar JWT do usuário ──
@@ -163,6 +165,8 @@ export async function POST(req: Request) {
       sendCreditsExhaustedEmail(user.email).catch(() => {});
     }
 
+    lap('auth+credits');
+
     // ── 1. Parse FormData ──
     let formData: FormData;
     try {
@@ -199,7 +203,9 @@ export async function POST(req: Request) {
 
     const selections = JSON.parse(selectionsStr);
 
-    // ── 2. Read all file buffers once (reuse for upload + AI) ──
+    lap('formData parsed');
+
+    // ── 2. Read all file buffers once ──
     const fileBuffers: Buffer[] = [];
     for (const file of files) {
       fileBuffers.push(Buffer.from(await file.arrayBuffer()));
@@ -228,19 +234,38 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── 4. Construção do Prompt ──
+    lap('original uploaded');
+
+    // ── 4. Otimizar imagens para a IA (resize + JPEG comprimido) ──
+    // A IA não precisa de alta resolução para entender o produto.
+    // 1024px max + JPEG 75% reduz payload em ~60-70%, acelerando muito a chamada.
+    const AI_MAX_SIZE = 1024;
+    const aiBuffers: Buffer[] = [];
+    for (const buf of fileBuffers) {
+      const optimized = await sharp(buf)
+        .resize(AI_MAX_SIZE, AI_MAX_SIZE, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 75 })
+        .toBuffer();
+      aiBuffers.push(optimized);
+    }
+
+    lap(`images optimized for AI (${aiBuffers.map(b => (b.length/1024).toFixed(0)+'KB').join(', ')})`);
+
+    // ── 5. Construção do Prompt ──
     const finalPrompt = buildEnglishPrompt(niche, selections);
 
-    // Prepara a matriz de imagens para a IA (reusa buffers já lidos)
+    // Prepara a matriz de imagens otimizadas para a IA
     const parts: any[] = [{ text: finalPrompt }];
-    for (let i = 0; i < files.length; i++) {
+    for (const aiBuf of aiBuffers) {
       parts.push({
         inlineData: {
-          mimeType: files[i].type,
-          data: fileBuffers[i].toString('base64')
+          mimeType: 'image/jpeg',
+          data: aiBuf.toString('base64')
         }
       });
     }
+
+    lap('prompt built');
 
     // ── 4. Autenticação Vertex AI ──
     let accessToken: string | null | undefined;
@@ -273,6 +298,8 @@ export async function POST(req: Request) {
     const modelId = 'gemini-3-pro-image-preview';
     const endpoint = `https://aiplatform.googleapis.com/v1beta1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
 
+    lap('vertex auth');
+
     // ── 5. Chamada Multimodal com retry ──
     const aiData = await callVertexAI(endpoint, accessToken, {
       contents: [
@@ -284,9 +311,11 @@ export async function POST(req: Request) {
       generationConfig: {
         responseModalities: ["IMAGE"],
         candidateCount: 1,
-        temperature: 0.7
+        temperature: 0.4
       }
     });
+
+    lap('vertex AI responded');
 
     const generatedPart = aiData.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
     const generatedBase64 = generatedPart?.inlineData?.data;
@@ -343,6 +372,8 @@ export async function POST(req: Request) {
       );
     }
 
+    lap('generated image saved');
+
     // ── 7. Registro no banco de dados ──
     const { error: dbError } = await supabaseAdmin.from('generations').insert({
       user_id: user.id,
@@ -361,6 +392,7 @@ export async function POST(req: Request) {
       console.error('[Generate] Erro ao registrar no banco:', dbError);
     }
 
+    lap('DONE — total');
     return NextResponse.json({ url: generatedUrl });
 
   } catch (error: any) {

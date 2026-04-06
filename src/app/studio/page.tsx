@@ -104,8 +104,8 @@ function StudioContent() {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          // Max 1536px — good quality for AI, small enough for fast mobile upload
-          const MAX_SIZE = 1536;
+          // Max 1024px — servidor otimiza para IA; manter leve para upload mobile rápido
+          const MAX_SIZE = 1024;
           let width = img.width;
           let height = img.height;
 
@@ -172,15 +172,12 @@ function StudioContent() {
       setIsSidebarOpen(false);
     }
 
-    // Recovery: if request fails (timeout/network), poll until the image appears
-    // Covers up to ~3min total generation time even when nginx cuts the connection early
+    // Recovery: se nginx cortar a conexão, faz polling rápido para encontrar a imagem
     const recoverFromTimeout = async (): Promise<string | null> => {
-      // Wait a bit for the server to finish saving
-      await new Promise(r => setTimeout(r, 3000));
+      await new Promise(r => setTimeout(r, 2000));
 
-      // Poll up to 30 times × 4s = 120s of polling (+ 3s initial = ~2min of recovery)
-      // Combined with ~60s nginx timeout = covers up to ~3min total generation
-      for (let attempt = 0; attempt < 30; attempt++) {
+      // Poll 15× a cada 3s = 45s de recovery (cobre geração de até ~90s total)
+      for (let attempt = 0; attempt < 15; attempt++) {
         try {
           const res = await fetch('/api/generations?page=1', {
             headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
@@ -192,7 +189,7 @@ function StudioContent() {
             return latest.generated_image_url;
           }
         } catch { /* ignore */ }
-        await new Promise(r => setTimeout(r, 4000));
+        await new Promise(r => setTimeout(r, 3000));
       }
       return null;
     };
