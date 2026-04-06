@@ -15,13 +15,13 @@ export default function LandingPage() {
       <NeuralBackground />
 
       {/* ── M3 Top App Bar — Small ── */}
-      <nav className="h-16 flex items-center justify-between px-4 md:px-6 fixed top-0 w-full z-50 bg-[var(--surface-container-low)]/80 backdrop-blur-lg border-b border-[var(--outline-variant)]/20">
+      <nav className="h-16 flex items-center justify-between px-4 md:px-6 fixed top-0 w-full z-50 bg-[var(--surface-container-low)]/80 backdrop-blur-lg border-b border-[var(--outline-variant)]/15">
         <div className="flex items-center cursor-pointer" onClick={() => router.push('/')}>
           <img src="/logo_neksti.png" alt="Neksti" className="h-8 md:h-9 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
         </div>
         <button
           onClick={() => router.push('/auth')}
-          className="h-10 px-6 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large transition-all duration-[var(--duration-medium2)] hover:shadow-lg hover:elevation-2 active:scale-[0.98] state-layer"
+          className="m3-btn-filled h-10 px-6 md3-label-large state-layer"
         >
           Entrar no Estúdio
         </button>
@@ -31,17 +31,17 @@ export default function LandingPage() {
       <section className="relative pt-28 pb-16 md:pt-44 md:pb-28 px-6 overflow-hidden">
         <div className="max-w-4xl mx-auto flex flex-col items-center text-center relative z-10">
           {/* M3 Assist Chip */}
-          <div className="animate-fade-up inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] bg-[var(--surface-container-high)]/80 backdrop-blur-sm border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] md3-label-medium mb-8">
-            <Star className="w-3.5 h-3.5 text-[var(--primary)] fill-[var(--primary)]" />
+          <div className="animate-fade-up m3-chip bg-[var(--surface-container-high)]/80 backdrop-blur-sm border-[var(--outline-variant)]/40 cursor-default mb-8">
+            <Star className="w-4 h-4 text-[var(--primary)] fill-[var(--primary)]" />
             <span>Redefinindo a Fotografia Digital</span>
           </div>
 
-          <h1 className="animate-fade-up stagger-1 font-serif text-[clamp(2.5rem,7vw,4.5rem)] font-bold tracking-tight mb-6 max-w-4xl leading-[1.08]">
+          <h1 className="animate-fade-up stagger-1 font-serif md3-display-medium md:md3-display-large font-bold tracking-tight mb-6 max-w-4xl leading-[1.08]" style={{ fontSize: 'clamp(2.5rem,7vw,4.5rem)' }}>
             Transforme Fotos de Celular em{' '}
             <span className="text-gradient">Estúdio Profissional</span>
           </h1>
 
-          <p className="animate-fade-up stagger-2 text-[var(--on-surface-variant)] md3-body-large md:text-xl max-w-2xl mb-10 leading-relaxed">
+          <p className="animate-fade-up stagger-2 text-[var(--on-surface-variant)] md3-body-large md:md3-headline-small max-w-2xl mb-10 leading-relaxed font-light">
             A primeira plataforma de IA brasileira focada em compor cenários de luxo para joias, moda e calçados em segundos.
           </p>
 
@@ -49,27 +49,27 @@ export default function LandingPage() {
           <div className="animate-fade-up stagger-3 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button
               onClick={() => router.push('/auth')}
-              className="h-14 px-8 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-3 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] state-layer group"
+              className="m3-btn-filled h-14 px-8 gap-3 md3-label-large state-layer group m3-touch-target"
             >
               Começar Agora <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-[var(--duration-short4)]" />
             </button>
             <button
-              className="h-14 px-8 rounded-[var(--shape-full)] bg-[var(--secondary-container)]/80 backdrop-blur-sm text-[var(--on-secondary-container)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-1 active:scale-[0.98] state-layer flex items-center justify-center gap-2"
+              className="m3-btn-tonal h-14 px-8 gap-2.5 md3-label-large backdrop-blur-sm state-layer m3-touch-target"
             >
-              <Play className="w-4 h-4" /> Ver Demonstração
+              <Play className="w-5 h-5" /> Ver Demonstração
             </button>
           </div>
 
           {/* M3 Suggestion Chips — Niche indicators */}
-          <div className="animate-fade-up stagger-4 mt-14 flex flex-wrap justify-center gap-2">
+          <div className="animate-fade-up stagger-4 mt-14 flex flex-wrap justify-center gap-2.5">
             {[
-              { icon: <Gem className="w-3.5 h-3.5" />, label: 'Joalheria' },
-              { icon: <Shirt className="w-3.5 h-3.5" />, label: 'Moda' },
-              { icon: <Footprints className="w-3.5 h-3.5" />, label: 'Calçados' },
+              { icon: <Gem className="w-4 h-4" />, label: 'Joalheria' },
+              { icon: <Shirt className="w-4 h-4" />, label: 'Moda' },
+              { icon: <Footprints className="w-4 h-4" />, label: 'Calçados' },
             ].map((chip) => (
               <div
                 key={chip.label}
-                className="inline-flex items-center gap-2 h-8 px-4 rounded-[var(--shape-small)] border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--surface-container-high)]/60 backdrop-blur-sm"
+                className="m3-chip bg-transparent border-[var(--outline-variant)]/40 backdrop-blur-sm cursor-default"
               >
                 {chip.icon}
                 <span>{chip.label}</span>
@@ -86,7 +86,7 @@ export default function LandingPage() {
       <section className="py-16 md:py-24 bg-[var(--surface-container-lowest)]/90 backdrop-blur-sm relative px-6 z-10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 animate-fade-up">Como funciona</h2>
+            <h2 className="font-serif md3-headline-large md:md3-display-small font-bold mb-4 animate-fade-up">Como funciona</h2>
             <p className="text-[var(--on-surface-variant)] md3-body-large max-w-xl mx-auto animate-fade-up stagger-1">
               Três passos simples para transformar suas fotos de produto.
             </p>
@@ -123,7 +123,7 @@ export default function LandingPage() {
                   </div>
                   <span className="md3-label-small text-[var(--outline)]">{feature.step}</span>
                 </div>
-                <h3 className="font-serif text-xl font-bold mb-3">{feature.title}</h3>
+                <h3 className="font-serif md3-title-large font-bold mb-3">{feature.title}</h3>
                 <p className="text-[var(--on-surface-variant)] md3-body-medium leading-relaxed">{feature.description}</p>
               </div>
             ))}
@@ -135,7 +135,7 @@ export default function LandingPage() {
       <section className="py-16 md:py-20 px-6 relative z-10">
         <div className="max-w-4xl mx-auto rounded-[var(--shape-extra-large)] bg-[var(--primary-container)] p-10 md:p-16 text-center relative overflow-hidden elevation-2">
           <div className="absolute inset-0 bg-[var(--primary)]/[0.04] pointer-events-none" />
-          <h2 className="font-serif text-3xl md:text-[2.75rem] font-bold mb-6 text-[var(--on-primary-container)] leading-tight relative z-10">
+          <h2 className="font-serif md3-headline-large md:md3-display-small font-bold mb-6 text-[var(--on-primary-container)] leading-tight relative z-10">
             Pronto para elevar sua marca?
           </h2>
           <p className="text-[var(--on-primary-container)]/80 md3-body-large mb-10 max-w-lg mx-auto relative z-10">
@@ -143,7 +143,7 @@ export default function LandingPage() {
           </p>
           <button
             onClick={() => router.push('/auth')}
-            className="relative z-10 h-14 px-10 rounded-[var(--shape-full)] bg-[var(--on-primary-container)] text-[var(--primary-container)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-3 active:scale-[0.98] state-layer"
+            className="relative z-10 m3-btn-filled h-14 px-10 md3-label-large bg-[var(--on-primary-container)] text-[var(--primary-container)] state-layer m3-touch-target"
           >
             Começar Grátis
           </button>
@@ -153,11 +153,11 @@ export default function LandingPage() {
       {/* ── Footer — M3 Surface Container ── */}
       <footer className="py-10 border-t border-[var(--outline-variant)]/20 px-6 bg-[var(--surface-container-lowest)]/90 backdrop-blur-sm relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[var(--shape-small)] bg-[var(--primary)] flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--on-primary)]" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-[var(--shape-small)] bg-[var(--primary)] flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-[var(--on-primary)]" />
             </div>
-            <span className="font-serif text-base font-bold">Neksti Studio</span>
+            <span className="md3-title-medium font-medium">Neksti Studio</span>
           </div>
           <div className="flex gap-6 text-[var(--on-surface-variant)] md3-body-medium">
             <a href="/termos" className="hover:text-[var(--primary)] transition-colors duration-[var(--duration-short4)]">Termos</a>

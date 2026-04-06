@@ -211,7 +211,7 @@ export default function AuthPage() {
       <nav className="h-16 flex items-center px-4 md:px-6 fixed top-0 w-full z-50 bg-transparent">
         <button
           onClick={() => router.push('/')}
-          className="flex items-center gap-2 text-[var(--on-surface-variant)] hover:text-[var(--foreground)] transition-colors duration-[var(--duration-short4)]"
+          className="m3-btn-text text-[var(--on-surface-variant)] gap-2 m3-touch-target"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="md3-label-large">Voltar</span>
@@ -270,7 +270,7 @@ export default function AuthPage() {
                       onChange={(e) => { setEmail(e.target.value); setPassword(''); setError(''); }}
                       onKeyDown={(e) => e.key === 'Enter' && !isAdminEmail && handleSendOtp()}
                       autoFocus
-                      className="w-full h-14 pl-12 pr-4 rounded-[var(--shape-medium)] border border-[var(--outline)]/40 bg-[var(--surface-container-low)] text-[var(--foreground)] md3-body-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30 placeholder:text-[var(--on-surface-variant)]/40"
+                      className="w-full h-14 pl-12 pr-4 rounded-[var(--shape-extra-small)] border border-[var(--outline)] bg-[var(--surface-container-low)] text-[var(--foreground)] md3-body-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none focus:border-[var(--primary)] focus:border-2 placeholder:text-[var(--on-surface-variant)]/40 m3-touch-target"
                     />
                   </div>
                 </div>
@@ -288,7 +288,7 @@ export default function AuthPage() {
                         onChange={(e) => { setPassword(e.target.value); setError(''); }}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
                         autoFocus
-                        className="w-full h-14 pl-12 pr-4 rounded-[var(--shape-medium)] border border-[var(--outline)]/40 bg-[var(--surface-container-low)] text-[var(--foreground)] md3-body-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30 placeholder:text-[var(--on-surface-variant)]/40"
+                        className="w-full h-14 pl-12 pr-4 rounded-[var(--shape-extra-small)] border border-[var(--outline)] bg-[var(--surface-container-low)] text-[var(--foreground)] md3-body-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] outline-none focus:border-[var(--primary)] focus:border-2 placeholder:text-[var(--on-surface-variant)]/40 m3-touch-target"
                       />
                     </div>
                   </div>
@@ -297,7 +297,7 @@ export default function AuthPage() {
                 <button
                   onClick={handleSendOtp}
                   disabled={loading || !email || (isAdminEmail && !password)}
-                  className="w-full h-14 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-2.5 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
+                  className="w-full m3-btn-filled h-14 gap-2.5 md3-label-large active:scale-[0.98] state-layer m3-touch-target"
                 >
                   {loading ? (
                     <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Entrando...</>
@@ -351,7 +351,7 @@ export default function AuthPage() {
                 <button
                   onClick={() => handleVerifyOtp()}
                   disabled={loading || otp.some(d => !d)}
-                  className="w-full h-14 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large flex items-center justify-center gap-2.5 transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] hover:elevation-2 active:scale-[0.98] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
+                  className="w-full m3-btn-filled h-14 gap-2.5 md3-label-large active:scale-[0.98] state-layer m3-touch-target"
                 >
                   {loading ? (
                     <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Verificando...</>

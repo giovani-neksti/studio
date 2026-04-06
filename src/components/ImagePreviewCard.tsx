@@ -202,36 +202,36 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
           <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover animate-scale-in" />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-transparent">
-            <div className="w-14 h-14 rounded-[var(--shape-extra-large)] bg-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center mb-4">
-              <Sparkles className="w-7 h-7 text-[var(--primary)]/60" />
+            <div className="w-16 h-16 rounded-[var(--shape-large)] bg-[var(--primary)]/8 border border-[var(--primary)]/15 flex items-center justify-center mb-5">
+              <Sparkles className="w-8 h-8 text-[var(--primary)]/50" />
             </div>
-            <p className="text-[var(--on-surface-variant)]/60 md3-body-medium max-w-[240px] leading-relaxed">
+            <p className="text-[var(--on-surface-variant)] md3-body-large max-w-[260px] leading-relaxed">
               Configure as opções e gere sua imagem profissional.
             </p>
           </div>
         )}
       </div>
 
-      {/* QUALITY CHECKS — M3 Outlined Card, Desktop only */}
+      {/* QUALITY CHECKS — M3 Outlined Card */}
       {qualityChecks.length > 0 && !imageUrl && (
-        <div className="hidden md:block w-full max-w-[480px] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 rounded-[var(--shape-medium)] p-4 text-left shrink-0">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" />
-            <p className="md3-label-small text-[var(--primary)] uppercase tracking-wider font-semibold">Qualidade da Composição</p>
+        <div className="hidden md:block w-full max-w-[480px] m3-card-outlined text-left shrink-0">
+          <div className="flex items-center gap-2.5 mb-4">
+            <Sparkles className="w-4 h-4 text-[var(--primary)]" />
+            <p className="md3-title-small text-[var(--primary)]">Qualidade da Composição</p>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {qualityChecks.map((check, i) => (
               <div
                 key={i}
-                className="flex items-start gap-2.5 animate-fade-up"
+                className="flex items-start gap-3 animate-fade-up"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--primary)]/15 text-[var(--primary)] mt-0.5 shrink-0">
-                  <Check className="w-3 h-3" />
+                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--primary)]/12 text-[var(--primary)] mt-0.5 shrink-0">
+                  <Check className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="md3-label-medium text-[var(--foreground)]">{check.label}</span>
-                  <span className="md3-body-small text-[var(--on-surface-variant)]/70">{check.detail}</span>
+                  <span className="md3-label-large text-[var(--foreground)]">{check.label}</span>
+                  <span className="md3-body-small text-[var(--on-surface-variant)]">{check.detail}</span>
                 </div>
               </div>
             ))}
@@ -239,29 +239,29 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         </div>
       )}
 
-      {/* ACTION BUTTONS — M3 Outlined + Filled */}
+      {/* ACTION BUTTONS — M3 Button Group */}
       {imageUrl && (
-        <div className="flex gap-2.5 shrink-0 mb-4 md:mb-8 mt-1 w-full max-w-[500px]">
+        <div className="flex gap-3 shrink-0 mb-4 md:mb-8 mt-2 w-full max-w-[500px]">
           <button
             onClick={onGenerate}
-            className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:bg-[var(--on-surface-variant)]/8"
+            className="flex-1 m3-btn-outlined h-12 gap-2 md3-label-large m3-touch-target"
           >
-            <RefreshCw className="w-4 h-4" /> Regenerar
+            <RefreshCw className="w-[18px] h-[18px]" /> Regenerar
           </button>
           <button
             onClick={() => window.open(imageUrl)}
-            className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:elevation-1 state-layer"
+            className="flex-1 m3-btn-filled h-12 gap-2 md3-label-large state-layer m3-touch-target"
           >
-            <Download className="w-4 h-4" /> Baixar HD
+            <Download className="w-[18px] h-[18px]" /> Baixar HD
           </button>
           {canShare && (
             <button
               onClick={() => shareImage(imageUrl, `neksti_${Date.now()}.png`)}
               disabled={isSharing}
               aria-label="Compartilhar imagem no Instagram ou outras redes"
-              className="flex items-center justify-center gap-2 h-11 px-5 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
+              className="flex items-center justify-center gap-2 h-12 px-5 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 m3-touch-target"
             >
-              <InstagramIcon className="w-4 h-4" />
+              <InstagramIcon className="w-[18px] h-[18px]" />
               <span>Postar</span>
             </button>
           )}

@@ -85,8 +85,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Faltam arquivos ou seleções.' }, { status: 400 });
     }
 
-    // Validate files: max 100 MB each, max 5 files, images only
-    const MAX_FILE_SIZE = 100 * 1024 * 1024;
+    // Validate files: max 5 files, images only (no size limit — client compresses before upload)
     const MAX_FILES = 5;
     const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
 
@@ -97,9 +96,6 @@ export async function POST(req: Request) {
     for (const file of files) {
       if (!ALLOWED_TYPES.has(file.type)) {
         return NextResponse.json({ error: `Formato não suportado: ${file.type}. Use JPG, PNG ou WebP.` }, { status: 400 });
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json({ error: `Arquivo "${file.name}" excede o limite de 100 MB.` }, { status: 400 });
       }
     }
 

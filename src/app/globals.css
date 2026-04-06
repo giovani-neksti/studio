@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
-  --font-mono: var(--font-mono, 'JetBrains Mono'), ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+  --font-mono: var(--font-mono, 'Roboto Mono'), ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
 
   --color-primary: var(--primary);
   --color-primary-container: var(--primary-container);
@@ -360,23 +360,24 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* ============================================
-   M3 Typography Scale
+   M3 Typography Scale — Google Material Design 3
+   https://m3.material.io/styles/typography/type-scale-tokens
    ============================================ */
-.md3-display-large  { font-size: 57px; line-height: 64px; letter-spacing: -0.25px; font-weight: 400; }
-.md3-display-medium { font-size: 45px; line-height: 52px; font-weight: 400; }
-.md3-display-small  { font-size: 36px; line-height: 44px; font-weight: 400; }
-.md3-headline-large { font-size: 32px; line-height: 40px; font-weight: 400; }
-.md3-headline-medium{ font-size: 28px; line-height: 36px; font-weight: 400; }
-.md3-headline-small { font-size: 24px; line-height: 32px; font-weight: 400; }
-.md3-title-large    { font-size: 22px; line-height: 28px; font-weight: 400; }
-.md3-title-medium   { font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; }
-.md3-title-small    { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
-.md3-body-large     { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0.5px; }
-.md3-body-medium    { font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
-.md3-body-small     { font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0.4px; }
-.md3-label-large    { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
-.md3-label-medium   { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
-.md3-label-small    { font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+.md3-display-large  { font-family: var(--font-serif), var(--font-sans), sans-serif; font-size: 57px; line-height: 64px; letter-spacing: -0.25px; font-weight: 400; }
+.md3-display-medium { font-family: var(--font-serif), var(--font-sans), sans-serif; font-size: 45px; line-height: 52px; font-weight: 400; }
+.md3-display-small  { font-family: var(--font-serif), var(--font-sans), sans-serif; font-size: 36px; line-height: 44px; font-weight: 400; }
+.md3-headline-large { font-family: var(--font-serif), var(--font-sans), sans-serif; font-size: 32px; line-height: 40px; font-weight: 400; }
+.md3-headline-medium{ font-family: var(--font-serif), var(--font-sans), sans-serif; font-size: 28px; line-height: 36px; font-weight: 400; }
+.md3-headline-small { font-family: var(--font-serif), var(--font-sans), sans-serif; font-size: 24px; line-height: 32px; font-weight: 400; }
+.md3-title-large    { font-family: var(--font-sans), sans-serif; font-size: 22px; line-height: 28px; font-weight: 400; }
+.md3-title-medium   { font-family: var(--font-sans), sans-serif; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; }
+.md3-title-small    { font-family: var(--font-sans), sans-serif; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.md3-body-large     { font-family: var(--font-sans), sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0.5px; }
+.md3-body-medium    { font-family: var(--font-sans), sans-serif; font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
+.md3-body-small     { font-family: var(--font-sans), sans-serif; font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0.4px; }
+.md3-label-large    { font-family: var(--font-sans), sans-serif; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.md3-label-medium   { font-family: var(--font-sans), sans-serif; font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+.md3-label-small    { font-family: var(--font-sans), sans-serif; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
 
 /* ============================================
    M3 Animations
@@ -462,4 +463,246 @@
   height: 1px;
   background: var(--outline-variant);
   border: none;
+}
+
+/* ============================================
+   M3 Focus Ring — visible keyboard focus
+   ============================================ */
+.m3-focus-ring:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* ============================================
+   M3 Touch Target — 48dp minimum on mobile
+   ============================================ */
+@media (pointer: coarse) {
+  .m3-touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* ============================================
+   M3 Filled Button base
+   ============================================ */
+.m3-btn-filled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: var(--shape-full);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow var(--duration-short4) var(--easing-standard),
+              background-color var(--duration-short4) var(--easing-standard);
+}
+.m3-btn-filled:hover { box-shadow: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.30); }
+.m3-btn-filled:disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; }
+
+/* M3 Tonal Button */
+.m3-btn-tonal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: var(--shape-full);
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow var(--duration-short4) var(--easing-standard);
+}
+.m3-btn-tonal:hover { box-shadow: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.30); }
+
+/* M3 Outlined Button */
+.m3-btn-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: var(--shape-full);
+  background: transparent;
+  color: var(--primary);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  border: 1px solid var(--outline);
+  cursor: pointer;
+  transition: background-color var(--duration-short4) var(--easing-standard);
+}
+.m3-btn-outlined:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+
+/* M3 Text Button */
+.m3-btn-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--shape-full);
+  background: transparent;
+  color: var(--primary);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--duration-short4) var(--easing-standard);
+}
+.m3-btn-text:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+
+/* M3 FAB (Floating Action Button) */
+.m3-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--shape-large);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.30);
+  transition: box-shadow var(--duration-short4) var(--easing-standard);
+}
+.m3-fab:hover {
+  box-shadow: 0px 6px 10px 4px rgba(0,0,0,0.15), 0px 2px 3px 0px rgba(0,0,0,0.30);
+}
+
+/* M3 Extended FAB */
+.m3-fab-extended {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: var(--shape-large);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.30);
+  transition: box-shadow var(--duration-short4) var(--easing-standard);
+}
+.m3-fab-extended:hover {
+  box-shadow: 0px 6px 10px 4px rgba(0,0,0,0.15), 0px 2px 3px 0px rgba(0,0,0,0.30);
+}
+
+/* M3 Chip (Input / Filter / Suggestion) */
+.m3-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--shape-small);
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  transition: background-color var(--duration-short4) var(--easing-standard),
+              border-color var(--duration-short4) var(--easing-standard);
+}
+.m3-chip:hover { background: color-mix(in srgb, var(--on-surface-variant) 8%, transparent); }
+.m3-chip[aria-pressed="true"],
+.m3-chip.active {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  border-color: transparent;
+}
+
+/* M3 Card — Filled */
+.m3-card-filled {
+  background: var(--surface-container-highest);
+  border-radius: var(--shape-medium);
+  padding: 16px;
+}
+
+/* M3 Card — Outlined */
+.m3-card-outlined {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--shape-medium);
+  padding: 16px;
+}
+
+/* M3 Card — Elevated */
+.m3-card-elevated {
+  background: var(--surface-container-low);
+  border-radius: var(--shape-medium);
+  padding: 16px;
+  box-shadow: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.30);
+}
+
+/* M3 Text Field — Outlined */
+.m3-textfield {
+  width: 100%;
+  height: 56px;
+  padding: 16px;
+  border: 1px solid var(--outline);
+  border-radius: var(--shape-extra-small);
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.5px;
+  outline: none;
+  transition: border-color var(--duration-short4) var(--easing-standard);
+}
+.m3-textfield:focus {
+  border-color: var(--primary);
+  border-width: 2px;
+  padding: 15px;
+}
+.m3-textfield::placeholder {
+  color: var(--on-surface-variant);
+}
+
+/* M3 Navigation Bar indicator animation */
+@keyframes nav-indicator {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+.animate-nav-indicator {
+  animation: nav-indicator var(--duration-medium2) var(--easing-emphasized-decelerate) both;
 }

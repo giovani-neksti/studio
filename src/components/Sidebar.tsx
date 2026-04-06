@@ -113,7 +113,7 @@ const getDisplayIcon = (id: string): ReactNode => {
   }
 };
 
-/* ── M3 Segmented Button (unchanged) ── */
+/* ── M3 Segmented Button — per Material Design 3 spec ── */
 function SegmentedButton({
   options,
   value,
@@ -124,19 +124,22 @@ function SegmentedButton({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex h-10 rounded-[var(--shape-full)] border border-[var(--outline)]/40 overflow-hidden mb-4 bg-[var(--surface-container)]/30 p-0.5">
-      {options.map((opt) => {
+    <div role="group" className="flex h-10 rounded-[var(--shape-full)] border border-[var(--outline)]/50 overflow-hidden mb-4 bg-transparent">
+      {options.map((opt, idx) => {
         const isActive = value === opt.id;
         return (
           <button
             key={opt.id}
+            role="radio"
+            aria-checked={isActive}
             onClick={() => onChange(opt.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-2 md3-label-medium rounded-[var(--shape-full)] transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)]
+            className={`flex-1 flex items-center justify-center gap-2 px-3 md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] m3-touch-target
+              ${idx > 0 ? 'border-l border-[var(--outline)]/50' : ''}
               ${isActive
-                ? 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)] elevation-1'
-                : 'text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                ? 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)]'
+                : 'text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8'}`}
           >
-            {isActive && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
+            {isActive && <Check className="w-4 h-4" aria-hidden="true" />}
             {opt.label}
           </button>
         );
@@ -145,7 +148,7 @@ function SegmentedButton({
   );
 }
 
-/* ── Step Progress Bar ── */
+/* ── Step Progress Bar — M3 Linear Progress ── */
 const STEP_LABELS = ['Categoria', 'Foto', 'Ambiente', 'Exibição', 'Assinatura', 'Formato'];
 const STEP_TITLES = [
   'Categoria do Produto',
@@ -166,28 +169,22 @@ const STEP_ICONS = [
 
 function StepProgress({ current }: { current: number }) {
   const total = 6;
+  const progress = ((current + 1) / total) * 100;
   return (
-    <div className="flex-shrink-0 px-4 md:px-5 pt-3.5 pb-2">
-      {/* Pills */}
-      <div className="flex items-center gap-1 mb-2.5">
-        {Array.from({ length: total }).map((_, i) => {
-          const done    = i < current;
-          const active  = i === current;
-          return (
-            <div
-              key={i}
-              className={`h-[5px] rounded-[var(--shape-full)] transition-all duration-[var(--duration-medium3)] ease-[var(--easing-standard)]
-                ${active ? 'flex-[3] bg-[var(--primary)]' : done ? 'flex-1 bg-[var(--primary)]/50' : 'flex-1 bg-[var(--outline-variant)]/40'}`}
-            />
-          );
-        })}
+    <div className="flex-shrink-0 px-4 md:px-5 pt-4 pb-2.5">
+      {/* M3 Linear Progress Track */}
+      <div className="relative h-1 bg-[var(--surface-container-highest)] rounded-[var(--shape-full)] overflow-hidden mb-3">
+        <div
+          className="absolute inset-y-0 left-0 bg-[var(--primary)] rounded-[var(--shape-full)] transition-all duration-[var(--duration-medium4)] ease-[var(--easing-emphasized)]"
+          style={{ width: `${progress}%` }}
+        />
       </div>
       {/* Label row */}
       <div className="flex items-center justify-between">
-        <span className="md3-label-small text-[var(--on-surface-variant)]">
-          Passo {current + 1} de {total}
+        <span className="md3-label-medium text-[var(--on-surface-variant)]">
+          {current + 1}/{total}
         </span>
-        <span className="md3-label-small text-[var(--primary)] font-semibold flex items-center gap-1">
+        <span className="md3-label-medium text-[var(--primary)] font-medium flex items-center gap-1.5">
           {STEP_ICONS[current]}
           {STEP_LABELS[current]}
         </span>
@@ -242,15 +239,9 @@ export function Sidebar({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && activeUploadKey) {
       const file = e.target.files[0];
-      const MAX_SIZE      = 100 * 1024 * 1024;
       const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
       if (!ALLOWED_TYPES.includes(file.type)) {
         alert('Formato não suportado. Use JPG, PNG ou WebP.');
-        e.target.value = '';
-        return;
-      }
-      if (file.size > MAX_SIZE) {
-        alert('Arquivo muito grande. O limite é 100 MB.');
         e.target.value = '';
         return;
       }
@@ -262,12 +253,11 @@ export function Sidebar({
   const handleBatchFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const files = Array.from(e.target.files);
-    const MAX_SIZE = 100 * 1024 * 1024;
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
-    const validFiles = files.filter(f => ALLOWED_TYPES.includes(f.type) && f.size <= MAX_SIZE);
+    const validFiles = files.filter(f => ALLOWED_TYPES.includes(f.type));
     if (validFiles.length < files.length) {
-      alert('Alguns arquivos foram ignorados por tamanho (máx 100MB) ou formato inválido.');
+      alert('Alguns arquivos foram ignorados por formato inválido. Use JPG, PNG ou WebP.');
     }
 
     const currentBatch = (selections.batchFiles as File[]) || [];
@@ -330,10 +320,10 @@ export function Sidebar({
               Selecione a categoria do produto que você vai fotografar.
             </p>
 
-            {/* Categories */}
+            {/* Categories — M3 Filter Chip Grid */}
             <div>
-              <p className="md3-label-small text-[var(--on-surface-variant)] mb-2 uppercase tracking-wider">Categoria do Produto</p>
-              <div className="grid grid-cols-2 gap-2">
+              <p className="md3-label-medium text-[var(--on-surface-variant)] mb-3 tracking-wide">Categoria do Produto</p>
+              <div className="grid grid-cols-2 gap-2.5">
                 {config.categories.map((cat) => {
                   const isActive = selections.category === cat;
                   return (
@@ -341,37 +331,37 @@ export function Sidebar({
                       key={cat}
                       onClick={() => onSelect('category', cat)}
                       aria-pressed={isActive}
-                      className={`group/cat relative flex flex-col items-center justify-center p-3 md:p-3.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] min-h-[68px]
+                      className={`group/cat relative flex items-center gap-3 p-3 md:p-3.5 rounded-[var(--shape-medium)] border transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] min-h-[52px] m3-touch-target
                         ${isActive
-                          ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]'
-                          : 'border-[var(--outline-variant)]/40 bg-transparent text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8 hover:text-[var(--primary)]'}`}
+                          ? 'border-[var(--primary)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)]'
+                          : 'border-[var(--outline-variant)]/40 bg-transparent text-[var(--on-surface-variant)] hover:bg-[var(--on-surface)]/8'}`}
                     >
-                      {isActive && (
-                        <div aria-hidden="true" className="absolute top-1.5 right-1.5 w-4 h-4 rounded-[var(--shape-full)] bg-[var(--primary)] flex items-center justify-center">
-                          <Check className="w-2.5 h-2.5 text-[var(--on-primary)]" />
-                        </div>
-                      )}
-                      <span className="mb-1.5">{getCategoryIcon(cat)}</span>
-                      <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)] group-hover/cat:text-[var(--primary)]'}`}>
+                      <span className={`shrink-0 ${isActive ? 'text-[var(--on-secondary-container)]' : ''}`}>{getCategoryIcon(cat)}</span>
+                      <span className={`md3-label-large leading-tight text-left flex-1 ${isActive ? 'text-[var(--on-secondary-container)]' : 'text-[var(--on-surface)] group-hover/cat:text-[var(--on-surface)]'}`}>
                         {cat}
                       </span>
+                      {isActive && (
+                        <div aria-hidden="true" className="w-5 h-5 rounded-[var(--shape-full)] bg-[var(--primary)] flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 text-[var(--on-primary)]" />
+                        </div>
+                      )}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Material */}
+            {/* Material — M3 Outlined Select */}
             {hasMaterials && (
               <div>
-                <label htmlFor="select-material" className="md3-label-small text-[var(--on-surface-variant)] mb-2 block uppercase tracking-wider">
+                <label htmlFor="select-material" className="md3-label-medium text-[var(--on-surface-variant)] mb-2.5 block tracking-wide">
                   Material Predominante
                 </label>
                 <select
                   id="select-material"
                   value={selections.material || ''}
                   onChange={(e) => onSelect('material', e.target.value)}
-                  className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-colors duration-[var(--duration-short4)] outline-none"
+                  className="w-full h-14 px-4 rounded-[var(--shape-extra-small)] md3-body-large border border-[var(--outline)] bg-transparent text-[var(--foreground)] focus:border-[var(--primary)] focus:border-2 transition-colors duration-[var(--duration-short4)] outline-none m3-touch-target"
                 >
                   <option value="" disabled>Selecione o Material</option>
                   {config.materialOptions?.map((mat) => (
@@ -482,28 +472,34 @@ export function Sidebar({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
                         onClick={() => cameraInputRef.current?.click()}
                         aria-label="Tirar foto com câmera"
-                        className={`p-4 border-2 border-dashed rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]
+                        className={`p-5 border-2 border-dashed rounded-[var(--shape-large)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[100px] m3-touch-target
                           ${uploadError ? 'border-[var(--error)] bg-[var(--error)]/5' : 'border-[var(--outline-variant)]/50'}`}
                       >
                         <input type="file" ref={cameraInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
-                        <Camera className="w-6 h-6 mb-2 text-[var(--primary)]" aria-hidden="true" />
-                        <span className="md3-label-small text-[var(--primary)]">Tirar Foto</span>
+                        <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
+                          <Camera className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
+                        </div>
+                        <span className="md3-label-large text-[var(--primary)]">Câmera</span>
+                        <span className="md3-body-small text-[var(--on-surface-variant)] mt-0.5">Tirar foto agora</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         aria-label="Selecionar imagem da galeria"
-                        className={`p-4 border-2 border-dashed rounded-[var(--shape-medium)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[80px]
+                        className={`p-5 border-2 border-dashed rounded-[var(--shape-large)] text-center cursor-pointer hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 transition-all duration-[var(--duration-short4)] flex flex-col items-center justify-center min-h-[100px] m3-touch-target
                           ${uploadError ? 'border-[var(--error)] bg-[var(--error)]/5' : 'border-[var(--outline-variant)]/50'}`}
                       >
                         <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={handleFileUpload} tabIndex={-1} aria-hidden="true" />
-                        <UploadCloud className="w-6 h-6 mb-2 text-[var(--primary)]" aria-hidden="true" />
-                        <span className="md3-label-small text-[var(--primary)]">Galeria</span>
+                        <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
+                          <UploadCloud className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
+                        </div>
+                        <span className="md3-label-large text-[var(--primary)]">Galeria</span>
+                        <span className="md3-body-small text-[var(--on-surface-variant)] mt-0.5">Escolher imagem</span>
                       </button>
                     </div>
                   </div>
@@ -576,14 +572,14 @@ export function Sidebar({
 
             {hasProps && (
               <div>
-                <label htmlFor="select-prop" className="md3-label-small text-[var(--on-surface-variant)] mb-2 block uppercase tracking-wider">
+                <label htmlFor="select-prop" className="md3-label-medium text-[var(--on-surface-variant)] mb-2.5 block tracking-wide">
                   Adereços de Composição
                 </label>
                 <select
                   id="select-prop"
                   value={selections.prop || 'none'}
                   onChange={(e) => onSelect('prop', e.target.value)}
-                  className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-colors duration-[var(--duration-short4)] outline-none"
+                  className="w-full h-14 px-4 rounded-[var(--shape-extra-small)] md3-body-large border border-[var(--outline)] bg-transparent text-[var(--foreground)] focus:border-[var(--primary)] focus:border-2 transition-colors duration-[var(--duration-short4)] outline-none m3-touch-target"
                 >
                   {config.propOptions?.map((prop) => (
                     <option key={prop.id} value={prop.id}>{prop.label}</option>
@@ -674,14 +670,14 @@ export function Sidebar({
               aria-label="Texto da assinatura visual"
               value={selections.text || ''}
               onChange={(e) => onSelect('text', e.target.value)}
-              className="bg-transparent text-[var(--foreground)] h-11 border border-[var(--outline)]/40 rounded-[var(--shape-extra-small)] md3-body-medium focus:ring-2 focus:ring-[var(--primary)]/30 transition-colors"
+              className="bg-transparent text-[var(--foreground)] h-14 px-4 border border-[var(--outline)] rounded-[var(--shape-extra-small)] md3-body-large focus:border-[var(--primary)] focus:border-2 transition-colors m3-touch-target"
             />
 
             <select
               aria-label="Escolher fonte tipográfica"
               value={selections.typography || ''}
               onChange={(e) => onSelect('typography', e.target.value)}
-              className="w-full h-11 px-3 rounded-[var(--shape-extra-small)] md3-body-medium border border-[var(--outline)]/40 bg-transparent text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]/30 transition-colors duration-[var(--duration-short4)] outline-none"
+              className="w-full h-14 px-4 rounded-[var(--shape-extra-small)] md3-body-large border border-[var(--outline)] bg-transparent text-[var(--foreground)] focus:border-[var(--primary)] focus:border-2 transition-colors duration-[var(--duration-short4)] outline-none m3-touch-target"
             >
               <option value="" disabled>Escolha a Fonte</option>
               {config.typographyOptions.map((font) => (
@@ -890,10 +886,10 @@ export function Sidebar({
   return (
     <div className="flex flex-col h-full w-full min-h-0 overflow-hidden bg-[var(--surface-container-low)]">
 
-      {/* Desktop Header */}
+      {/* Desktop Header — M3 */}
       <div className="hidden md:flex px-5 py-4 border-b border-[var(--outline-variant)]/20 shrink-0 items-center gap-3">
         <Gem className="w-5 h-5 text-[var(--primary)]" />
-        <h2 className="md3-title-small text-[var(--foreground)]">Configurações</h2>
+        <h2 className="md3-title-medium text-[var(--foreground)]">Configurações</h2>
       </div>
 
       {/* Step Progress Bar */}
@@ -916,28 +912,28 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Footer Navigation — always visible */}
+      {/* Footer Navigation — M3 Bottom Action Bar */}
       <div className="flex-shrink-0 w-full z-10 px-4 py-3 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
 
-          {/* Back button — only from step 1+ */}
+          {/* Back button — M3 Icon Button Standard */}
           {currentStep > 0 && (
             <button
               onClick={goBack}
-              className="flex items-center justify-center h-12 w-12 rounded-[var(--shape-full)] border border-[var(--outline-variant)]/40 text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 flex-shrink-0 active:scale-95"
+              className="flex items-center justify-center h-12 w-12 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 flex-shrink-0 active:scale-95 m3-touch-target"
               aria-label="Passo anterior"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-6 h-6" />
             </button>
           )}
 
-          {/* Action button — always rendered, disabled when not ready */}
+          {/* Action button — M3 Filled / Tonal */}
           <div className="flex-1 min-w-0">
             {isLastStep ? (
               <button
                 onClick={onGenerate}
                 disabled={!canGenerate}
-                className="w-full flex items-center justify-center gap-2.5 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 active:scale-[0.98] state-layer disabled:opacity-40 disabled:pointer-events-none"
+                className="w-full flex items-center justify-center gap-2.5 h-14 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 active:scale-[0.98] state-layer disabled:opacity-[0.38] disabled:pointer-events-none m3-touch-target"
               >
                 {isGenerating ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /><span>Gerando...</span></>
@@ -948,10 +944,10 @@ export function Sidebar({
             ) : (
               <button
                 onClick={goNext}
-                className="w-full flex items-center justify-center gap-2 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] hover:elevation-1 active:scale-[0.98] state-layer"
+                className="w-full flex items-center justify-center gap-2.5 h-14 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 active:scale-[0.98] state-layer m3-touch-target"
               >
                 <span>Próximo</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4.5 h-4.5" />
               </button>
             )}
           </div>

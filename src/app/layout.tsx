@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -8,24 +8,24 @@ import "./globals.css";
 
 const GA_ID = "G-5S3354R4FJ";
 
-// M3 Typography: Inter for body (most readable sans-serif on screens)
-const inter = Inter({
+// M3 Typography: Roboto — the canonical Google / Material Design typeface
+const roboto = Roboto({
   variable: "--font-sans",
   subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "700"],
   display: "swap",
 });
 
-// Space Grotesk for headings — geometric, techy, Silicon Valley feel
-const spaceGrotesk = Space_Grotesk({
+// Roboto also used for headings (Google uses the same family with different weights)
+const robotoHeading = Roboto({
   variable: "--font-serif",
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
-// JetBrains Mono for technical/AI data display
-const jetbrainsMono = JetBrains_Mono({
+// Roboto Mono for technical/code data — Google's monospace companion
+const robotoMono = Roboto_Mono({
   variable: "--font-mono",
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500"],
@@ -70,7 +70,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased h-full`}>
+      <body className={`${roboto.variable} ${robotoHeading.variable} ${robotoMono.variable} antialiased h-full`}>
         <ErrorBoundary>
           <GlobalErrorCatcher />
           <AuthProvider>{children}</AuthProvider>

@@ -269,7 +269,7 @@ function StudioContent() {
         } else {
           const text = await res.text();
           console.error('Resposta não-JSON do servidor:', res.status, text.substring(0, 200));
-          throw new Error('Erro interno do servidor. Tente novamente com uma imagem menor.');
+          throw new Error('Erro interno do servidor. Tente novamente em alguns instantes.');
         }
 
         if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA');
@@ -340,25 +340,25 @@ function StudioContent() {
       <NeuralBackground variant="gold" />
 
       {/* ── M3 Small Top App Bar ── */}
-      <header className="theme-jewelry h-16 flex-shrink-0 flex items-center justify-between px-4 md:px-6 bg-[var(--surface-container)] z-40 relative border-b border-[var(--outline-variant)]/20">
+      <header className="theme-jewelry h-16 flex-shrink-0 flex items-center justify-between px-3 md:px-6 bg-[var(--surface-container)] z-40 relative border-b border-[var(--outline-variant)]/20">
         {/* Left: Logo + Niche Selector */}
-        <div className="flex items-center gap-3 h-full">
+        <div className="flex items-center gap-2 md:gap-3 h-full">
           <div className="flex items-center h-full cursor-pointer py-2" onClick={() => router.push('/')}>
-            <img src="/logo_joias.png" alt="Logo" className="h-20 md:h-24 w-auto object-contain" />
+            <img src="/logo_joias.png" alt="Logo" className="h-16 md:h-24 w-auto object-contain" />
           </div>
 
-          {/* M3 Filled Tonal Button as niche selector */}
+          {/* M3 Tonal Button — niche selector */}
           <div className="relative">
             <button
               onClick={() => setNicheMenuOpen(!nicheMenuOpen)}
               aria-expanded={nicheMenuOpen}
               aria-haspopup="listbox"
               aria-label={`Nicho selecionado: ${config.label}. Clique para alterar`}
-              className="flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] md3-label-medium transition-all duration-[var(--duration-short4)] hover:elevation-1 state-layer"
+              className="m3-btn-tonal h-10 px-4 gap-2 md3-label-large state-layer"
             >
               <span className="text-sm" aria-hidden="true">{config.icon}</span>
-              <span className="font-semibold hidden sm:inline">{config.label}</span>
-              <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-[var(--duration-short4)] ${nicheMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              <span className="hidden sm:inline">{config.label}</span>
+              <ChevronDown className={`w-4 h-4 opacity-70 transition-transform duration-[var(--duration-short4)] ${nicheMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
 
             {/* M3 Menu */}
@@ -374,16 +374,16 @@ function StudioContent() {
                       aria-selected={isSelected}
                       onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
                       disabled={!isEnabled}
-                      className={`w-full flex items-center gap-3 px-3 py-3 md3-body-medium transition-colors duration-[var(--duration-short4)] text-left
-                        ${isEnabled ? 'hover:bg-[var(--on-surface-variant)]/8' : 'opacity-38 cursor-not-allowed'}
+                      className={`w-full flex items-center gap-3 px-4 py-3 md3-body-large transition-colors duration-[var(--duration-short4)] text-left m3-touch-target
+                        ${isEnabled ? 'hover:bg-[var(--on-surface-variant)]/8' : 'opacity-[0.38] cursor-not-allowed'}
                         ${isSelected ? 'bg-[var(--secondary-container)]' : ''}`}
                     >
                       <span className="text-lg w-7 text-center" aria-hidden="true">{cfg.icon}</span>
                       <div className="flex flex-col flex-1">
-                        <span className={isSelected ? 'font-semibold text-[var(--on-secondary-container)]' : ''}>{cfg.label}</span>
+                        <span className={isSelected ? 'font-medium text-[var(--on-secondary-container)]' : ''}>{cfg.label}</span>
                         {!isEnabled && <span className="md3-label-small text-[var(--outline)]">Em breve</span>}
                       </div>
-                      {isSelected && <Check className="w-4 h-4 text-[var(--primary)]" aria-hidden="true" />}
+                      {isSelected && <Check className="w-5 h-5 text-[var(--primary)]" aria-hidden="true" />}
                     </button>
                   );
                 })}
@@ -393,7 +393,7 @@ function StudioContent() {
         </div>
 
         {/* Right: Credits Badge + Desktop Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           {/* M3 Badge-style credits */}
           <div
             className="flex items-center gap-1.5 h-8 px-3 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-medium"
@@ -402,61 +402,62 @@ function StudioContent() {
             <Gem className="w-3.5 h-3.5" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
           </div>
 
-          {/* Batch Mode Toggle */}
+          {/* Batch Mode Toggle — M3 Filter Chip */}
           <button
             onClick={() => setShowBatch(!showBatch)}
             aria-pressed={showBatch}
             aria-label={showBatch ? 'Desativar modo batch' : 'Ativar geração em batch (até 10 produtos)'}
-            className={`flex items-center gap-1.5 h-8 px-3 rounded-[var(--shape-full)] md3-label-medium transition-all duration-[var(--duration-short4)]
+            className={`hidden sm:flex items-center gap-1.5 h-8 px-4 rounded-[var(--shape-small)] md3-label-medium border transition-all duration-[var(--duration-short4)]
               ${showBatch
-                ? 'bg-[var(--primary)] text-[var(--on-primary)]'
-                : 'bg-[var(--surface-container-highest)] text-[var(--on-surface-variant)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                ? 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)] border-transparent'
+                : 'bg-transparent text-[var(--on-surface-variant)] border-[var(--outline)] hover:bg-[var(--on-surface-variant)]/8'}`}
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Batch</span>
+            <Layers className="w-4 h-4" />
+            <span>Batch</span>
           </button>
 
-          {/* Desktop: My Generations */}
+          {/* Desktop: My Generations — M3 Tonal Button */}
           <button
             onClick={() => router.push('/studio/geracoes')}
-            className="hidden md:flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--secondary-container)] text-[var(--on-secondary-container)] md3-label-medium transition-all duration-[var(--duration-short4)] hover:elevation-1 state-layer"
+            className="hidden md:flex m3-btn-tonal h-10 px-4 gap-2 md3-label-large state-layer"
           >
-            <History className="w-3.5 h-3.5" />Minhas Gerações
+            <History className="w-4 h-4" />Gerações
           </button>
 
-          {/* Desktop: Subscription — M3 Filled Tonal Button */}
+          {/* Desktop: Subscription — M3 Filled Button */}
           <button
             onClick={() => setIsPricingOpen(true)}
-            className="hidden md:flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-medium transition-all duration-[var(--duration-short4)] hover:elevation-1 state-layer"
+            className="hidden md:flex m3-btn-filled h-10 px-5 gap-2 md3-label-large state-layer"
           >
-            <CreditCard className="w-3.5 h-3.5" />Assinatura
+            <CreditCard className="w-4 h-4" />Planos
           </button>
 
-          {/* Desktop: Admin — visible only for admins */}
+          {/* Desktop: Admin */}
           {isAdmin(user?.email) && (
             <button
               onClick={() => router.push('/admin')}
-              className="hidden md:flex items-center gap-1.5 h-9 px-3 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
+              className="hidden md:flex m3-btn-text h-10 gap-2 md3-label-large text-[var(--on-surface-variant)]"
             >
-              <ShieldCheck className="w-3.5 h-3.5" /><span className="hidden sm:inline">Admin</span>
+              <ShieldCheck className="w-4 h-4" />Admin
             </button>
           )}
 
-          {/* Theme Toggle — M3 Icon Button */}
+          {/* Theme Toggle — M3 Standard Icon Button */}
           <button
             onClick={toggleTheme}
             aria-label={isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro'}
-            className="flex items-center justify-center w-9 h-9 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
+            className="flex items-center justify-center w-10 h-10 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 m3-touch-target"
           >
-            {isDark ? <Sun className="w-4 h-4" aria-hidden="true" /> : <Moon className="w-4 h-4" aria-hidden="true" />}
+            {isDark ? <Sun className="w-5 h-5" aria-hidden="true" /> : <Moon className="w-5 h-5" aria-hidden="true" />}
           </button>
 
-          {/* Desktop: Logout — M3 Text Button */}
+          {/* Desktop: Logout — M3 Icon Button */}
           <button
             onClick={() => { signOut(); router.push('/'); }}
-            className="hidden md:flex items-center gap-1.5 h-9 px-3 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] md3-label-medium transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
+            aria-label="Sair"
+            className="hidden md:flex items-center justify-center w-10 h-10 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
           >
-            <LogOut className="w-3.5 h-3.5" /><span className="hidden sm:inline">Sair</span>
+            <LogOut className="w-5 h-5" />
           </button>
         </div>
       </header>
@@ -499,18 +500,17 @@ function StudioContent() {
           className={`md:hidden fixed inset-0 z-[100] flex flex-col overflow-hidden bg-[var(--surface-container-low)] transition-transform duration-[var(--duration-long2)] ease-[var(--easing-emphasized)]
             ${isSidebarOpen ? 'translate-y-0' : 'translate-y-full'}`}
         >
-          {/* Mobile Wizard Top Bar */}
-          <div className="flex-shrink-0 flex items-center justify-between h-14 px-4 border-b border-[var(--outline-variant)]/20 bg-[var(--surface-container)]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+          {/* Mobile Wizard Top Bar — M3 Top App Bar */}
+          <div className="flex-shrink-0 flex items-center justify-between h-16 px-2 border-b border-[var(--outline-variant)]/15 bg-[var(--surface-container)]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="flex items-center gap-1.5 h-10 px-2 -ml-2 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors hover:bg-[var(--on-surface-variant)]/8"
+              className="flex items-center justify-center w-12 h-12 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors hover:bg-[var(--on-surface-variant)]/8 m3-touch-target"
               aria-label="Fechar configurações"
             >
-              <ChevronLeft className="w-5 h-5" />
-              <span className="md3-label-medium">Voltar</span>
+              <ChevronLeft className="w-6 h-6" />
             </button>
-            <span className="md3-title-small text-[var(--foreground)] font-semibold">Configurações</span>
-            <div className="w-16" aria-hidden="true" />
+            <span className="md3-title-large text-[var(--foreground)]">Configurações</span>
+            <div className="w-12" aria-hidden="true" />
           </div>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
@@ -526,7 +526,7 @@ function StudioContent() {
               <button
                 onClick={handleGenerate}
                 disabled={!canGenerate}
-                className="w-full flex items-center justify-center gap-3 h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 state-layer"
+                className="w-full m3-btn-filled h-14 gap-3 md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
               >
                 {isGenerating ? (
                   <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
@@ -571,33 +571,33 @@ function StudioContent() {
 
       {/* Mobile FAB removed — generation is now handled inside the wizard footer (Sidebar step 4) */}
 
-      {/* ── Mobile Bottom Navigation — M3 Navigation Bar (hidden when wizard is open) ── */}
+      {/* ── Mobile Bottom Navigation — M3 Navigation Bar ── */}
       <nav
         aria-label="Navegação principal"
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--surface-container)] border-t border-[var(--outline-variant)]/20 transition-transform duration-[var(--duration-medium2)] ${isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--surface-container)] border-t border-[var(--outline-variant)]/15 transition-transform duration-[var(--duration-medium2)] ease-[var(--easing-standard)] ${isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        <div className="flex items-center justify-around h-20 px-2">
+        <div className="flex items-center justify-around h-20 px-1">
           {[
-            { id: 'compose', icon: <SlidersHorizontal className="w-[22px] h-[22px]" />, label: 'Compor', action: () => setIsSidebarOpen(true) },
-            { id: 'gallery', icon: <History className="w-[22px] h-[22px]" />, label: 'Histórico', action: () => router.push('/studio/geracoes') },
-            { id: 'plans', icon: <CreditCard className="w-[22px] h-[22px]" />, label: 'Planos', action: () => setIsPricingOpen(true) },
-            { id: 'logout', icon: <LogOut className="w-[22px] h-[22px]" />, label: 'Sair', action: () => { signOut(); router.push('/'); } },
+            { id: 'compose', icon: <SlidersHorizontal className="w-6 h-6" />, label: 'Compor', action: () => setIsSidebarOpen(true) },
+            { id: 'gallery', icon: <History className="w-6 h-6" />, label: 'Histórico', action: () => router.push('/studio/geracoes') },
+            { id: 'plans', icon: <CreditCard className="w-6 h-6" />, label: 'Planos', action: () => setIsPricingOpen(true) },
+            { id: 'logout', icon: <LogOut className="w-6 h-6" />, label: 'Sair', action: () => { signOut(); router.push('/'); } },
           ].map((item) => {
             const isActive = activeNav === item.id;
             return (
               <button
                 key={item.id}
                 onClick={item.action}
-                className="flex flex-col items-center gap-1 min-w-[64px] py-2 group"
+                className="flex flex-col items-center gap-1 min-w-[64px] py-2 group m3-touch-target"
               >
-                {/* M3 Active Indicator Pill */}
+                {/* M3 Active Indicator Pill — 64×32 per spec */}
                 <div className={`flex items-center justify-center w-16 h-8 rounded-[var(--shape-full)] transition-all duration-[var(--duration-medium1)] ease-[var(--easing-standard)]
-                  ${isActive ? 'bg-[var(--secondary-container)]' : 'group-hover:bg-[var(--on-surface-variant)]/8'}`}
+                  ${isActive ? 'bg-[var(--secondary-container)] animate-nav-indicator' : 'group-active:bg-[var(--on-surface-variant)]/12'}`}
                 >
                   <span className={`transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-secondary-container)]' : 'text-[var(--on-surface-variant)]'}`}>{item.icon}</span>
                 </div>
-                <span className={`md3-label-small transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-surface)]' : 'text-[var(--on-surface-variant)]'}`}>{item.label}</span>
+                <span className={`md3-label-medium transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-surface)] font-medium' : 'text-[var(--on-surface-variant)]'}`}>{item.label}</span>
               </button>
             );
           })}

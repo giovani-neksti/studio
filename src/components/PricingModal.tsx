@@ -143,10 +143,10 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
                 {/* M3 Filled / Outlined Button */}
                 <button
                   onClick={() => window.open(buildStripeUrl(plan.stripeUrl), '_blank')}
-                  className={`w-full md3-label-large h-11 rounded-[var(--shape-full)] transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] state-layer
+                  className={`w-full h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] state-layer m3-touch-target
                     ${plan.popular
-                      ? 'bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1'
-                      : 'border border-[var(--outline)]/40 text-[var(--foreground)] hover:bg-[var(--on-surface-variant)]/8'}`}
+                      ? 'm3-btn-filled'
+                      : 'm3-btn-outlined'}`}
                 >
                   Assinar {plan.name}
                 </button>
@@ -165,9 +165,8 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
                 <div className="md3-title-small text-[var(--foreground)]">R$ 3,00</div>
                 <div className="md3-label-small text-[var(--outline)]">por foto</div>
               </div>
-              {/* M3 Outlined Button */}
               <button
-                className="h-10 px-5 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-large transition-all duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8"
+                className="m3-btn-outlined h-12 px-6 md3-label-large m3-touch-target"
                 onClick={() => alert('Redirecionando para Stripe - Avulsos')}
               >
                 Comprar Avulso

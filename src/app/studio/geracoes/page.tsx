@@ -81,9 +81,9 @@ export default function GeracoesPage() {
         <button
           onClick={() => router.push('/studio')}
           aria-label="Retornar ao estúdio"
-          className="flex items-center justify-center w-10 h-10 rounded-[var(--shape-full)] hover:bg-[var(--on-surface-variant)]/8 transition-colors"
+          className="flex items-center justify-center w-12 h-12 rounded-[var(--shape-full)] hover:bg-[var(--on-surface-variant)]/8 transition-colors m3-touch-target"
         >
-          <ArrowLeft className="w-5 h-5 text-[var(--on-surface)]" aria-hidden="true" />
+          <ArrowLeft className="w-6 h-6 text-[var(--on-surface)]" aria-hidden="true" />
         </button>
         <div className="flex-1">
           <h1 className="md3-title-large font-semibold text-[var(--on-surface)]">Minhas Gerações</h1>
@@ -100,7 +100,7 @@ export default function GeracoesPage() {
         </button>
         <button
           onClick={() => router.push('/studio')}
-          className="flex items-center gap-2 h-9 px-4 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-medium hover:elevation-1 transition-all"
+          className="m3-btn-filled h-10 px-5 gap-2 md3-label-large m3-touch-target"
         >
           <Sparkles className="w-4 h-4" />
           <span className="hidden sm:inline">Nova Geração</span>
@@ -125,7 +125,7 @@ export default function GeracoesPage() {
             </p>
             <button
               onClick={() => router.push('/studio')}
-              className="mt-6 flex items-center gap-2 h-10 px-6 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large hover:elevation-1 transition-all"
+              className="mt-6 m3-btn-filled h-12 px-6 gap-2 md3-label-large m3-touch-target"
             >
               <Sparkles className="w-4 h-4" />Ir para o Estúdio
             </button>
