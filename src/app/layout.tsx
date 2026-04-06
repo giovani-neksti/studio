@@ -45,9 +45,14 @@ export const metadata: Metadata = {
   description: "Plataforma de IA especializada em fotografia de produto para joalheria, moda e calçados. Componha cenários de luxo em segundos.",
   keywords: ["IA", "fotografia de produto", "e-commerce", "joias", "moda", "calçados", "neksti"],
   icons: {
-    icon: '/logo_neksti.png',
-    apple: '/logo_neksti.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
+  manifest: '/site.webmanifest',
   openGraph: {
     title: "JoIAs by Neksti",
     description: "Fotos de estúdio profissionais geradas por IA a partir do seu celular.",
