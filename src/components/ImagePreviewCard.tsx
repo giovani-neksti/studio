@@ -186,8 +186,8 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
               <Sparkles className="absolute w-5 h-5 text-[var(--primary)]" />
             </div>
 
-            <div className="h-10 flex items-center justify-center">
-              <p aria-live="polite" aria-atomic="true" className="md3-body-medium text-[var(--foreground)]">
+            <div className="h-12 flex items-center justify-center">
+              <p aria-live="polite" aria-atomic="true" className="md3-body-large text-[var(--foreground)]">
                 {loadingMessages[messageIndex]}{dots}
               </p>
             </div>
@@ -211,10 +211,10 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
           <img src={imageUrl} alt="Resultado IA" className="w-full h-full object-cover animate-scale-in" />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-transparent">
-            <div className="w-16 h-16 rounded-[var(--shape-large)] bg-[var(--primary)]/8 border border-[var(--primary)]/15 flex items-center justify-center mb-5">
-              <Sparkles className="w-8 h-8 text-[var(--primary)]/50" />
+            <div className="w-18 h-18 rounded-[var(--shape-large)] bg-[var(--primary)]/8 border border-[var(--primary)]/15 flex items-center justify-center mb-5" style={{ width: 72, height: 72 }}>
+              <Sparkles className="w-9 h-9 text-[var(--primary)]/50" />
             </div>
-            <p className="text-[var(--on-surface-variant)] md3-body-large max-w-[260px] leading-relaxed">
+            <p className="text-[var(--on-surface-variant)] md3-title-medium max-w-[280px] leading-relaxed">
               Configure as opções e gere sua imagem profissional.
             </p>
           </div>
@@ -253,24 +253,24 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         <div className="flex gap-3 shrink-0 mb-4 md:mb-8 mt-2 w-full max-w-[500px]">
           <button
             onClick={onGenerate}
-            className="flex-1 m3-btn-outlined h-12 gap-2 md3-label-large m3-touch-target"
+            className="flex-1 m3-btn-outlined h-12 gap-2.5 md3-title-small m3-touch-target"
           >
-            <RefreshCw className="w-[18px] h-[18px]" /> Regenerar
+            <RefreshCw className="w-5 h-5" /> Regenerar
           </button>
           <button
             onClick={() => window.open(imageUrl)}
-            className="flex-1 m3-btn-filled h-12 gap-2 md3-label-large state-layer m3-touch-target"
+            className="flex-1 m3-btn-filled h-12 gap-2.5 md3-title-small state-layer m3-touch-target"
           >
-            <Download className="w-[18px] h-[18px]" /> Baixar HD
+            <Download className="w-5 h-5" /> Baixar HD
           </button>
           {canShare && (
             <button
               onClick={() => shareImage(imageUrl, `neksti_${Date.now()}.png`)}
               disabled={isSharing}
               aria-label="Compartilhar imagem no Instagram ou outras redes"
-              className="flex items-center justify-center gap-2 h-12 px-5 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 m3-touch-target"
+              className="flex items-center justify-center gap-2.5 h-12 px-5 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-title-small transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 m3-touch-target"
             >
-              <InstagramIcon className="w-[18px] h-[18px]" />
+              <InstagramIcon className="w-5 h-5" />
               <span>Postar</span>
             </button>
           )}

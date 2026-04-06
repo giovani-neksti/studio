@@ -450,10 +450,10 @@ function StudioContent() {
         <div className="flex items-center gap-1.5 md:gap-2">
           {/* M3 Badge-style credits */}
           <div
-            className="flex items-center gap-1.5 h-8 px-3 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-medium"
+            className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-large"
             style={{ color: userIsAdmin || (credits ?? 0) > 1 ? 'var(--primary)' : 'var(--error)' }}
           >
-            <Gem className="w-3.5 h-3.5" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
+            <Gem className="w-4 h-4" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
           </div>
 
           {/* Batch Mode Toggle — M3 Filter Chip */}
@@ -580,7 +580,7 @@ function StudioContent() {
               <button
                 onClick={handleGenerate}
                 disabled={!canGenerate}
-                className="w-full m3-btn-filled h-14 gap-3 md3-label-large transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
+                className="w-full m3-btn-filled h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
               >
                 {isGenerating ? (
                   <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
@@ -631,7 +631,7 @@ function StudioContent() {
         className={`md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[var(--surface-container)] border-t border-[var(--outline-variant)]/15 transition-transform duration-[var(--duration-medium2)] ease-[var(--easing-standard)] ${isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        <div className="flex items-center justify-around h-20 px-1">
+        <div className="flex items-center justify-around h-20 px-2">
           {[
             { id: 'compose', icon: <SlidersHorizontal className="w-6 h-6" />, label: 'Compor', action: () => setIsSidebarOpen(true) },
             { id: 'gallery', icon: <History className="w-6 h-6" />, label: 'Histórico', action: () => router.push('/studio/geracoes') },
@@ -651,7 +651,7 @@ function StudioContent() {
                 >
                   <span className={`transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-secondary-container)]' : 'text-[var(--on-surface-variant)]'}`}>{item.icon}</span>
                 </div>
-                <span className={`md3-label-medium transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-surface)] font-medium' : 'text-[var(--on-surface-variant)]'}`}>{item.label}</span>
+                <span className={`md3-label-large transition-colors duration-[var(--duration-medium1)] ${isActive ? 'text-[var(--on-surface)] font-medium' : 'text-[var(--on-surface-variant)]'}`}>{item.label}</span>
               </button>
             );
           })}
