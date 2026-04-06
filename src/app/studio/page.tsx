@@ -607,7 +607,7 @@ function StudioContent() {
             <div className="hidden md:flex flex-shrink-0 h-20 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container)] px-6 py-3 items-center">
               <div className="flex flex-col h-full justify-center">
                 <button onClick={() => setIsGalleryOpen(true)} className="flex items-center gap-2 mb-2 text-left group">
-                  <span className="md3-label-small text-[var(--on-surface-variant)] uppercase tracking-wider">Galeria</span>
+                  <span className="md3-label-medium text-[var(--on-surface-variant)] uppercase tracking-wider">Galeria</span>
                   <Images className="w-3.5 h-3.5 text-[var(--on-surface-variant)] group-hover:text-[var(--primary)] transition-colors" />
                 </button>
                 <div className="flex items-center gap-2">

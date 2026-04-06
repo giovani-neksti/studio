@@ -192,10 +192,10 @@ function StepProgress({ current }: { current: number }) {
       </div>
       {/* Label row */}
       <div className="flex items-center justify-between">
-        <span className="md3-label-medium text-[var(--on-surface-variant)]">
+        <span className="md3-label-large text-[var(--on-surface-variant)]">
           {current + 1}/{total}
         </span>
-        <span className="md3-label-medium text-[var(--primary)] font-medium flex items-center gap-1.5">
+        <span className="md3-label-large text-[var(--primary)] font-medium flex items-center gap-1.5">
           {STEP_ICONS[current]}
           {STEP_LABELS[current]}
         </span>
@@ -326,13 +326,13 @@ export function Sidebar({
       case 0:
         return (
           <div className="space-y-5">
-            <p className="md3-body-small text-[var(--on-surface-variant)]">
+            <p className="md3-body-medium text-[var(--on-surface-variant)]">
               Selecione a categoria do produto que você vai fotografar.
             </p>
 
             {/* Categories — M3 Filter Chip Grid */}
             <div>
-              <p className="md3-label-medium text-[var(--on-surface-variant)] mb-3 tracking-wide">Categoria do Produto</p>
+              <p className="md3-label-large text-[var(--on-surface-variant)] mb-3 tracking-wide">Categoria do Produto</p>
               <div className="grid grid-cols-2 gap-2.5">
                 {config.categories.map((cat) => {
                   const isActive = selections.category === cat;
@@ -368,13 +368,13 @@ export function Sidebar({
       case 1:
         return (
           <div className="space-y-5">
-            <p className="md3-body-small text-[var(--on-surface-variant)]">
+            <p className="md3-body-medium text-[var(--on-surface-variant)]">
               Anexe a foto do seu produto. <strong className="text-[var(--error)]">Obrigatório</strong> para continuar.
             </p>
 
             {/* Normal / Batch toggle */}
             <div>
-              <p className="md3-label-small text-[var(--on-surface-variant)] mb-2 uppercase tracking-wider">Modo de Upload</p>
+              <p className="md3-label-medium text-[var(--on-surface-variant)] mb-2 uppercase tracking-wider">Modo de Upload</p>
               <div className="flex h-11 rounded-[var(--shape-full)] border border-[var(--outline)]/40 overflow-hidden bg-[var(--surface-container)]/30 p-0.5 gap-0.5">
                 <button
                   onClick={() => showBatch && onToggleBatch?.()}
@@ -399,7 +399,7 @@ export function Sidebar({
                 </button>
               </div>
               {showBatch && (
-                <p className="md3-body-small text-[var(--on-surface-variant)] mt-2 px-1">
+                <p className="md3-body-medium text-[var(--on-surface-variant)] mt-2 px-1">
                   Gere até 10 fotos de uma só vez.
                 </p>
               )}
@@ -411,7 +411,7 @@ export function Sidebar({
                 <div className="space-y-4">
                   {((selections.batchFiles as File[])?.length > 0) ? (
                     <div className="space-y-3">
-                      <p className="md3-label-small text-[var(--on-surface-variant)] uppercase tracking-wider">Imagens Adicionadas ({(selections.batchFiles as File[]).length}/10)</p>
+                      <p className="md3-label-medium text-[var(--on-surface-variant)] uppercase tracking-wider">Imagens Adicionadas ({(selections.batchFiles as File[]).length}/10)</p>
                       <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                         {(selections.batchFiles as File[]).map((file, idx) => (
                           <div key={idx} className="relative aspect-square rounded-[var(--shape-small)] overflow-hidden border border-[var(--outline-variant)]/40 bg-[var(--surface-container-high)]">
@@ -424,7 +424,7 @@ export function Sidebar({
                         {((selections.batchFiles as File[])?.length || 0) < 10 && (
                           <button type="button" onClick={() => fileInputRef.current?.click()} className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-[var(--outline-variant)]/40 hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 text-[var(--on-surface-variant)] rounded-[var(--shape-small)] transition-colors">
                             <UploadCloud className="w-5 h-5 mb-1 text-[var(--primary)]" />
-                            <span className="text-[10px] text-[var(--primary)]">Adicionar</span>
+                            <span className="text-[11px] text-[var(--primary)]">Adicionar</span>
                           </button>
                         )}
                       </div>
@@ -437,8 +437,8 @@ export function Sidebar({
                         ${uploadError ? 'border-[var(--error)] bg-[var(--error)]/5' : 'border-[var(--outline-variant)]/50'}`}
                     >
                       <Layers className="w-8 h-8 mb-2 text-[var(--primary)]/80" aria-hidden="true" />
-                      <p className="md3-title-small text-[var(--foreground)] mb-1">Upload em Lote</p>
-                      <span className="md3-body-small text-[var(--on-surface-variant)]">Selecione até 10 fotos</span>
+                      <p className="md3-title-medium text-[var(--foreground)] mb-1">Upload em Lote</p>
+                      <span className="md3-body-medium text-[var(--on-surface-variant)]">Selecione até 10 fotos</span>
                     </button>
                   )}
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onChange={handleBatchFileUpload} tabIndex={-1} aria-hidden="true" />
@@ -450,13 +450,13 @@ export function Sidebar({
                       <div className="w-6 h-6 rounded-[var(--shape-full)] bg-green-600 flex items-center justify-center flex-shrink-0">
                         <Check className="w-3.5 h-3.5 text-white" />
                       </div>
-                      <span className="md3-body-small font-medium text-[var(--foreground)] truncate">
+                      <span className="md3-body-medium font-medium text-[var(--foreground)] truncate">
                         {selections[activeUploadKey].name}
                       </span>
                     </div>
                     <button
                       onClick={() => onSelect(activeUploadKey, null)}
-                      className="md3-label-medium text-[var(--error)] ml-2 px-3 py-1.5 rounded-[var(--shape-full)] hover:bg-[var(--error)]/10 transition-colors duration-[var(--duration-short4)] shrink-0"
+                      className="md3-label-large text-[var(--error)] ml-2 px-3 py-1.5 rounded-[var(--shape-full)] hover:bg-[var(--error)]/10 transition-colors duration-[var(--duration-short4)] shrink-0"
                     >
                       Remover
                     </button>
@@ -475,8 +475,8 @@ export function Sidebar({
                         <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
                           <Camera className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
                         </div>
-                        <span className="md3-label-large text-[var(--primary)]">Câmera</span>
-                        <span className="md3-body-small text-[var(--on-surface-variant)] mt-0.5">Tirar foto agora</span>
+                        <span className="md3-title-small text-[var(--primary)]">Câmera</span>
+                        <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Tirar foto agora</span>
                       </button>
                       <button
                         type="button"
@@ -489,8 +489,8 @@ export function Sidebar({
                         <div className="w-12 h-12 rounded-[var(--shape-full)] bg-[var(--primary)]/10 flex items-center justify-center mb-2.5">
                           <UploadCloud className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
                         </div>
-                        <span className="md3-label-large text-[var(--primary)]">Galeria</span>
-                        <span className="md3-body-small text-[var(--on-surface-variant)] mt-0.5">Escolher imagem</span>
+                        <span className="md3-title-small text-[var(--primary)]">Galeria</span>
+                        <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Escolher imagem</span>
                       </button>
                     </div>
                   </div>
@@ -502,7 +502,7 @@ export function Sidebar({
             {uploadError && !localHasUpload && (
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-[var(--shape-small)] bg-[var(--error)]/10 border border-[var(--error)]/30">
                 <X className="w-4 h-4 text-[var(--error)] flex-shrink-0" />
-                <span className="md3-body-small text-[var(--error)] font-medium">
+                <span className="md3-body-medium text-[var(--error)] font-medium">
                   Anexe pelo menos uma foto do produto para continuar.
                 </span>
               </div>
@@ -527,7 +527,7 @@ export function Sidebar({
 
             {(!hasScenarios || bgTab === 'solid') ? (
               <div>
-                <p className="md3-label-small text-[var(--on-surface-variant)] mb-2 uppercase tracking-wider">Cor de Fundo</p>
+                <p className="md3-label-medium text-[var(--on-surface-variant)] mb-2 uppercase tracking-wider">Cor de Fundo</p>
                 <div className="grid grid-cols-5 gap-2">
                   {config.solidColors.map((color) => (
                     <button
@@ -543,7 +543,7 @@ export function Sidebar({
               </div>
             ) : (
               <div>
-                <p className="md3-label-small text-[var(--on-surface-variant)] mb-2 uppercase tracking-wider">Cenário</p>
+                <p className="md3-label-medium text-[var(--on-surface-variant)] mb-2 uppercase tracking-wider">Cenário</p>
                 <div className="grid grid-cols-2 gap-2">
                   {config.scenarios?.map((scenario) => (
                     <button
@@ -563,7 +563,7 @@ export function Sidebar({
 
             {hasProps && (
               <div>
-                <label htmlFor="select-prop" className="md3-label-medium text-[var(--on-surface-variant)] mb-2.5 block tracking-wide">
+                <label htmlFor="select-prop" className="md3-label-large text-[var(--on-surface-variant)] mb-2.5 block tracking-wide">
                   Adereços de Composição
                 </label>
                 <select
@@ -610,7 +610,7 @@ export function Sidebar({
                     >
                       {isActive && <Check className="absolute top-1.5 right-1.5 w-3 h-3 text-[var(--primary)]" aria-hidden="true" />}
                       <span className="mb-1.5">{getDisplayIcon(opt.id)}</span>
-                      <span className={`md3-label-small leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)] group-hover/disp:text-[var(--primary)]'}`}>
+                      <span className={`md3-label-medium leading-tight text-center ${isActive ? 'text-[var(--primary)]' : 'text-[var(--foreground)] group-hover/disp:text-[var(--primary)]'}`}>
                         {opt.label}
                       </span>
                     </button>
@@ -636,7 +636,7 @@ export function Sidebar({
                         {opt.name}
                       </span>
                       {opt.type && (
-                        <span className="text-[10px] md:text-[11px] text-[var(--outline)] leading-tight line-clamp-2">
+                        <span className="text-[11px] md:text-[12px] text-[var(--outline)] leading-tight line-clamp-2">
                           {opt.type}
                         </span>
                       )}
@@ -652,7 +652,7 @@ export function Sidebar({
       case 4:
         return (
           <div className="space-y-3">
-            <p className="md3-body-small text-[var(--on-surface-variant)]">
+            <p className="md3-body-medium text-[var(--on-surface-variant)]">
               Opcional — deixe em branco para pular.
             </p>
 
@@ -701,7 +701,7 @@ export function Sidebar({
               <div className="pt-2 flex flex-col gap-3">
                 <div className="flex items-start gap-3 w-full">
                   <div className="flex-1">
-                    <p className="md3-label-small text-[var(--on-surface-variant)] mb-1.5">Tamanho</p>
+                    <p className="md3-label-medium text-[var(--on-surface-variant)] mb-1.5">Tamanho</p>
                     <div className="flex w-full border border-[var(--outline)]/40 rounded-[var(--shape-full)] overflow-hidden h-8">
                       {config.textSizeOptions?.map((size) => {
                         const isActive = selections.textSize === size.id || (!selections.textSize && size.id === 'medium');
@@ -721,7 +721,7 @@ export function Sidebar({
                   </div>
 
                   <div className="flex-shrink-0">
-                    <p className="md3-label-small text-[var(--on-surface-variant)] mb-1.5">Cor da Letra</p>
+                    <p className="md3-label-medium text-[var(--on-surface-variant)] mb-1.5">Cor da Letra</p>
                     <div className="flex items-center gap-1.5 h-8">
                       {config.textColorOptions?.map((color) => {
                         const isActive = selections.textColor === color.id || (!selections.textColor && color.id === 'white');
@@ -742,7 +742,7 @@ export function Sidebar({
                 </div>
 
                 <div>
-                  <p className="md3-label-small text-[var(--on-surface-variant)] mb-1.5 flex items-center gap-1">
+                  <p className="md3-label-medium text-[var(--on-surface-variant)] mb-1.5 flex items-center gap-1">
                     <AlignVerticalSpaceAround className="w-3.5 h-3.5" /> Posição na Imagem
                   </p>
                   <div className="grid grid-cols-3 gap-2">
@@ -761,7 +761,7 @@ export function Sidebar({
                         >
                           <div className={`h-1 w-5 rounded-sm ${selections.textPosition === pos.id ? 'bg-[var(--primary)]' : 'bg-[var(--foreground)]/30'}`} />
                         </div>
-                        <span className={`text-[9px] md:text-[10px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--on-surface-variant)]'}`}>
+                        <span className={`text-[10px] md:text-[11px] font-medium leading-none ${selections.textPosition === pos.id ? 'text-[var(--primary)]' : 'text-[var(--on-surface-variant)]'}`}>
                           {pos.label}
                         </span>
                       </button>
@@ -846,7 +846,7 @@ export function Sidebar({
                         {meta?.platforms.map((p) => (
                           <span
                             key={p.name}
-                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium"
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium"
                             style={{
                               backgroundColor: `${p.color}18`,
                               color: isActive ? 'var(--primary)' : p.color,
