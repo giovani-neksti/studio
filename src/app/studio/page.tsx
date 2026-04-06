@@ -161,6 +161,9 @@ function StudioContent() {
       return;
     }
 
+    // Track timestamp before generation to detect images created during this request
+    const generationStartedAt = new Date().toISOString();
+
     setIsGenerating(true);
     setImageUrl(null);
 
@@ -169,10 +172,46 @@ function StudioContent() {
       setIsSidebarOpen(false);
     }
 
+    // Recovery: if request fails (timeout/network), check if the image was generated anyway
+    const recoverFromTimeout = async (): Promise<string | null> => {
+      // Wait a bit for the server to finish saving
+      await new Promise(r => setTimeout(r, 5000));
+
+      // Poll up to 6 times (30s total) checking if a new generation appeared
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try {
+          const res = await fetch('/api/generations?page=1', {
+            headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
+          });
+          if (!res.ok) break;
+          const data = await res.json();
+          const latest = data.generations?.[0];
+          if (latest && new Date(latest.created_at) > new Date(generationStartedAt)) {
+            return latest.generated_image_url;
+          }
+        } catch { /* ignore */ }
+        await new Promise(r => setTimeout(r, 5000));
+      }
+      return null;
+    };
+
+    const refreshCredits = async () => {
+      if (userIsAdmin) return;
+      try {
+        const creditRes = await fetch(`/api/credits?userId=${user!.id}`);
+        if (creditRes.ok) {
+          const creditData = await creditRes.json();
+          setCredits(creditData.credits);
+        } else {
+          setCredits((c) => Math.max(0, (c ?? 0) - 1));
+        }
+      } catch { setCredits((c) => Math.max(0, (c ?? 0) - 1)); }
+    };
+
     let generatedSuccessfully = false;
     try {
       const cleanSelections = { ...selections };
-      
+
       if (isBatchMode) {
         // Remove file references from payload
         Object.keys(cleanSelections).forEach(k => {
@@ -186,53 +225,55 @@ function StudioContent() {
         for (let i = 0; i < bFiles.length; i++) {
           const originalFile = bFiles[i];
           const processedFile = await processImageForAI(originalFile);
-          
+
           const formData = new FormData();
           formData.append('niche', niche);
           formData.append('files', processedFile);
           formData.append('selections', JSON.stringify(cleanSelections));
 
-          const res = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
-            body: formData,
-          });
+          try {
+            const res = await fetch('/api/generate', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
+              body: formData,
+            });
 
-          let data: any;
-          const contentType = res.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            data = await res.json();
-          } else {
-            const text = await res.text();
-            console.error('[Batch] Resposta não-JSON:', res.status, text.substring(0, 300));
-            data = { error: res.status === 504 ? 'Timeout — a geração demorou demais.' : 'Erro no servidor. Tente novamente.' };
-          }
-
-          if (res.ok && data.url) {
-            setRecentImages(prev => [data.url, ...prev].slice(0, 12));
-            if (i === 0) setImageUrl(data.url);
-            setImageIndex((idx) => idx + 1);
-            successCount++;
-
-            // Credits already deducted server-side in /api/generate — just refresh display
-            if (!userIsAdmin) {
-              try {
-                const creditRes = await fetch(`/api/credits?userId=${user!.id}`);
-                if (creditRes.ok) {
-                  const creditData = await creditRes.json();
-                  setCredits(creditData.credits);
-                } else {
-                  setCredits((c) => Math.max(0, (c ?? 0) - 1));
-                }
-              } catch { setCredits((c) => Math.max(0, (c ?? 0) - 1)); }
+            let data: any;
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+              data = await res.json();
+            } else {
+              // Timeout or non-JSON — try to recover
+              console.warn(`[Batch ${i+1}] Resposta não-JSON (${res.status}), tentando recuperar...`);
+              const recoveredUrl = await recoverFromTimeout();
+              data = recoveredUrl ? { url: recoveredUrl } : { error: 'Timeout na conexão.' };
             }
-          } else {
-             console.error(`Falha ao gerar o item ${i+1}: ${data.error}`);
+
+            if ((res.ok || data.url) && data.url) {
+              setRecentImages(prev => [data.url, ...prev].slice(0, 12));
+              if (i === 0) setImageUrl(data.url);
+              setImageIndex((idx) => idx + 1);
+              successCount++;
+              await refreshCredits();
+            } else {
+              console.error(`Falha ao gerar o item ${i+1}: ${data.error}`);
+            }
+          } catch (fetchErr: any) {
+            // Network error / timeout — try recovery
+            console.warn(`[Batch ${i+1}] Erro de rede: ${fetchErr.message}, tentando recuperar...`);
+            const recoveredUrl = await recoverFromTimeout();
+            if (recoveredUrl) {
+              setRecentImages(prev => [recoveredUrl, ...prev].slice(0, 12));
+              if (i === 0) setImageUrl(recoveredUrl);
+              setImageIndex((idx) => idx + 1);
+              successCount++;
+              await refreshCredits();
+            }
           }
         }
-        
+
         if (successCount === 0) {
-          throw new Error("Nenhuma imagem em lote pôde ser gerada com sucesso.");
+          throw new Error("Nenhuma imagem pôde ser gerada. Verifique sua conexão e tente novamente.");
         }
         generatedSuccessfully = successCount > 0;
       } else {
@@ -240,7 +281,7 @@ function StudioContent() {
         const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
         if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
 
-        // Remove file refernces
+        // Remove file references
         uploadKeys.forEach(k => delete cleanSelections[k]);
         if (cleanSelections.batchFiles) delete cleanSelections.batchFiles;
         cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
@@ -256,44 +297,51 @@ function StudioContent() {
 
         formData.append('selections', JSON.stringify(cleanSelections));
 
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
-          body: formData,
-        });
+        let imageResultUrl: string | null = null;
 
-        let data: any;
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          data = await res.json();
-        } else {
-          const text = await res.text();
-          console.error('[Single] Resposta não-JSON:', res.status, text.substring(0, 300));
-          throw new Error(
-            res.status === 504
-              ? 'Timeout — a geração demorou demais. Tente novamente.'
-              : 'Erro no servidor. Tente novamente em alguns instantes.'
-          );
+        try {
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
+            body: formData,
+          });
+
+          let data: any;
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            data = await res.json();
+          } else {
+            // Timeout or non-JSON — try to recover
+            console.warn(`[Single] Resposta não-JSON (${res.status}), tentando recuperar...`);
+            const recoveredUrl = await recoverFromTimeout();
+            if (recoveredUrl) {
+              data = { url: recoveredUrl };
+            } else {
+              throw new Error('A geração demorou mais que o esperado. Verifique em "Gerações" se a imagem apareceu.');
+            }
+          }
+
+          if (!res.ok && !data.url) throw new Error(data.error || 'Erro ao comunicar com a IA.');
+          imageResultUrl = data.url;
+        } catch (fetchErr: any) {
+          // Network error (ERR_NETWORK, TypeError: Failed to fetch) — try recovery
+          if (fetchErr.message?.includes('fetch') || fetchErr.message?.includes('network') || fetchErr.name === 'TypeError') {
+            console.warn('[Single] Erro de rede, tentando recuperar...', fetchErr.message);
+            imageResultUrl = await recoverFromTimeout();
+            if (!imageResultUrl) {
+              throw new Error('Conexão interrompida. Verifique em "Gerações" se a imagem foi gerada.');
+            }
+          } else {
+            throw fetchErr;
+          }
         }
 
-        if (!res.ok) throw new Error(data.error || 'Erro ao comunicar com a IA.');
-
-        setImageUrl(data.url);
-        setRecentImages(prev => [data.url, ...prev].slice(0, 12));
-        setImageIndex((i) => i + 1);
-        generatedSuccessfully = true;
-
-        // Credits already deducted server-side in /api/generate — just refresh display
-        if (!userIsAdmin) {
-          try {
-            const creditRes = await fetch(`/api/credits?userId=${user!.id}`);
-            if (creditRes.ok) {
-              const creditData = await creditRes.json();
-              setCredits(creditData.credits);
-            } else {
-              setCredits((c) => Math.max(0, (c ?? 0) - 1));
-            }
-          } catch { setCredits((c) => Math.max(0, (c ?? 0) - 1)); }
+        if (imageResultUrl) {
+          setImageUrl(imageResultUrl);
+          setRecentImages(prev => [imageResultUrl!, ...prev].slice(0, 12));
+          setImageIndex((i) => i + 1);
+          generatedSuccessfully = true;
+          await refreshCredits();
         }
       }
 
