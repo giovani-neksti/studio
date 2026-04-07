@@ -105,8 +105,11 @@ function StudioContent() {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          // Max 1024px — servidor otimiza para IA; manter leve para upload mobile rápido
-          const MAX_SIZE = 1024;
+          // Mobile: compressão agressiva para upload rápido (iPhone fotos = 12MP+)
+          // Desktop: qualidade um pouco maior pois upload é mais rápido
+          const isMobile = window.innerWidth < 768;
+          const MAX_SIZE = isMobile ? 768 : 1024;
+          const QUALITY = isMobile ? 0.65 : 0.80;
           let width = img.width;
           let height = img.height;
 
@@ -136,7 +139,7 @@ function StudioContent() {
             } else {
               resolve(file);
             }
-          }, 'image/jpeg', 0.82);
+          }, 'image/jpeg', QUALITY);
         };
         img.onerror = () => resolve(file);
         img.src = dataUrl;

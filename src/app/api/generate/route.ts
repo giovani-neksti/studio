@@ -192,10 +192,10 @@ export async function POST(req: Request) {
       fileBuffers.push(Buffer.from(await file.arrayBuffer()));
     }
 
-    // ── 3. Upload original para o Supabase (comprimido para WebP) ──
-    let originalUrl: string;
-    try {
-      const originalWebp = await sharp(fileBuffers[0]).webp({ quality: 80 }).toBuffer();
+    // ── 3. Upload original para Supabase (fire-and-forget, não bloqueia a IA) ──
+    // Roda em paralelo com otimização + auth — economiza ~2-5s
+    const originalUploadPromise = (async (): Promise<string> => {
+      const originalWebp = await sharp(fileBuffers[0]).webp({ quality: 75 }).toBuffer();
       const fileName = `${Date.now()}_original.webp`;
       const { error: uploadError } = await supabaseAdmin.storage
         .from('uploads')
@@ -203,29 +203,20 @@ export async function POST(req: Request) {
 
       if (uploadError) {
         console.error('[Generate] Erro no upload Supabase:', uploadError);
-        throw new Error(uploadError.message);
+        return '';
       }
+      lap('original uploaded (parallel)');
+      return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
+    })();
 
-      originalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${fileName}`;
-    } catch (err: any) {
-      console.error('[Generate] Falha ao salvar imagem original:', err.message);
-      return NextResponse.json(
-        { error: 'Erro ao salvar a imagem no servidor. Tente novamente.' },
-        { status: 500 }
-      );
-    }
-
-    lap('original uploaded');
-
-    // ── 4. Otimizar imagens para a IA (resize + JPEG comprimido) ──
-    // A IA não precisa de alta resolução para entender o produto.
-    // 1024px max + JPEG 75% reduz payload em ~60-70%, acelerando muito a chamada.
-    const AI_MAX_SIZE = 1024;
+    // ── 4. Otimizar imagens para a IA (resize agressivo + JPEG comprimido) ──
+    // Gemini entende o produto com 768px — reduz payload base64 em ~50% vs 1024px
+    const AI_MAX_SIZE = 768;
     const aiBuffers: Buffer[] = [];
     for (const buf of fileBuffers) {
       const optimized = await sharp(buf)
         .resize(AI_MAX_SIZE, AI_MAX_SIZE, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 75 })
+        .jpeg({ quality: 60 })
         .toBuffer();
       aiBuffers.push(optimized);
     }
@@ -248,7 +239,7 @@ export async function POST(req: Request) {
 
     lap('prompt built');
 
-    // ── 4. Autenticação Vertex AI ──
+    // ── 6. Autenticação Vertex AI ──
     let accessToken: string | null | undefined;
     try {
       const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
@@ -386,10 +377,13 @@ export async function POST(req: Request) {
     lap('generated image saved');
 
     // ── 7. Registro no banco de dados ──
+    // Aguarda o upload original que rodou em paralelo
+    const originalUrl = await originalUploadPromise;
+
     const { error: dbError } = await supabaseAdmin.from('generations').insert({
       user_id: user.id,
       niche,
-      original_image_url: originalUrl,
+      original_image_url: originalUrl || '',
       generated_image_url: generatedUrl,
       prompt: finalPrompt,
       selections,
