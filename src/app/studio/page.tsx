@@ -287,7 +287,7 @@ function StudioContent() {
         }
         generatedSuccessfully = successCount > 0;
       } else {
-        // --- MODO SINGLE ORIGINAL ---
+        // --- MODO SINGLE — com auto-retry silencioso ---
         const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
         if (uploadKeys.length === 0) throw new Error("Envie uma foto do produto para começar");
 
@@ -297,52 +297,84 @@ function StudioContent() {
         delete cleanSelections.categories;
         cleanSelections.uploadedCategories = uploadKeys.map(k => k.replace('upload_', ''));
 
-        const formData = new FormData();
-        formData.append('niche', niche);
-
+        // Processar imagens UMA vez (reutilizadas no retry)
+        const processedFiles: File[] = [];
         for (const key of uploadKeys) {
           const originalFile = selections[key] as File;
-          const processedFile = await processImageForAI(originalFile);
-          formData.append('files', processedFile);
+          processedFiles.push(await processImageForAI(originalFile));
         }
-
-        formData.append('selections', JSON.stringify(cleanSelections));
+        const selectionsJson = JSON.stringify(cleanSelections);
 
         let imageResultUrl: string | null = null;
+        const MAX_CLIENT_RETRIES = 1; // 1 retry = 2 tentativas total
 
-        try {
-          const res = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
-            body: formData,
-          });
-
-          let data: any;
-          const contentType = res.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            data = await res.json();
-          } else {
-            // Timeout or non-JSON — try to recover
-            console.warn(`[Single] Resposta não-JSON (${res.status}), tentando recuperar...`);
-            const recoveredUrl = await recoverFromTimeout();
-            if (recoveredUrl) {
-              data = { url: recoveredUrl };
-            } else {
-              throw new Error('Está demorando mais que o normal — tente novamente, costuma ser rápido!');
-            }
+        for (let clientAttempt = 0; clientAttempt <= MAX_CLIENT_RETRIES; clientAttempt++) {
+          if (clientAttempt > 0) {
+            // Antes do retry, verificar se a imagem já foi gerada (evita cobrar 2x)
+            console.log('[Single] Verificando se imagem já existe antes do retry...');
+            const recovered = await recoverFromTimeout();
+            if (recovered) { imageResultUrl = recovered; break; }
+            console.log(`[Single] Auto-retry silencioso (tentativa ${clientAttempt + 1})`);
+            await new Promise(r => setTimeout(r, 1500));
           }
 
-          if (!res.ok && !data.url) throw new Error('Não foi dessa vez — tente novamente em alguns segundos');
-          imageResultUrl = data.url;
-        } catch (fetchErr: any) {
-          // Network error (ERR_NETWORK, TypeError: Failed to fetch) — try recovery
-          if (fetchErr.message?.includes('fetch') || fetchErr.message?.includes('network') || fetchErr.name === 'TypeError') {
-            console.warn('[Single] Erro de rede, tentando recuperar...', fetchErr.message);
-            imageResultUrl = await recoverFromTimeout();
-            if (!imageResultUrl) {
+          // Reconstruir FormData (stream consumido pelo fetch anterior)
+          const formData = new FormData();
+          formData.append('niche', niche);
+          for (const pf of processedFiles) formData.append('files', pf);
+          formData.append('selections', selectionsJson);
+
+          try {
+            const res = await fetch('/api/generate', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${session?.access_token ?? ''}` },
+              body: formData,
+            });
+
+            let data: any;
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+              data = await res.json();
+            } else {
+              console.warn(`[Single] Resposta não-JSON (${res.status}), tentando recuperar...`);
+              const recoveredUrl = await recoverFromTimeout();
+              if (recoveredUrl) {
+                data = { url: recoveredUrl };
+              } else if (clientAttempt < MAX_CLIENT_RETRIES) {
+                continue; // retry silencioso
+              } else {
+                throw new Error('Está demorando mais que o normal — tente novamente, costuma ser rápido!');
+              }
+            }
+
+            // Erros definitivos — NÃO fazer retry
+            if (res.status === 401 || res.status === 403 || res.status === 429) {
+              throw new Error(data.error || 'Erro na geração');
+            }
+
+            // Erros retryáveis (500, 502) — retry silencioso
+            if (!res.ok && !data.url) {
+              if (clientAttempt < MAX_CLIENT_RETRIES) {
+                console.warn(`[Single] Server ${res.status}, auto-retry...`);
+                continue;
+              }
+              // Última tentativa — mostrar mensagem do server (inclui info de refund)
+              throw new Error(data.refunded
+                ? 'A IA está instável no momento. Seu crédito foi devolvido — tente novamente!'
+                : data.error || 'Não foi dessa vez — tente novamente em alguns segundos');
+            }
+
+            imageResultUrl = data.url;
+            break; // sucesso
+          } catch (fetchErr: any) {
+            // Erro de rede — tentar recovery + retry
+            if (fetchErr.message?.includes('fetch') || fetchErr.message?.includes('network') || fetchErr.name === 'TypeError') {
+              console.warn('[Single] Erro de rede, tentando recuperar...', fetchErr.message);
+              imageResultUrl = await recoverFromTimeout();
+              if (imageResultUrl) break;
+              if (clientAttempt < MAX_CLIENT_RETRIES) continue;
               throw new Error('Sua conexão oscilou — tente novamente, costuma funcionar!');
             }
-          } else {
             throw fetchErr;
           }
         }

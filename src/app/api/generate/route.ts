@@ -35,19 +35,34 @@ setInterval(() => {
   }
 }, 5 * 60_000);
 
+// ── Helpers ──
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+function isRetryableError(msg: string): boolean {
+  // Non-retryable: bad request, auth, permission, not found, safety
+  if (/\[VertexAI (400|401|403|404|422)\]/.test(msg)) return false;
+  if (msg.includes('SAFETY')) return false;
+  // Retryable: rate limit, server errors, timeout, network
+  if (/\[VertexAI (429|500|502|503)\]/.test(msg)) return true;
+  if (msg.includes('Timeout') || msg.includes('Erro de rede')) return true;
+  return true; // unknown errors default to retryable
+}
+
 // ── Model Cascade — tenta modelos rápidos primeiro, fallback para mais lentos ──
 interface ModelConfig {
   modelId: string;
   location: string;
   timeoutMs: number;
+  retryTimeoutMs: number;
+  maxRetries: number;
   label: string;
 }
 
 const MODEL_CASCADE: ModelConfig[] = [
-  // Flash: ~3x mais rápido, boa qualidade para foto de produto
-  { modelId: 'gemini-2.0-flash-exp', location: 'us-central1', timeoutMs: 50_000, label: 'Flash' },
-  // Pro: qualidade máxima — fallback quando Flash falha ou não retorna imagem
-  { modelId: 'gemini-3-pro-image-preview', location: 'global', timeoutMs: 90_000, label: 'Pro' },
+  // Flash: 2 tentativas (45s + backoff + 30s ≈ 76s max)
+  { modelId: 'gemini-2.0-flash-exp', location: 'us-central1', timeoutMs: 45_000, retryTimeoutMs: 30_000, maxRetries: 1, label: 'Flash' },
+  // Pro: 1 tentativa (usa tempo restante)
+  { modelId: 'gemini-3-pro-image-preview', location: 'global', timeoutMs: 90_000, retryTimeoutMs: 0, maxRetries: 0, label: 'Pro' },
 ];
 
 // ── Vertex AI fetch (single attempt per model — cascade substitui retries) ──
@@ -281,38 +296,70 @@ export async function POST(req: Request) {
 
     let aiData: any = null;
     let usedModel = '';
+    const TIME_BUDGET_MS = 100_000; // não iniciar tentativa se >100s elapsed (maxDuration=120s)
 
     for (const model of MODEL_CASCADE) {
+      if (Date.now() - t0 > TIME_BUDGET_MS) {
+        console.warn(`[Generate] Budget de tempo esgotado (${Date.now() - t0}ms). Parando cascade.`);
+        break;
+      }
+
       const host = model.location === 'global'
         ? 'aiplatform.googleapis.com'
         : `${model.location}-aiplatform.googleapis.com`;
       const endpoint = `https://${host}/v1beta1/projects/${projectId}/locations/${model.location}/publishers/google/models/${model.modelId}:generateContent`;
 
-      try {
-        lap(`tentando ${model.label} (${model.modelId})`);
-        aiData = await callVertexAI(endpoint, accessToken, requestBody, model.timeoutMs);
+      for (let attempt = 0; attempt <= model.maxRetries; attempt++) {
+        if (attempt > 0 && Date.now() - t0 > TIME_BUDGET_MS) break;
 
-        // Verifica se retornou imagem
-        const hasImage = aiData.candidates?.[0]?.content?.parts?.some((p: any) => p.inlineData);
-        if (hasImage) {
-          usedModel = model.label;
-          lap(`${model.label} respondeu com imagem`);
-          break;
+        const timeout = attempt === 0 ? model.timeoutMs : model.retryTimeoutMs;
+
+        try {
+          lap(`tentando ${model.label} (attempt ${attempt + 1}/${model.maxRetries + 1})`);
+          aiData = await callVertexAI(endpoint, accessToken, requestBody, timeout);
+
+          // Verifica se retornou imagem
+          const hasImage = aiData.candidates?.[0]?.content?.parts?.some((p: any) => p.inlineData);
+          if (hasImage) {
+            usedModel = model.label;
+            lap(`${model.label} respondeu com imagem`);
+            break;
+          }
+
+          // Modelo respondeu mas sem imagem — safety block não faz retry
+          const reason = aiData.candidates?.[0]?.finishReason || 'sem motivo';
+          console.warn(`[Generate] ${model.label} respondeu sem imagem (${reason}).`);
+          aiData = null;
+          break; // sem imagem = próximo modelo
+        } catch (err: any) {
+          console.warn(`[Generate] ${model.label} attempt ${attempt + 1} falhou: ${err.message}`);
+          aiData = null;
+
+          if (!isRetryableError(err.message) || attempt >= model.maxRetries) break;
+
+          // Backoff exponencial: 1s, 2s
+          const backoffMs = 1000 * Math.pow(2, attempt);
+          lap(`backoff ${backoffMs}ms antes de retry`);
+          await sleep(backoffMs);
         }
-
-        // Modelo respondeu mas sem imagem
-        const reason = aiData.candidates?.[0]?.finishReason || 'sem motivo';
-        console.warn(`[Generate] ${model.label} respondeu sem imagem (${reason}). Tentando próximo...`);
-        aiData = null;
-      } catch (err: any) {
-        console.warn(`[Generate] ${model.label} falhou: ${err.message}. Tentando próximo...`);
-        aiData = null;
       }
+
+      if (aiData) break; // sucesso — sai do cascade
     }
 
     if (!aiData) {
+      // Reembolsar crédito — geração falhou completamente
+      if (creditDeducted && userId) {
+        try {
+          await supabaseAdmin.rpc('refund_credit', { user_id: userId });
+          creditDeducted = false;
+          console.log(`[Generate] Crédito reembolsado para ${userId}`);
+        } catch (refundErr: any) {
+          console.error(`[Generate] Falha ao reembolsar crédito: ${refundErr.message}`);
+        }
+      }
       return NextResponse.json(
-        { error: 'Todos os modelos de IA falharam. Tente novamente em alguns instantes.' },
+        { error: 'A IA está instável no momento. Seu crédito foi devolvido — tente novamente!', refunded: true },
         { status: 502 }
       );
     }
@@ -323,20 +370,28 @@ export async function POST(req: Request) {
     const generatedBase64 = generatedPart?.inlineData?.data;
 
     if (!generatedBase64) {
-      // Check if there's a safety block
+      // Reembolsar crédito — IA não gerou imagem
+      if (creditDeducted && userId) {
+        try {
+          await supabaseAdmin.rpc('refund_credit', { user_id: userId });
+          creditDeducted = false;
+          console.log(`[Generate] Crédito reembolsado (sem imagem) para ${userId}`);
+        } catch (e: any) { console.error(`[Generate] Falha refund: ${e.message}`); }
+      }
+
       const blockReason = aiData.candidates?.[0]?.finishReason;
       const safetyRatings = aiData.candidates?.[0]?.safetyRatings;
       console.error('[Generate] IA não retornou imagem. finishReason:', blockReason, 'safety:', JSON.stringify(safetyRatings));
 
       if (blockReason === 'SAFETY') {
         return NextResponse.json(
-          { error: 'A IA bloqueou esta imagem por filtros de segurança. Tente com outra foto ou configuração.' },
+          { error: 'A IA bloqueou esta imagem por filtros de segurança. Tente com outra foto.', refunded: true },
           { status: 422 }
         );
       }
 
       return NextResponse.json(
-        { error: 'A IA não conseguiu gerar a imagem. Tente novamente com outra configuração.' },
+        { error: 'A IA não gerou a imagem desta vez. Seu crédito foi devolvido — tente novamente!', refunded: true },
         { status: 422 }
       );
     }
@@ -403,11 +458,23 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[Generate] Erro:", error.message);
 
-    // Return the specific error message from our improved error handling
+    // Reembolsar crédito se foi cobrado mas a geração não completou
+    let refunded = false;
+    if (creditDeducted && userId) {
+      try {
+        await supabaseAdmin.rpc('refund_credit', { user_id: userId });
+        refunded = true;
+        console.log(`[Generate] Crédito reembolsado (catch) para ${userId}`);
+      } catch (e: any) { console.error(`[Generate] Falha refund (catch): ${e.message}`); }
+    }
+
     const userMessage = error.message?.startsWith('[VertexAI')
       ? 'Erro no serviço de IA. Tente novamente em alguns instantes.'
       : error.message || 'Erro inesperado. Tente novamente.';
 
-    return NextResponse.json({ error: userMessage }, { status: 500 });
+    return NextResponse.json({
+      error: refunded ? `${userMessage} Seu crédito foi devolvido.` : userMessage,
+      refunded,
+    }, { status: 500 });
   }
 }
