@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { getNicheConfig, nicheConfigs, NicheKey } from '@/lib/niche-config';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,6 +38,13 @@ function StudioContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showBatch, setShowBatch] = useState(false);
   const [resetKey, setResetKey] = useState(0);
+
+  // Toast amigável — substitui alert() com mensagens que não assustam o cliente
+  const [toast, setToast] = useState<{ message: string; type: 'info' | 'warn' } | null>(null);
+  const showToast = useCallback((message: string, type: 'info' | 'warn' = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5000);
+  }, []);
 
   // Auth guard — redirect to /auth if not logged in
   useEffect(() => {
@@ -153,7 +160,7 @@ function StudioContent() {
   const handleGenerate = async () => {
     if (!credits || credits <= 0) return;
     if (!hasUpload) {
-      alert("Por favor, selecione uma categoria e faça o upload de pelo menos uma imagem do produto.");
+      showToast("Envie uma foto do produto para começar", "info");
       return;
     }
 
@@ -161,7 +168,7 @@ function StudioContent() {
     const requiredCredits = isBatchMode ? selections.batchFiles.length : 1;
 
     if (!userIsAdmin && (credits ?? 0) < requiredCredits) {
-      alert(`Créditos insuficientes. Você tem ${credits} mas precisa de ${requiredCredits}.`);
+      showToast("Seus créditos acabaram — veja nossos planos para continuar criando", "warn");
       return;
     }
 
@@ -276,13 +283,13 @@ function StudioContent() {
         }
 
         if (successCount === 0) {
-          throw new Error("Nenhuma imagem pôde ser gerada. Verifique sua conexão e tente novamente.");
+          throw new Error("Não foi dessa vez — tente novamente em alguns segundos");
         }
         generatedSuccessfully = successCount > 0;
       } else {
         // --- MODO SINGLE ORIGINAL ---
         const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
-        if (uploadKeys.length === 0) throw new Error("Nenhuma imagem encontrada");
+        if (uploadKeys.length === 0) throw new Error("Envie uma foto do produto para começar");
 
         // Remove file references and UI-only keys
         uploadKeys.forEach(k => delete cleanSelections[k]);
@@ -321,11 +328,11 @@ function StudioContent() {
             if (recoveredUrl) {
               data = { url: recoveredUrl };
             } else {
-              throw new Error('A geração demorou mais que o esperado. Verifique em "Gerações" se a imagem apareceu.');
+              throw new Error('Está demorando mais que o normal — tente novamente, costuma ser rápido!');
             }
           }
 
-          if (!res.ok && !data.url) throw new Error(data.error || 'Erro ao comunicar com a IA.');
+          if (!res.ok && !data.url) throw new Error('Não foi dessa vez — tente novamente em alguns segundos');
           imageResultUrl = data.url;
         } catch (fetchErr: any) {
           // Network error (ERR_NETWORK, TypeError: Failed to fetch) — try recovery
@@ -333,7 +340,7 @@ function StudioContent() {
             console.warn('[Single] Erro de rede, tentando recuperar...', fetchErr.message);
             imageResultUrl = await recoverFromTimeout();
             if (!imageResultUrl) {
-              throw new Error('Conexão interrompida. Verifique em "Gerações" se a imagem foi gerada.');
+              throw new Error('Sua conexão oscilou — tente novamente, costuma funcionar!');
             }
           } else {
             throw fetchErr;
@@ -352,7 +359,7 @@ function StudioContent() {
     } catch (e: any) {
       console.error('Erro na geração:', e);
       if (!generatedSuccessfully) {
-        alert("Houve um erro ao gerar a imagem: " + e.message);
+        showToast(e.message || 'Não foi dessa vez — tente novamente em alguns segundos', 'warn');
         if (window.innerWidth < 768) setIsSidebarOpen(true);
       }
     } finally {
@@ -681,6 +688,23 @@ function StudioContent() {
       {nicheMenuOpen && <div aria-hidden="true" className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
       <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} themeClass={config.themeClass} />
       <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} userEmail={user?.email} userId={user?.id} />
+
+      {/* Toast M3 Snackbar — mensagens amigáveis sem parecer erro */}
+      {toast && (
+        <div
+          onClick={() => setToast(null)}
+          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[200] w-[calc(100%-2rem)] max-w-md animate-fade-up cursor-pointer"
+        >
+          <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-xl backdrop-blur-sm ${
+            toast.type === 'warn'
+              ? 'bg-[var(--surface-container-highest)] border border-[var(--outline-variant)]/30'
+              : 'bg-[var(--surface-container-highest)] border border-[var(--outline-variant)]/30'
+          }`}>
+            <span className="text-lg shrink-0">{toast.type === 'warn' ? '💡' : '✨'}</span>
+            <p className="md3-body-medium text-[var(--on-surface)] flex-1">{toast.message}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
