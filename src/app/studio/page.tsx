@@ -9,7 +9,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon, Layers } from 'lucide-react';
+import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon, Layers, Plus } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { isAdmin } from '@/lib/admin';
@@ -364,6 +364,11 @@ function StudioContent() {
     setImageUrl(null);
   };
 
+  const handleNewImage = () => {
+    setSelections({ bgTab: 'solid', displayTab: 'expositor' });
+    setImageUrl(null);
+  };
+
   const canGenerate = !isGenerating && (credits ?? 0) > 0 && hasUpload && !creditsLoading;
 
   const liveSelections = { ...selections };
@@ -573,19 +578,28 @@ function StudioContent() {
         {/* Main Content */}
         <main className="flex-1 flex flex-col bg-transparent relative min-h-0 overflow-hidden">
 
-          {/* Desktop Generate Button — M3 Filled Button */}
+          {/* Desktop Generate / New Image Button — M3 Filled Button */}
           <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">
-              <button
-                onClick={handleGenerate}
-                disabled={!canGenerate}
-                className="w-full m3-btn-filled h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
-              >
-                {isGenerating ? (
-                  <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
-                ) : (
-                  <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
-                )}
-              </button>
+              {imageUrl && !isGenerating ? (
+                <button
+                  onClick={handleNewImage}
+                  className="w-full m3-btn-outlined h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] state-layer"
+                >
+                  <Plus className="w-5 h-5" /><span>Nova Imagem</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleGenerate}
+                  disabled={!canGenerate}
+                  className="w-full m3-btn-filled h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
+                >
+                  {isGenerating ? (
+                    <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
+                  ) : (
+                    <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
+                  )}
+                </button>
+              )}
             </div>
 
           {/* Preview Area */}

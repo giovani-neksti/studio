@@ -248,30 +248,30 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         </div>
       )}
 
-      {/* ACTION BUTTONS — M3 Button Group */}
+      {/* ACTION BUTTONS — M3 Button Group (equal-width grid) */}
       {imageUrl && (
-        <div className="flex gap-3 shrink-0 mb-4 md:mb-8 mt-2 w-full max-w-[500px]">
+        <div className={`grid shrink-0 mb-4 md:mb-8 mt-2 w-full max-w-[500px] gap-3 ${canShare ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <button
             onClick={onGenerate}
-            className="flex-1 m3-btn-outlined h-12 gap-2.5 md3-title-small m3-touch-target"
+            className="m3-btn-outlined h-12 gap-2 md3-title-small m3-touch-target justify-center"
           >
-            <RefreshCw className="w-5 h-5" /> Regenerar
+            <RefreshCw className="w-4.5 h-4.5 shrink-0" /> <span className="truncate">Regenerar</span>
           </button>
           <button
             onClick={() => window.open(imageUrl)}
-            className="flex-1 m3-btn-filled h-12 gap-2.5 md3-title-small state-layer m3-touch-target"
+            className="m3-btn-filled h-12 gap-2 md3-title-small state-layer m3-touch-target justify-center"
           >
-            <Download className="w-5 h-5" /> Baixar HD
+            <Download className="w-4.5 h-4.5 shrink-0" /> <span className="truncate">Baixar HD</span>
           </button>
           {canShare && (
             <button
               onClick={() => shareImage(imageUrl, `neksti_${Date.now()}.png`)}
               disabled={isSharing}
               aria-label="Compartilhar imagem no Instagram ou outras redes"
-              className="flex items-center justify-center gap-2.5 h-12 px-5 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-title-small transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 m3-touch-target"
+              className="flex items-center justify-center gap-2 h-12 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-title-small transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 m3-touch-target"
             >
-              <InstagramIcon className="w-5 h-5" />
-              <span>Postar</span>
+              <InstagramIcon className="w-4.5 h-4.5 shrink-0" />
+              <span className="truncate">Postar</span>
             </button>
           )}
         </div>
