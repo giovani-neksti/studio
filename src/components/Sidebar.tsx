@@ -63,6 +63,7 @@ interface SidebarProps {
   hasUpload?: boolean;
   showBatch?: boolean;
   onToggleBatch?: () => void;
+  resetKey?: number;
 }
 
 // Font preview mapping for typography selector
@@ -216,6 +217,7 @@ export function Sidebar({
   hasUpload,
   showBatch,
   onToggleBatch,
+  resetKey,
 }: SidebarProps) {
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -223,6 +225,14 @@ export function Sidebar({
 
   const [currentStep, setCurrentStep] = useState(0);
   const [animDir, setAnimDir]         = useState<'fwd' | 'bck'>('fwd');
+
+  // Reset wizard to step 1 when parent triggers "Nova Imagem"
+  useEffect(() => {
+    if (resetKey && resetKey > 0) {
+      setAnimDir('bck');
+      setCurrentStep(0);
+    }
+  }, [resetKey]);
 
   const bgTab      = selections.bgTab      || 'solid';
   const displayTab = selections.displayTab || 'expositor';

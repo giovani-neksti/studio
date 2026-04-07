@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Download, RefreshCw, Check, Camera, Layers, Maximize, Palette, Box } from 'lucide-react';
+import { Sparkles, Download, RefreshCw, Check, Camera, Layers, Maximize, Palette, Box, Plus } from 'lucide-react';
 import { useShareImage } from '@/hooks/useShareImage';
 import { ShareToast } from './ShareToast';
 
@@ -19,6 +19,7 @@ interface ImagePreviewCardProps {
   selections: Record<string, string>;
   niche: string;
   onGenerate: () => void;
+  onNewImage?: () => void;
   livePrompt?: string;
 }
 
@@ -136,7 +137,7 @@ function buildQualityChecks(selections: Record<string, string>, niche: string): 
   return checks;
 }
 
-export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, onGenerate, livePrompt }: ImagePreviewCardProps) {
+export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, onGenerate, onNewImage, livePrompt }: ImagePreviewCardProps) {
   const [dots, setDots] = useState('');
   const [messageIndex, setMessageIndex] = useState(0);
   const { canShare, isSharing, shareImage, toast, dismissToast } = useShareImage();
@@ -275,6 +276,16 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
             </button>
           )}
         </div>
+      )}
+
+      {/* Mobile "Nova Imagem" — resets and goes to step 1 */}
+      {imageUrl && onNewImage && (
+        <button
+          onClick={onNewImage}
+          className="md:hidden shrink-0 m3-btn-outlined !flex w-full max-w-[500px] h-12 gap-2 md3-title-small m3-touch-target justify-center mb-6"
+        >
+          <Plus className="w-4.5 h-4.5 shrink-0" /> <span>Nova Imagem</span>
+        </button>
       )}
 
       <ShareToast message={toast} onDismiss={dismissToast} />
