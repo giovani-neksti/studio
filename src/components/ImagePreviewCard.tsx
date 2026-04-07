@@ -253,13 +253,13 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
         <div className={`grid shrink-0 mb-4 md:mb-8 mt-2 w-full max-w-[500px] gap-3 ${canShare ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <button
             onClick={onGenerate}
-            className="m3-btn-outlined h-12 gap-2 md3-title-small m3-touch-target justify-center"
+            className="m3-btn-outlined !flex w-full h-12 gap-2 md3-title-small m3-touch-target justify-center"
           >
             <RefreshCw className="w-4.5 h-4.5 shrink-0" /> <span className="truncate">Regenerar</span>
           </button>
           <button
             onClick={() => window.open(imageUrl)}
-            className="m3-btn-filled h-12 gap-2 md3-title-small state-layer m3-touch-target justify-center"
+            className="m3-btn-filled !flex w-full h-12 gap-2 md3-title-small state-layer m3-touch-target justify-center"
           >
             <Download className="w-4.5 h-4.5 shrink-0" /> <span className="truncate">Baixar HD</span>
           </button>
@@ -268,7 +268,7 @@ export function ImagePreviewCard({ isGenerating, imageUrl, selections, niche, on
               onClick={() => shareImage(imageUrl, `neksti_${Date.now()}.png`)}
               disabled={isSharing}
               aria-label="Compartilhar imagem no Instagram ou outras redes"
-              className="flex items-center justify-center gap-2 h-12 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-title-small transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 m3-touch-target"
+              className="flex items-center justify-center w-full gap-2 h-12 rounded-[var(--shape-full)] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white md3-title-small transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 m3-touch-target"
             >
               <InstagramIcon className="w-4.5 h-4.5 shrink-0" />
               <span className="truncate">Postar</span>
