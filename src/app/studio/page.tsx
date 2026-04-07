@@ -532,7 +532,7 @@ function StudioContent() {
         <div className={`hidden md:flex flex-col min-h-0 bg-[var(--surface-container-low)] transition-all duration-[var(--duration-medium4)] ease-[var(--easing-emphasized)] shrink-0
           ${isSidebarOpen ? 'w-[320px] xl:w-[360px] border-r border-[var(--outline-variant)]/20' : 'w-0 overflow-hidden'}`}
         >
-          <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} resetKey={resetKey} />
+          <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} resetKey={resetKey} onClose={() => setIsSidebarOpen(false)} />
         </div>
 
         {/* Desktop Sidebar Toggle — M3 Icon Button */}
@@ -577,7 +577,7 @@ function StudioContent() {
           </div>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} resetKey={resetKey} />
+            <Sidebar config={config} niche={niche} selections={selections} onSelect={handleSelect} onGenerate={handleGenerate} canGenerate={canGenerate} isGenerating={isGenerating} hasUpload={hasUpload} showBatch={showBatch} onToggleBatch={() => setShowBatch(!showBatch)} resetKey={resetKey} onClose={() => setIsSidebarOpen(false)} />
           </div>
         </div>
 

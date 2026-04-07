@@ -64,6 +64,7 @@ interface SidebarProps {
   showBatch?: boolean;
   onToggleBatch?: () => void;
   resetKey?: number;
+  onClose?: () => void;
 }
 
 // Font preview mapping for typography selector
@@ -218,6 +219,7 @@ export function Sidebar({
   showBatch,
   onToggleBatch,
   resetKey,
+  onClose,
 }: SidebarProps) {
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -987,16 +989,14 @@ export function Sidebar({
       <div className="flex-shrink-0 w-full z-10 px-4 py-3.5 border-t border-[var(--outline-variant)]/20 bg-[var(--surface-container-low)]">
         <div className="flex items-center gap-3">
 
-          {/* Back button — M3 Icon Button Standard */}
-          {currentStep > 0 && (
-            <button
-              onClick={goBack}
-              className="flex items-center justify-center h-12 w-12 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 flex-shrink-0 active:scale-95 m3-touch-target"
-              aria-label="Passo anterior"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-          )}
+          {/* Back button — M3 Icon Button Standard (step 0 = fechar wizard) */}
+          <button
+            onClick={currentStep === 0 ? onClose : goBack}
+            className="flex items-center justify-center h-12 w-12 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 flex-shrink-0 active:scale-95 m3-touch-target"
+            aria-label={currentStep === 0 ? 'Voltar à área de trabalho' : 'Passo anterior'}
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
 
           {/* Action button — M3 Filled / Tonal */}
           <div className="flex-1 min-w-0">
