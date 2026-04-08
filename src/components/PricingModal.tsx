@@ -113,20 +113,21 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
                 )}
 
                 <h3 className={`md3-title-large font-semibold mb-1.5 ${plan.popular ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>{plan.name}</h3>
-                <p className="text-[var(--on-surface-variant)] md3-body-small mb-5 min-h-[40px]">{plan.description}</p>
+                <p className="text-[var(--on-surface-variant)] md3-body-small mb-4 min-h-[40px]">{plan.description}</p>
 
-                <div className="mb-2">
-                  <span className="text-3xl font-bold text-[var(--foreground)]">R$ {plan.price}</span>
-                  <span className="text-[var(--outline)] md3-body-medium"> /mês</span>
+                {/* Credits hero — destaque principal */}
+                <div className="bg-[var(--secondary-container)] rounded-[var(--shape-medium)] p-4 text-center mb-4">
+                  <span className="text-4xl font-bold text-[var(--on-secondary-container)]">{plan.credits}</span>
+                  <div className="md3-label-large text-[var(--on-secondary-container)]/80 mt-1">fotos profissionais</div>
+                  <div className="md3-label-small text-[var(--primary)] mt-1">
+                    apenas {plan.perCredit} por foto
+                  </div>
                 </div>
 
-                {/* Credits highlight — M3 Tonal Surface */}
-                <div className="bg-[var(--secondary-container)] rounded-[var(--shape-medium)] p-3 text-center mb-5">
-                  <span className="md3-label-large text-[var(--on-secondary-container)]">{plan.credits}</span>
-                  <span className="text-[var(--on-secondary-container)]/70 md3-body-small"> fotos mensais</span>
-                  <div className="md3-label-small text-[var(--primary)] mt-1">
-                    ({plan.perCredit} a foto)
-                  </div>
+                {/* Preço secundário */}
+                <div className="mb-4 text-center">
+                  <span className="md3-body-large text-[var(--on-surface-variant)]">R$ {plan.price}</span>
+                  <span className="text-[var(--outline)] md3-body-small"> /mês</span>
                 </div>
 
                 <div className="space-y-2.5 mb-6 flex-1">
