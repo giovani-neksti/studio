@@ -26,30 +26,30 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
     {
       name: 'Essentials',
       price: '400',
-      credits: '200',
-      perCredit: 'R$ 2,00',
+      credits: '100',
+      perCredit: 'R$ 4,00',
       description: 'Ideal para validar produtos com imagens profissionais.',
-      features: ['200 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'R$ 2,00 por foto'],
+      features: ['100 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'R$ 4,00 por foto'],
       popular: false,
       stripeUrl: 'https://buy.stripe.com/28E9AL0NDck7aiDcRJ6Ri07',
     },
     {
       name: 'Professional',
       price: '600',
-      credits: '400',
-      perCredit: 'R$ 1,50',
+      credits: '240',
+      perCredit: 'R$ 2,50',
       description: 'O dobro de fotos por uma fração do preço. O favorito.',
-      features: ['400 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'Prioridade na fila de geração', 'R$ 1,50 por foto'],
+      features: ['240 fotos mensais', 'Acesso a todos os nichos', 'Formatos sociais', 'Prioridade na fila de geração', 'R$ 2,50 por foto'],
       popular: true,
       stripeUrl: 'https://buy.stripe.com/cNi6oz67Xbg34YjeZR6Ri06',
     },
     {
       name: 'Premium',
       price: '1.000',
-      credits: '1.000',
-      perCredit: 'R$ 1,00',
+      credits: '500',
+      perCredit: 'R$ 2,00',
       description: 'Para alto volume de postagens e franqueados.',
-      features: ['1.000 fotos mensais', 'Suporte dedicado via WhatsApp', 'Acesso a todos os nichos', 'Acesso Antecipado a Modelos', 'R$ 1,00 por foto'],
+      features: ['500 fotos mensais', 'Suporte dedicado via WhatsApp', 'Acesso a todos os nichos', 'Acesso Antecipado a Modelos', 'R$ 2,00 por foto'],
       popular: false,
       stripeUrl: 'https://buy.stripe.com/28E5kv0ND83R3Ufg3V6Ri08',
     }
@@ -154,25 +154,6 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
             ))}
           </div>
 
-          {/* Credits Extra — M3 Outlined Card */}
-          <div className="mt-10 max-w-2xl mx-auto border border-[var(--outline-variant)]/30 bg-[var(--surface-container-low)] rounded-[var(--shape-large)] p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h4 className="md3-title-small text-[var(--foreground)]">Créditos Avulsos</h4>
-              <p className="text-[var(--on-surface-variant)] md3-body-small">Acabou a cota do mês? Compre unidades avulsas.</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="md3-title-small text-[var(--foreground)]">R$ 3,00</div>
-                <div className="md3-label-small text-[var(--outline)]">por foto</div>
-              </div>
-              <button
-                className="m3-btn-outlined h-12 px-6 md3-label-large m3-touch-target"
-                onClick={() => alert('Redirecionando para Stripe - Avulsos')}
-              >
-                Comprar Avulso
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
