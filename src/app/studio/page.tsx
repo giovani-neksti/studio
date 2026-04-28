@@ -94,7 +94,7 @@ function StudioContent() {
     });
   };
 
-  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_') && !!selections[k]) 
+  const hasUpload = Object.keys(selections).some(k => k.startsWith('upload_') && !!selections[k])
     || (showBatch && selections.batchFiles && selections.batchFiles.length > 0);
   const hasPreviewContent = isGenerating || !!imageUrl;
 
@@ -159,7 +159,7 @@ function StudioContent() {
 
   const handleGenerate = async () => {
     const isBatchMode = showBatch && selections.batchFiles && selections.batchFiles.length > 0;
-    const requiredTokens = isBatchMode ? selections.batchFiles.length * 5 : 1; 
+    const requiredTokens = isBatchMode ? selections.batchFiles.length * 5 : 1;
 
     if (!userIsAdmin && (credits ?? 0) < 1) {
       showToast("Seus tokens acabaram — faça uma recarga para continuar criando", "warn");
@@ -248,7 +248,7 @@ function StudioContent() {
               data = await res.json();
             } else {
               // Timeout or non-JSON — try to recover
-              console.warn(`[Batch ${i+1}] Resposta não-JSON (${res.status}), tentando recuperar...`);
+              console.warn(`[Batch ${i + 1}] Resposta não-JSON (${res.status}), tentando recuperar...`);
               const recoveredUrl = await recoverFromTimeout();
               data = recoveredUrl ? { url: recoveredUrl } : { error: 'Timeout na conexão.' };
             }
@@ -260,11 +260,11 @@ function StudioContent() {
               successCount++;
               await refreshCredits();
             } else {
-              console.error(`Falha ao gerar o item ${i+1}: ${data.error}`);
+              console.error(`Falha ao gerar o item ${i + 1}: ${data.error}`);
             }
           } catch (fetchErr: any) {
             // Network error / timeout — try recovery
-            console.warn(`[Batch ${i+1}] Erro de rede: ${fetchErr.message}, tentando recuperar...`);
+            console.warn(`[Batch ${i + 1}] Erro de rede: ${fetchErr.message}, tentando recuperar...`);
             const recoveredUrl = await recoverFromTimeout();
             if (recoveredUrl) {
               setRecentImages(prev => [recoveredUrl, ...prev].slice(0, 12));
@@ -619,27 +619,27 @@ function StudioContent() {
 
           {/* Desktop Generate / New Image Button — M3 Filled Button */}
           <div className="hidden md:block flex-shrink-0 px-6 pt-5 pb-2 z-10">
-              {imageUrl && !isGenerating ? (
-                <button
-                  onClick={handleNewImage}
-                  className="w-full m3-btn-outlined h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] state-layer"
-                >
-                  <Plus className="w-5 h-5" /><span>Nova Imagem</span>
-                </button>
-              ) : (
-                <button
-                  onClick={handleGenerate}
-                  disabled={!canGenerate}
-                  className="w-full m3-btn-filled h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
-                >
-                  {isGenerating ? (
-                    <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
-                  ) : (
-                    <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
-                  )}
-                </button>
-              )}
-            </div>
+            {imageUrl && !isGenerating ? (
+              <button
+                onClick={handleNewImage}
+                className="w-full m3-btn-outlined h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] state-layer"
+              >
+                <Plus className="w-5 h-5" /><span>Nova Imagem</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleGenerate}
+                disabled={!canGenerate}
+                className="w-full m3-btn-filled h-14 gap-3 md3-title-small transition-all duration-[var(--duration-medium2)] ease-[var(--easing-standard)] disabled:opacity-[0.38] disabled:cursor-not-allowed state-layer"
+              >
+                {isGenerating ? (
+                  <><div className="w-5 h-5 rounded-full border-2 border-current/30 border-t-current animate-spin" /><span>Gerando...</span></>
+                ) : (
+                  <><Sparkles className="w-5 h-5" /><span>{hasUpload ? 'Gerar Imagem' : 'Envie uma foto primeiro'}</span></>
+                )}
+              </button>
+            )}
+          </div>
 
           {/* Preview Area */}
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -721,11 +721,10 @@ function StudioContent() {
           onClick={() => setToast(null)}
           className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[200] w-[calc(100%-2rem)] max-w-md animate-fade-up cursor-pointer"
         >
-          <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-xl backdrop-blur-sm ${
-            toast.type === 'warn'
+          <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-xl backdrop-blur-sm ${toast.type === 'warn'
               ? 'bg-[var(--surface-container-highest)] border border-[var(--outline-variant)]/30'
               : 'bg-[var(--surface-container-highest)] border border-[var(--outline-variant)]/30'
-          }`}>
+            }`}>
             <span className="text-lg shrink-0">{toast.type === 'warn' ? '💡' : '✨'}</span>
             <p className="md3-body-medium text-[var(--on-surface)] flex-1">{toast.message}</p>
           </div>
