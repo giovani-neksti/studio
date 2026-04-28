@@ -62,7 +62,7 @@ interface TrendPoint {
   generations: number;
 }
 
-interface NichePoint {
+interface EngagementPoint {
   name: string;
   value: number;
 }
@@ -207,7 +207,7 @@ export default function AdminPage() {
   const [togglingShowcase, setTogglingShowcase] = useState<string | null>(null);
   const [showcaseFilter, setShowcaseFilter] = useState<'all' | 'showcase' | 'not_showcase'>('all');
   const [trends, setTrends] = useState<TrendPoint[]>([]);
-  const [nicheData, setNicheData] = useState<NichePoint[]>([]);
+  const [engagementData, setEngagementData] = useState<EngagementPoint[]>([]);
   const { canShare, shareImage, toast, dismissToast } = useShareImage();
 
   const showcaseCount = generations.filter(g => g.showcase).length;
@@ -260,7 +260,7 @@ export default function AdminPage() {
         setGenerations(data.recentGenerations);
         setErrorLogs(data.errorLogs);
         if (data.trends) setTrends(data.trends);
-        if (data.nicheData) setNicheData(data.nicheData);
+        if (data.engagementData) setEngagementData(data.engagementData);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -535,17 +535,17 @@ export default function AdminPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Niche Distribution Chart */}
+                  {/* Engagement Segmentation Chart */}
                   <div className="p-6 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
                     <h3 className="md3-title-medium font-semibold mb-6 flex items-center gap-2">
-                      <ImageIcon className="w-5 h-5 text-[var(--primary)]" />
-                      Distribuição por Nicho (Volume Histórico)
+                      <Users className="w-5 h-5 text-[var(--primary)]" />
+                      Segmentação de Engajamento (Usuários)
                     </h3>
                     <div className="h-[250px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <RePieChart>
                           <Pie
-                            data={nicheData}
+                            data={engagementData}
                             cx="50%"
                             cy="50%"
                             innerRadius={60}
@@ -553,14 +553,14 @@ export default function AdminPage() {
                             paddingAngle={5}
                             dataKey="value"
                           >
-                            {nicheData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={['#6750A4', '#7c5cbf', '#9575cd', '#b39ddb'][index % 4]} />
+                            {engagementData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={['#c62828', '#1565c0', '#2e7d32'][index % 3]} />
                             ))}
                           </Pie>
                           <Tooltip 
                              contentStyle={{ backgroundColor: 'var(--surface-container-high)', border: '1px solid var(--outline-variant)', borderRadius: '12px' }}
                           />
-                          <Legend />
+                          <Legend verticalAlign="bottom" height={36} />
                         </RePieChart>
                       </ResponsiveContainer>
                     </div>

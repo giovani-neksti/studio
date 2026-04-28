@@ -101,14 +101,21 @@ export async function GET(req: Request) {
       ...trends[date]
     }));
 
-    // 5. Niche Distribution
-    const nicheCount: Record<string, number> = {};
-    processedGenerations.forEach(g => {
-      const n = g.niche || 'jewelry';
-      nicheCount[n] = (nicheCount[n] || 0) + 1;
+    // 5. User Segmentation (Engagement)
+    const segments = {
+      'Inativos (0)': 0,
+      'Exploradores (1-10)': 0,
+      'Heavy Users (10+)': 0
+    };
+
+    processedProfiles.forEach(p => {
+      const gens = p.total_generations || 0;
+      if (gens === 0) segments['Inativos (0)']++;
+      else if (gens <= 10) segments['Exploradores (1-10)']++;
+      else segments['Heavy Users (10+)']++;
     });
 
-    const nicheData = Object.entries(nicheCount).map(([name, value]) => ({ name, value }));
+    const engagementData = Object.entries(segments).map(([name, value]) => ({ name, value }));
 
     const { data: errorLogs } = await supabaseAdmin
       .from('error_logs')
@@ -137,7 +144,7 @@ export async function GET(req: Request) {
         totalErrors: errorLogs?.length ?? 0,
       },
       trends: trendData,
-      nicheData,
+      engagementData,
       users: processedProfiles.slice(0, 100),
       recentGenerations: processedGenerations.slice(0, 50),
       errorLogs: errorLogs ?? [],
