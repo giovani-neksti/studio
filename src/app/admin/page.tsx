@@ -405,7 +405,7 @@ export default function AdminPage() {
             )}
           </button>
           <div className="w-10 h-10 rounded-full bg-[var(--primary)] flex items-center justify-center text-white font-bold">
-            {user.email?.[0].toUpperCase()}
+            {user?.email?.[0].toUpperCase() || 'A'}
           </div>
         </div>
       </nav>
