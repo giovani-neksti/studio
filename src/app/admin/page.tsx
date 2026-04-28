@@ -338,6 +338,27 @@ export default function AdminPage() {
     }
   };
 
+  const updateTokens = async () => {
+    if (!session?.access_token || !editingTokens) return;
+    setIsUpdatingTokens(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId: editingTokens.id, tokens: editingTokens.tokens })
+      });
+      if (res.ok) {
+        setUsers(prev => prev.map(u => u.id === editingTokens.id ? { ...u, tokens: editingTokens.tokens } : u));
+        setEditingTokens(null);
+      }
+    } finally {
+      setIsUpdatingTokens(false);
+    }
+  };
+
   const filteredUsers = users.filter(
     (u) =>
       u.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -673,7 +694,6 @@ export default function AdminPage() {
                         {/* Showcase star toggle */}
                         <button
                           onClick={() => toggleShowcase(g.id, !!g.showcase)}
-                          disabled={togglingShowcase === g.id}
                           className={`absolute top-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg ${
                             g.showcase
                               ? 'bg-amber-500 text-white hover:bg-amber-600'
