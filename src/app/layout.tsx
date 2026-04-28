@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Roboto, Roboto_Mono } from "next/font/google";
+import { Montserrat, Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -8,27 +8,23 @@ import "./globals.css";
 
 const GA_ID = "G-5S3354R4FJ";
 
-// M3 Typography: Roboto — the canonical Google / Material Design typeface
-const roboto = Roboto({
+// NEKSTI Typography
+const inter = Inter({
   variable: "--font-sans",
-  subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
   display: "swap",
 });
 
-// Roboto also used for headings (Google uses the same family with different weights)
-const robotoHeading = Roboto({
+const montserrat = Montserrat({
   variable: "--font-serif",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
-// Roboto Mono for technical/code data — Google's monospace companion
-const robotoMono = Roboto_Mono({
+const jetbrains = JetBrains_Mono({
   variable: "--font-mono",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500"],
+  subsets: ["latin"],
   display: "swap",
 });
 
@@ -83,7 +79,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${roboto.variable} ${robotoHeading.variable} ${robotoMono.variable} antialiased h-full`}>
+      <body className={`${inter.variable} ${montserrat.variable} ${jetbrains.variable} antialiased h-full`}>
         <ErrorBoundary>
           <GlobalErrorCatcher />
           <AuthProvider>{children}</AuthProvider>

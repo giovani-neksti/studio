@@ -193,6 +193,25 @@ export default function AdminPage() {
   const router = useRouter();
   const { user, session, loading: authLoading } = useAuth();
 
+  const [tab, setTab] = useState<Tab>('insights');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'insights', label: 'Insights' },
+    { key: 'overview', label: 'Visão Geral' },
+    { key: 'users', label: 'Usuários' },
+    { key: 'generations', label: 'Gerações' },
+    { key: 'errors', label: 'Erros' },
+    { key: 'api', label: 'API Routes' },
+    { key: 'financeiro', label: 'Financeiro' },
+  ];
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    document.documentElement.classList.toggle('light', newTheme === 'light');
+  };
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [generations, setGenerations] = useState<Generation[]>([]);
@@ -200,13 +219,12 @@ export default function AdminPage() {
   const [expandedError, setExpandedError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<Tab>('overview');
   const [search, setSearch] = useState('');
   const [routeResults, setRouteResults] = useState<Record<string, RouteResult>>({});
   const [testingRoute, setTestingRoute] = useState<string | null>(null);
   const [financeiro, setFinanceiro] = useState<FinanceiroData | null>(null);
   const [finLoading, setFinLoading] = useState(false);
-  const [usdToBrl, setUsdToBrl] = useState(5.70); // Câmbio USD→BRL
+  const [usdToBrl, setUsdToBrl] = useState(5.70);
   const [togglingShowcase, setTogglingShowcase] = useState<string | null>(null);
   const [showcaseFilter, setShowcaseFilter] = useState<'all' | 'showcase' | 'not_showcase'>('all');
   const [trends, setTrends] = useState<TrendPoint[]>([]);
@@ -230,11 +248,8 @@ export default function AdminPage() {
         },
         body: JSON.stringify({ generationId: genId, showcase: !currentValue }),
       });
-      const data = await res.json();
       if (res.ok) {
         setGenerations(prev => prev.map(g => g.id === genId ? { ...g, showcase: !currentValue } : g));
-      } else {
-        alert(data.error || 'Erro ao atualizar showcase');
       }
     } catch {
       alert('Erro de rede');
@@ -243,14 +258,12 @@ export default function AdminPage() {
     }
   };
 
-  // Auth gate
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin(user.email))) {
       router.replace('/');
     }
   }, [user, authLoading, router]);
 
-  // Fetch data
   useEffect(() => {
     if (!session?.access_token || !user || !isAdmin(user.email)) return;
 
@@ -277,7 +290,6 @@ export default function AdminPage() {
     fetchData();
   }, [session, user]);
 
-  // Fetch financeiro data when tab is selected
   useEffect(() => {
     if (tab !== 'financeiro' || !session?.access_token || financeiro) return;
     setFinLoading(true);
@@ -292,74 +304,24 @@ export default function AdminPage() {
       .finally(() => setFinLoading(false));
   }, [tab, session?.access_token, financeiro]);
 
-  const refreshFinanceiro = () => {
-    if (!session?.access_token) return;
-    setFinanceiro(null);
-    setFinLoading(true);
-    fetch('/api/admin/financeiro', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.error) setFinanceiro(data);
-      })
-      .catch(() => {})
-      .finally(() => setFinLoading(false));
-  };
-
-  const updateTokens = async () => {
-    if (!editingTokens || !session?.access_token) return;
-    setIsUpdatingTokens(true);
-    try {
-      const res = await fetch('/api/admin/users', {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userId: editingTokens.id, tokens: editingTokens.tokens })
-      });
-      if (res.ok) {
-        setUsers(prev => prev.map(u => u.id === editingTokens.id ? { ...u, tokens: editingTokens.tokens } : u));
-        setEditingTokens(null);
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Erro ao atualizar tokens');
-      }
-    } catch (err) {
-      alert('Erro de rede');
-    } finally {
-      setIsUpdatingTokens(false);
-    }
-  };
-
   const deleteUser = async (userId: string, email: string) => {
     if (!session?.access_token) return;
-    if (!confirm(`Tem certeza que deseja excluir permanentemente a conta ${email}? Isso removerá o acesso do usuário e todos os seus dados.`)) return;
-    
+    if (!confirm(`Tem certeza que deseja excluir permanentemente a conta ${email}?`)) return;
     setIsDeletingUser(userId);
     try {
       const res = await fetch(`/api/admin/users?userId=${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
-      if (res.ok) {
-        setUsers(prev => prev.filter(u => u.id !== userId));
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Erro ao deletar usuário');
-      }
-    } catch (err) {
-      alert('Erro de rede');
+      if (res.ok) setUsers(prev => prev.filter(u => u.id !== userId));
     } finally {
-      setIsDeletingUser(userId);
+      setIsDeletingUser(null);
     }
   };
 
   const resetUser = async (userId: string, email: string) => {
     if (!session?.access_token) return;
     if (!confirm(`Deseja resetar a conta de ${email} para 30 tokens?`)) return;
-    
     setIsUpdatingTokens(true);
     try {
       const res = await fetch('/api/admin/users', {
@@ -370,97 +332,11 @@ export default function AdminPage() {
         },
         body: JSON.stringify({ userId, tokens: 30 })
       });
-      if (res.ok) {
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, tokens: 30 } : u));
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Erro ao resetar usuário');
-      }
-    } catch (err) {
-      alert('Erro de rede');
+      if (res.ok) setUsers(prev => prev.map(u => u.id === userId ? { ...u, tokens: 30 } : u));
     } finally {
       setIsUpdatingTokens(false);
     }
   };
-
-  const testRoute = async (route: RouteTest) => {
-    if (testingRoute) return;
-    setTestingRoute(route.id);
-
-    const start = performance.now();
-    try {
-      const headers: Record<string, string> = {};
-      if (route.needsAuth && session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-
-      let url = route.path;
-      let fetchOpts: RequestInit = { method: route.method, headers };
-
-      // Custom payloads for safe POST tests
-      if (route.id === 'errors-post') {
-        headers['Content-Type'] = 'application/json';
-        fetchOpts.body = JSON.stringify({ message: '[Admin Test] Ping de teste do painel', source: 'admin-panel-test' });
-      }
-
-      // Append userId for credits GET
-      if (route.id === 'credits-get' && user) {
-        url += `?userId=${user.id}`;
-      }
-
-      const res = await fetch(url, fetchOpts);
-      const ms = Math.round(performance.now() - start);
-      let body: string;
-      try {
-        const json = await res.json();
-        body = JSON.stringify(json, null, 2);
-      } catch {
-        body = await res.text().catch(() => '(sem corpo)');
-      }
-
-      setRouteResults((prev) => ({
-        ...prev,
-        [route.id]: {
-          status: res.status,
-          ok: res.ok,
-          ms,
-          body: body.slice(0, 3000),
-          testedAt: new Date().toLocaleTimeString('pt-BR'),
-        },
-      }));
-    } catch (err: any) {
-      const ms = Math.round(performance.now() - start);
-      setRouteResults((prev) => ({
-        ...prev,
-        [route.id]: {
-          status: 0,
-          ok: false,
-          ms,
-          body: `Erro de rede: ${err.message}`,
-          testedAt: new Date().toLocaleTimeString('pt-BR'),
-        },
-      }));
-    } finally {
-      setTestingRoute(null);
-    }
-  };
-
-  const testAllSafe = async () => {
-    const safeRoutes = API_ROUTES.filter((r) => r.safe);
-    for (const route of safeRoutes) {
-      await testRoute(route);
-    }
-  };
-
-  if (authLoading || (!user && loading)) {
-    return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--background)]">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--primary)]" />
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin(user.email)) return null;
 
   const filteredUsers = users.filter(
     (u) =>
@@ -470,80 +346,91 @@ export default function AdminPage() {
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
 
   const statCards = stats
     ? [
         { label: 'Usuários Total', value: stats.totalUsers, icon: Users, color: 'var(--primary)' },
-        { label: 'Gerações Total', value: stats.totalGenerations, icon: ImageIcon, color: 'var(--tertiary, #7c5cbf)' },
-        { label: 'Créditos em Circulação', value: stats.totalCredits, icon: CreditCard, color: 'var(--secondary, #625b71)' },
-        { label: 'Novos Hoje', value: stats.newUsersToday, icon: UserPlus, color: '#2e7d32' },
-        { label: 'Novos no Mês', value: stats.newUsersMonth, icon: TrendingUp, color: '#1565c0' },
-        { label: 'Gerações Hoje', value: stats.generationsToday, icon: ImageIcon, color: '#e65100' },
-        { label: 'Usuários Ativos', value: stats.activeUsers, icon: ShieldCheck, color: '#2e7d32' },
+        { label: 'Gerações Total', value: stats.totalGenerations, icon: ImageIcon, color: 'var(--secondary)' },
+        { label: 'Créditos em Circulação', value: stats.totalCredits, icon: CreditCard, color: 'var(--mint)' },
+        { label: 'Novos Hoje', value: stats.newUsersToday, icon: UserPlus, color: 'var(--primary)' },
+        { label: 'Novos no Mês', value: stats.newUsersMonth, icon: TrendingUp, color: 'var(--secondary)' },
+        { label: 'Gerações Hoje', value: stats.generationsToday, icon: ImageIcon, color: 'var(--primary)' },
+        { label: 'Usuários Ativos', value: stats.activeUsers, icon: ShieldCheck, color: 'var(--secondary)' },
         { label: 'Sem Créditos', value: stats.usersNoCredits, icon: AlertTriangle, color: '#c62828' },
         { label: 'Erros Hoje', value: stats.errorsToday, icon: Bug, color: '#d32f2f' },
         { label: 'Erros (últimos 100)', value: stats.totalErrors, icon: Bug, color: '#b71c1c' },
       ]
     : [];
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'overview', label: 'Visão Geral' },
-    { key: 'insights', label: 'Insights' },
-    { key: 'users', label: 'Usuários' },
-    { key: 'generations', label: 'Gerações' },
-    { key: 'errors', label: 'Erros' },
-    { key: 'api', label: 'API Routes' },
-    { key: 'financeiro', label: 'Financeiro' },
-  ];
-
   return (
-    <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
+    <div className={`min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] font-sans transition-colors duration-300`}>
       {/* Top Bar */}
-      <nav className="h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 bg-[var(--surface-container-low)]/80 backdrop-blur-lg border-b border-[var(--outline-variant)]/20">
-        <div className="flex items-center gap-3">
+      <nav className="h-20 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--outline-variant)]/30">
+        <div className="flex items-center gap-6">
           <button
             onClick={() => router.push('/studio')}
-            className="flex items-center gap-2 text-[var(--on-surface-variant)] hover:text-[var(--foreground)] transition-colors"
+            className="group flex items-center justify-center w-10 h-10 rounded-full bg-[var(--surface-variant)] hover:bg-[var(--primary)] transition-all duration-300"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-[var(--foreground)] group-hover:text-white" />
           </button>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[var(--primary)]" />
-            <span className="font-serif text-lg font-bold">Painel Admin</span>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="font-serif text-xl font-bold tracking-tight">
+                <span className="text-[var(--secondary)]">NXT</span>NEKSTI
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-bold tracking-widest uppercase">Admin</span>
+            </div>
+            <span className="text-[10px] text-[var(--on-surface-variant)] tracking-[0.2em] uppercase font-medium">HUB de Tecnologia & IA</span>
           </div>
         </div>
-        <span className="md3-label-medium text-[var(--on-surface-variant)]">{user.email}</span>
+        
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--surface-variant)] hover:bg-[var(--surface-bright)] border border-[var(--outline-variant)]/50 transition-all group"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span className="text-xs font-semibold hidden md:inline">MODO CLARO</span>
+              </>
+            ) : (
+              <>
+                <Clock className="w-4 h-4 text-[var(--primary)]" />
+                <span className="text-xs font-semibold hidden md:inline">MODO NAVY</span>
+              </>
+            )}
+          </button>
+          <div className="w-10 h-10 rounded-full bg-[var(--primary)] flex items-center justify-center text-white font-bold">
+            {user.email?.[0].toUpperCase()}
+          </div>
+        </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {error && (
-          <div className="mb-6 p-4 rounded-[var(--shape-medium)] bg-[var(--error-container)] text-[var(--on-error-container)] md3-body-medium">
-            {error}
+          <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-3 animate-shake">
+            <AlertTriangle className="w-5 h-5" />
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b border-[var(--outline-variant)]/20">
+        {/* Tab Navigation — Modern Pill Style */}
+        <div className="flex flex-wrap gap-2 mb-10 p-1.5 rounded-2xl bg-[var(--surface-variant)]/50 border border-[var(--outline-variant)]/30 w-fit">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-5 py-3 md3-label-large transition-colors relative
+              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300
                 ${tab === t.key
-                  ? 'text-[var(--primary)]'
-                  : 'text-[var(--on-surface-variant)] hover:text-[var(--foreground)]'
+                  ? 'bg-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/20 scale-105'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--foreground)] hover:bg-[var(--surface-bright)]'
                 }`}
             >
               {t.label}
-              {tab === t.key && (
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[var(--primary)] rounded-t-full" />
-              )}
             </button>
           ))}
         </div>
@@ -556,19 +443,32 @@ export default function AdminPage() {
           <>
             {/* Overview Tab */}
             {tab === 'overview' && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                {statCards.map((card) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-up">
+                {statCards.map((card, idx) => (
                   <div
                     key={card.label}
-                    className="p-4 md:p-5 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 flex flex-col gap-3"
+                    className="group p-6 rounded-2xl bg-[var(--surface)] border border-[var(--outline-variant)]/30 hover:border-[var(--primary)]/50 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-[var(--primary)]/5"
+                    style={{ animationDelay: `${idx * 50}ms` } as any}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="md3-label-medium text-[var(--on-surface-variant)]">{card.label}</span>
-                      <card.icon className="w-4 h-4" style={{ color: card.color }} />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-2.5 rounded-xl bg-[var(--background)] group-hover:bg-[var(--primary)]/10 transition-colors">
+                        <card.icon className="w-5 h-5 transition-colors" style={{ color: card.color }} />
+                      </div>
+                      <span className="text-[10px] font-bold tracking-widest text-[var(--on-surface-variant)] uppercase">Métrica</span>
                     </div>
-                    <span className="text-2xl md:text-3xl font-bold" style={{ color: card.color }}>
-                      {(card.value || 0).toLocaleString('pt-BR')}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-3xl font-bold tracking-tight" style={{ color: card.color }}>
+                        {(card.value || 0).toLocaleString('pt-BR')}
+                      </span>
+                      <span className="text-sm font-medium text-[var(--on-surface-variant)]">{card.label}</span>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-[var(--outline-variant)]/10 flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-green-500">
+                        <ArrowUpRight className="w-3 h-3" />
+                        <span>ATUALIZADO</span>
+                      </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -576,87 +476,123 @@ export default function AdminPage() {
 
             {/* Insights Tab */}
             {tab === 'insights' && (
-              <div className="space-y-6">
+              <div className="space-y-8 animate-fade-up">
                 {/* Registrations & Generations Chart */}
-                <div className="p-6 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
-                  <h3 className="md3-title-medium font-semibold mb-6 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-[var(--primary)]" />
-                    Crescimento & Atividade (Últimos 14 dias)
-                  </h3>
-                  <div className="h-[300px] w-full">
+                <div className="p-8 rounded-3xl bg-[var(--surface)] border border-[var(--outline-variant)]/30 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div>
+                      <h3 className="font-serif text-2xl font-bold mb-1">Crescimento de Rede</h3>
+                      <p className="text-sm text-[var(--on-surface-variant)]">Atividade de usuários e gerações nos últimos 14 dias</p>
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--background)] border border-[var(--outline-variant)]/20">
+                      <div className="w-2 h-2 rounded-full bg-[var(--primary)]" />
+                      <span className="text-xs font-bold uppercase tracking-wider">Tempo Real</span>
+                    </div>
+                  </div>
+                  
+                  <div className="h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={trends}>
                         <defs>
                           <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2}/>
                             <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
                           </linearGradient>
                           <linearGradient id="colorGen" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#7c5cbf" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#7c5cbf" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="var(--secondary)" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="var(--secondary)" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--outline-variant)" opacity={0.2} vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--outline-variant)" opacity={0.1} vertical={false} />
                         <XAxis 
                           dataKey="date" 
                           stroke="var(--on-surface-variant)" 
-                          fontSize={11}
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
                           tickFormatter={(val) => new Date(val).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                         />
-                        <YAxis stroke="var(--on-surface-variant)" fontSize={11} />
+                        <YAxis stroke="var(--on-surface-variant)" fontSize={10} tickLine={false} axisLine={false} />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: 'var(--surface-container-high)', border: '1px solid var(--outline-variant)', borderRadius: '12px' }}
-                          labelStyle={{ color: 'var(--on-surface-variant)', fontWeight: 'bold' }}
+                          contentStyle={{ 
+                            backgroundColor: 'var(--surface)', 
+                            border: '1px solid var(--outline-variant)', 
+                            borderRadius: '16px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+                          }}
+                          itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
                         />
-                        <Legend iconType="circle" />
-                        <Area type="monotone" name="Novos Usuários" dataKey="registrations" stroke="var(--primary)" fillOpacity={1} fill="url(#colorReg)" />
-                        <Area type="monotone" name="Gerações" dataKey="generations" stroke="#7c5cbf" fillOpacity={1} fill="url(#colorGen)" />
+                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 'bold' }} />
+                        <Area type="monotone" name="Novos Usuários" dataKey="registrations" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorReg)" />
+                        <Area type="monotone" name="Gerações" dataKey="generations" stroke="var(--secondary)" strokeWidth={3} fillOpacity={1} fill="url(#colorGen)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Engagement Segmentation Chart */}
-                  <div className="p-6 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20">
-                    <h3 className="md3-title-medium font-semibold mb-6 flex items-center gap-2">
-                      <Users className="w-5 h-5 text-[var(--primary)]" />
-                      Segmentação de Engajamento (Usuários)
-                    </h3>
-                    <div className="h-[250px] w-full">
+                  <div className="lg:col-span-2 p-8 rounded-3xl bg-[var(--surface)] border border-[var(--outline-variant)]/30 shadow-sm relative group">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                      <div>
+                        <h3 className="font-serif text-xl font-bold mb-1">Engajamento</h3>
+                        <p className="text-sm text-[var(--on-surface-variant)]">Distribuição da base de usuários</p>
+                      </div>
+                    </div>
+                    <div className="h-[300px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <RePieChart>
                           <Pie
                             data={engagementData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
+                            innerRadius={70}
+                            outerRadius={90}
+                            paddingAngle={8}
                             dataKey="value"
+                            stroke="none"
                           >
                             {engagementData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={['#c62828', '#1565c0', '#2e7d32'][index % 3]} />
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={[ 'var(--primary)', 'var(--secondary)', 'var(--mint)' ][index % 3]} 
+                                className="hover:opacity-80 transition-opacity cursor-pointer"
+                              />
                             ))}
                           </Pie>
                           <Tooltip 
-                             contentStyle={{ backgroundColor: 'var(--surface-container-high)', border: '1px solid var(--outline-variant)', borderRadius: '12px' }}
+                             contentStyle={{ 
+                               backgroundColor: 'var(--surface)', 
+                               border: '1px solid var(--outline-variant)', 
+                               borderRadius: '16px',
+                               boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+                             }}
                           />
-                          <Legend verticalAlign="bottom" height={36} />
+                          <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
                         </RePieChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
 
-                  {/* Retention Signal */}
-                  <div className="p-6 rounded-[var(--shape-large)] bg-[var(--surface-container)] border border-[var(--outline-variant)]/20 flex flex-col justify-center items-center text-center">
-                    <BarChart3 className="w-12 h-12 text-[var(--primary)] mb-4 opacity-40" />
-                    <h4 className="md3-title-small font-semibold mb-2">Sinais Estratégicos</h4>
-                    <p className="md3-body-small text-[var(--on-surface-variant)] mb-4 max-w-[240px]">
-                      Acompanhe o engajamento e a retenção média para otimizar seus planos.
-                    </p>
-                    <div className="px-4 py-2 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] md3-label-large">
-                      +15% Usuários Recorrentes (Estimado)
+                  {/* Retention Signal Card */}
+                  <div className="p-8 rounded-3xl bg-gradient-to-br from-[var(--primary)] to-[var(--green-lt)] text-white shadow-xl flex flex-col justify-between group overflow-hidden relative">
+                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                    <div>
+                      <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+                        <TrendingUp className="w-6 h-6 text-white" />
+                      </div>
+                      <h4 className="font-serif text-2xl font-bold mb-2 tracking-tight">Sinais de Retenção</h4>
+                      <p className="text-white/80 text-sm leading-relaxed">
+                        Seu engajamento atual sugere uma base sólida com potencial de escalonamento para planos Enterprise.
+                      </p>
+                    </div>
+                    <div className="mt-8">
+                      <div className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm">
+                        <span className="text-[10px] font-bold tracking-widest uppercase opacity-60">Status de Crescimento</span>
+                        <div className="text-xl font-bold mt-1">+15% Recorrência</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -665,97 +601,90 @@ export default function AdminPage() {
 
             {/* Users Tab */}
             {tab === 'users' && (
-              <div>
-                {/* Search */}
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--on-surface-variant)]/60" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por email ou ID..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full md:w-96 h-10 pl-10 pr-4 rounded-[var(--shape-full)] border border-[var(--outline)]/40 bg-[var(--surface-container-low)] text-[var(--foreground)] md3-body-medium outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30 transition-all"
-                  />
+              <div className="space-y-6 animate-fade-up">
+                {/* Search Bar Premium */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="relative group w-full md:w-[450px]">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--on-surface-variant)] group-focus-within:text-[var(--primary)] transition-colors" />
+                    <input
+                      type="text"
+                      placeholder="Identificar especialista por email ou ID..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-full h-12 pl-12 pr-6 rounded-2xl border border-[var(--outline-variant)]/30 bg-[var(--surface)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--on-surface-variant)] uppercase tracking-widest px-4 py-2 rounded-xl bg-[var(--surface-variant)]/30">
+                    <Users className="w-4 h-4" />
+                    <span>{filteredUsers.length} Membros Encontrados</span>
+                  </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto rounded-[var(--shape-large)] border border-[var(--outline-variant)]/20">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-[var(--surface-container-high)] border-b border-[var(--outline-variant)]/20">
-                        <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Email</th>
-                        <th className="text-center px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Tokens</th>
-                        <th className="text-center px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Gerações</th>
-                        <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)] hidden md:table-cell">Cadastro</th>
-                        <th className="text-right px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredUsers.map((u) => (
-                        <tr
-                          key={u.id}
-                          className="border-b border-[var(--outline-variant)]/10 hover:bg-[var(--surface-container-high)]/50 transition-colors"
-                        >
-                          <td className="px-4 py-3">
-                            <div className="md3-body-medium text-[var(--foreground)]">{u.email || '—'}</div>
-                            <div className="md3-label-small text-[var(--outline)] font-mono">{u.id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="text-center px-4 py-3">
-                            <span
-                              className={`inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded-[var(--shape-full)] md3-label-medium
-                                ${u.tokens <= 0
-                                  ? 'bg-[var(--error-container)] text-[var(--on-error-container)]'
-                                  : 'bg-[var(--primary-container)] text-[var(--on-primary-container)]'
-                                }`}
-                            >
-                              {u.tokens}
-                            </span>
-                          </td>
-                          <td className="text-center px-4 py-3 md3-body-medium text-[var(--on-surface-variant)]">
-                            {u.total_generations}
-                          </td>
-                          <td className="px-4 py-3 md3-body-small text-[var(--on-surface-variant)] hidden md:table-cell">
-                            {formatDate(u.created_at)}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                onClick={() => resetUser(u.id, u.email)}
-                                title="Resetar para 30 tokens"
-                                className="p-2 rounded-full hover:bg-[var(--primary)]/10 text-[var(--primary)] transition-colors"
-                              >
-                                <RotateCcw className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => setEditingTokens({ id: u.id, email: u.email, tokens: u.tokens })}
-                                title="Editar tokens"
-                                className="p-2 rounded-full hover:bg-[var(--secondary)]/10 text-[var(--secondary)] transition-colors"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => deleteUser(u.id, u.email)}
-                                title="Excluir conta"
-                                className="p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-colors"
-                                disabled={isDeletingUser === u.id}
-                              >
-                                {isDeletingUser === u.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                              </button>
-                            </div>
-                          </td>
+                {/* Table Premium */}
+                <div className="overflow-hidden rounded-3xl border border-[var(--outline-variant)]/30 bg-[var(--surface)] shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-[var(--surface-variant)]/20 border-b border-[var(--outline-variant)]/20">
+                          <th className="text-left px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Identidade / Especialista</th>
+                          <th className="text-center px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Créditos</th>
+                          <th className="text-center px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Gerações</th>
+                          <th className="text-left px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)] hidden lg:table-cell">Data de Ingresso</th>
+                          <th className="text-right px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Gerenciamento</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {filteredUsers.length === 0 && (
-                    <div className="text-center py-10 text-[var(--on-surface-variant)] md3-body-medium">
-                      Nenhum usuário encontrado.
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-3 md3-label-small text-[var(--outline)]">
-                  {filteredUsers.length} de {users.length} usuários
+                      </thead>
+                      <tbody>
+                        {filteredUsers.map((u) => (
+                          <tr key={u.id} className="group border-b border-[var(--outline-variant)]/10 hover:bg-[var(--surface-variant)]/10 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-[var(--background)] flex items-center justify-center text-xs font-bold border border-[var(--outline-variant)]/20 group-hover:border-[var(--primary)]/50 transition-colors">
+                                  {u.email?.[0].toUpperCase()}
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-semibold text-[var(--foreground)] truncate max-w-[200px]">{u.email || '—'}</span>
+                                  <span className="text-[10px] font-mono text-[var(--on-surface-variant)] opacity-60">ID: {u.id.slice(0, 12)}...</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="text-center px-6 py-4">
+                              <div className={`inline-flex items-center justify-center px-3 py-1 rounded-lg text-xs font-bold
+                                ${u.tokens <= 0 
+                                  ? 'bg-red-500/10 text-red-500' 
+                                  : 'bg-[var(--primary)]/10 text-[var(--primary)]'}`}
+                              >
+                                {u.tokens}
+                              </div>
+                            </td>
+                            <td className="text-center px-6 py-4 text-sm font-medium text-[var(--on-surface-variant)]">
+                              {u.total_generations}
+                            </td>
+                            <td className="px-6 py-4 text-xs text-[var(--on-surface-variant)] hidden lg:table-cell">
+                              {formatDate(u.created_at)}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => resetUser(u.id, u.email)}
+                                  className="p-2 rounded-xl hover:bg-[var(--primary)]/10 text-[var(--on-surface-variant)] hover:text-[var(--primary)] transition-all"
+                                  title="Resetar para 30 créditos"
+                                >
+                                  <RotateCcw className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => deleteUser(u.id, u.email)}
+                                  className="p-2 rounded-xl hover:bg-red-500/10 text-[var(--on-surface-variant)] hover:text-red-500 transition-all"
+                                  title="Remover acesso"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

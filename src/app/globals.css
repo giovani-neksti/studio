@@ -54,97 +54,82 @@
 /* ============================================
    MATERIAL DESIGN 3 — Full Token System
    ============================================ */
+/* ============================================
+   NEKSTI BRAND — Official Identity
+   ============================================ */
 :root {
-  /* ── M3 Surface / Neutral — Neksti Navy base ── */
-  --background: #0A1320;
-  --foreground: #E4E8ED;
-  --surface: #0D1B2E;
+  /* ── NEKSTI NAVY (Dominant) ── */
+  --background: #0D1B2E;
+  --foreground: #F8F7F4;
+  --surface: #122240;
   --surface-dim: #0A1320;
-  --surface-bright: #2A3A4E;
-  --surface-variant: #1E3048;
-  --on-surface-variant: #B0BEC5;
-  --outline: #607D8B;
-  --outline-variant: #1E3048;
+  --surface-bright: #1A2D4A;
+  --surface-variant: #233752;
+  --on-surface-variant: #AAAA9E;
+  --outline: #6B6B60;
+  --outline-variant: #233752;
 
-  /* ── M3 Surface Container Hierarchy — Neksti Navy scale ── */
-  --surface-container-lowest: #060E18;
-  --surface-container-low: #0D1B2E;
-  --surface-container: #122240;
-  --surface-container-high: #1A2D4A;
-  --surface-container-highest: #233752;
+  /* ── NEKSTI GREEN (Action) ── */
+  --primary: #2D6E45;
+  --on-primary: #F8F7F4;
+  --primary-container: #3D8A58;
+  --on-primary-container: #F8F7F4;
 
-  /* ── Primary Tonal — Neksti Green ── */
-  --primary: #6DBF8A;
-  --on-primary: #003920;
-  --primary-container: #2D6E45;
-  --on-primary-container: #C8F7D5;
-
-  /* ── Secondary Tonal — Neksti Navy Lighter ── */
-  --secondary: #8FA8C4;
+  /* ── NEKSTI MINT (Highlights) ── */
+  --secondary: #6DBF8A;
   --on-secondary: #0D1B2E;
-  --secondary-container: #1A2D4A;
-  --on-secondary-container: #CDDAE8;
+  --secondary-container: #2D6E45;
+  --on-secondary-container: #F8F7F4;
 
-  /* ── Tertiary Tonal — Neksti Mint ── */
-  --tertiary: #6DBF8A;
-  --on-tertiary: #003920;
-  --tertiary-container: #3D8A58;
-  --on-tertiary-container: #D4EABC;
+  /* ── Support Palette ── */
+  --cream: #F8F7F4;
+  --gray-100: #F2F2F0;
+  --gray-200: #E4E4E0;
+  --gray-400: #AAAA9E;
+  --gray-600: #6B6B60;
+  --mint: #6DBF8A;
+  --green-lt: #3D8A58;
 
-  /* ── Error ── */
-  --error: #F2B8B5;
-  --on-error: #601410;
-  --error-container: #8C1D18;
-  --on-error-container: #F9DEDC;
-
-  /* ── Legacy aliases (shadcn → M3 mapping) ── */
-  --card: var(--surface-container-low);
+  /* ── legacy shadcn mapping ── */
+  --card: var(--surface);
   --card-foreground: var(--foreground);
-  --popover: var(--surface-container-high);
+  --popover: var(--surface-bright);
   --popover-foreground: var(--foreground);
   --primary-foreground: var(--on-primary);
   --secondary-foreground: var(--on-secondary);
-  --muted: var(--surface-container);
-  --muted-foreground: var(--on-surface-variant);
-  --accent: var(--secondary-container);
-  --accent-foreground: var(--on-secondary-container);
-  --destructive: #F2B8B5;
-  --destructive-foreground: var(--on-error);
-  --border: var(--outline-variant);
-  --input: var(--outline-variant);
+  --muted: var(--surface-variant);
+  --muted-foreground: var(--gray-400);
+  --accent: var(--primary);
+  --accent-foreground: var(--on-primary);
+  --destructive: #8C1D18;
+  --destructive-foreground: #F8F7F4;
+  --border: var(--gray-200);
+  --input: var(--gray-200);
   --ring: var(--primary);
   --radius: 0.75rem;
+}
 
-  /* ── M3 Motion Tokens ── */
-  --duration-short1: 50ms;
-  --duration-short2: 100ms;
-  --duration-short3: 150ms;
-  --duration-short4: 200ms;
-  --duration-medium1: 250ms;
-  --duration-medium2: 300ms;
-  --duration-medium3: 350ms;
-  --duration-medium4: 400ms;
-  --duration-long1: 450ms;
-  --duration-long2: 500ms;
-  --duration-long3: 550ms;
-  --duration-long4: 600ms;
-  --duration-extra-long1: 700ms;
+/* ── LIGHT THEME (Cream/White) ── */
+.light {
+  --background: #F8F7F4;
+  --foreground: #0D1B2E;
+  --surface: #FFFFFF;
+  --surface-dim: #F2F2F0;
+  --surface-bright: #FFFFFF;
+  --surface-variant: #E4E4E0;
+  --on-surface-variant: #6B6B60;
+  --outline: #AAAA9E;
+  --outline-variant: #E4E4E0;
 
-  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
-  --easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
-  --easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
-  --easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
-  --easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
-  --easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --primary: #2D6E45;
+  --on-primary: #FFFFFF;
+  --secondary: #0D1B2E;
+  --on-secondary: #FFFFFF;
 
-  /* ── M3 Shape Scale ── */
-  --shape-none: 0px;
-  --shape-extra-small: 4px;
-  --shape-small: 8px;
-  --shape-medium: 12px;
-  --shape-large: 16px;
-  --shape-extra-large: 28px;
-  --shape-full: 9999px;
+  --card: #FFFFFF;
+  --muted: #F2F2F0;
+  --muted-foreground: #6B6B60;
+  --border: #E4E4E0;
 }
 
 /* ============================================
