@@ -1,12 +1,21 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Sparkles, Camera, Zap, ShieldCheck, ArrowRight, Star, Play, Gem, Shirt, Footprints } from 'lucide-react';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { ShowcaseCarousel } from '@/components/ShowcaseCarousel';
 
 export default function LandingPage() {
   const router = useRouter();
+  const [showDemoMessage, setShowDemoMessage] = useState(false);
+
+  useEffect(() => {
+    if (showDemoMessage) {
+      const timer = setTimeout(() => setShowDemoMessage(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showDemoMessage]);
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/20 overflow-x-hidden">
@@ -53,12 +62,24 @@ export default function LandingPage() {
             >
               Começar Agora <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-[var(--duration-short4)]" />
             </button>
-            <button
-              onClick={() => alert('Em breve...')}
-              className="m3-btn-tonal h-14 px-8 gap-2.5 md3-label-large backdrop-blur-sm state-layer m3-touch-target"
-            >
-              <Play className="w-5 h-5" /> Ver Demonstração
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowDemoMessage(true)}
+                className="m3-btn-tonal h-14 px-8 gap-2.5 md3-label-large backdrop-blur-sm state-layer m3-touch-target"
+              >
+                <Play className="w-5 h-5" /> Ver Demonstração
+              </button>
+              
+              {/* Floating "Em breve" message */}
+              <div 
+                className={`absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 rounded-[var(--shape-medium)] bg-[var(--surface-container-high)] border border-[var(--outline-variant)] shadow-lg transition-all duration-500 pointer-events-none whitespace-nowrap z-20
+                ${showDemoMessage ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+              >
+                <p className="md3-label-medium text-[var(--primary)] font-bold flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" /> Em breve...
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* M3 Suggestion Chips — Niche indicators */}
