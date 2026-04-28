@@ -169,9 +169,11 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
                     }
                   }}
                   className={`w-full h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] state-layer m3-touch-target
-                    ${plan.popular
-                      ? 'm3-btn-filled'
-                      : 'm3-btn-outlined'}`}
+                    ${plan.isEnterprise 
+                      ? 'bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-2' 
+                      : plan.popular
+                        ? 'm3-btn-filled'
+                        : 'm3-btn-outlined'}`}
                 >
                   {plan.isEnterprise ? 'Falar com Especialista' : `Assinar ${plan.name}`}
                 </button>
