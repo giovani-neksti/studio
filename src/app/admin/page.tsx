@@ -53,6 +53,8 @@ import {
   AreaChart,
   Area
 } from 'recharts';
+import { useShareImage } from '@/hooks/useShareImage';
+import { ShareToast } from '@/components/ShareToast';
 
 interface TrendPoint {
   date: string;
