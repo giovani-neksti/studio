@@ -127,9 +127,13 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
                     {plan.credits}
                   </span>
                   <div className="md3-label-large text-[var(--on-secondary-container)]/80 mt-1">
-                    {plan.isEnterprise ? 'Volume sob medida' : 'Tokens'}
+                    {plan.isEnterprise ? 'Volume e preço sob medida' : 'Tokens'}
                   </div>
-                  {!plan.isEnterprise && (
+                  {plan.isEnterprise ? (
+                    <div className="md3-label-small text-[var(--primary)] mt-1">
+                      De acordo com sua necessidade
+                    </div>
+                  ) : (
                     <div className="md3-label-small text-[var(--primary)] mt-1">
                       aproximadamente {Math.round(parseInt(plan.credits.replace('.', '')) / 5)} gerações profissionais
                     </div>
