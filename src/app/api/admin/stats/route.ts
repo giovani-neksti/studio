@@ -54,7 +54,7 @@ export async function GET(req: Request) {
         .limit(50);
       
       if (legacyGenError) throw legacyGenError;
-      generations = legacyGens || [];
+      generations = (legacyGens || []) as any[];
     }
 
     // Agregação de estatísticas
