@@ -418,7 +418,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Tab Navigation — Modern Pill Style */}
+        {/* Tab Navigation */}
         <div className="flex flex-wrap gap-2 mb-10 p-1.5 rounded-2xl bg-[var(--surface-variant)]/50 border border-[var(--outline-variant)]/30 w-fit">
           {tabs.map((t) => (
             <button
@@ -448,7 +448,6 @@ export default function AdminPage() {
                   <div
                     key={card.label}
                     className="group p-6 rounded-2xl bg-[var(--surface)] border border-[var(--outline-variant)]/30 hover:border-[var(--primary)]/50 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-[var(--primary)]/5"
-                    style={{ animationDelay: `${idx * 50}ms` } as any}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-2.5 rounded-xl bg-[var(--background)] group-hover:bg-[var(--primary)]/10 transition-colors">
@@ -462,13 +461,6 @@ export default function AdminPage() {
                       </span>
                       <span className="text-sm font-medium text-[var(--on-surface-variant)]">{card.label}</span>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-[var(--outline-variant)]/10 flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-[10px] font-bold text-green-500">
-                        <ArrowUpRight className="w-3 h-3" />
-                        <span>ATUALIZADO</span>
-                      </div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    </div>
                   </div>
                 ))}
               </div>
@@ -477,20 +469,7 @@ export default function AdminPage() {
             {/* Insights Tab */}
             {tab === 'insights' && (
               <div className="space-y-8 animate-fade-up">
-                {/* Registrations & Generations Chart */}
-                <div className="p-8 rounded-3xl bg-[var(--surface)] border border-[var(--outline-variant)]/30 shadow-sm overflow-hidden relative group">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-[var(--primary)] opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                    <div>
-                      <h3 className="font-serif text-2xl font-bold mb-1">Crescimento de Rede</h3>
-                      <p className="text-sm text-[var(--on-surface-variant)]">Atividade de usuários e gerações nos últimos 14 dias</p>
-                    </div>
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--background)] border border-[var(--outline-variant)]/20">
-                      <div className="w-2 h-2 rounded-full bg-[var(--primary)]" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Tempo Real</span>
-                    </div>
-                  </div>
-                  
+                <div className="p-8 rounded-3xl bg-[var(--surface)] border border-[var(--outline-variant)]/30 shadow-sm overflow-hidden">
                   <div className="h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={trends}>
@@ -499,101 +478,14 @@ export default function AdminPage() {
                             <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2}/>
                             <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
                           </linearGradient>
-                          <linearGradient id="colorGen" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--secondary)" stopOpacity={0.2}/>
-                            <stop offset="95%" stopColor="var(--secondary)" stopOpacity={0}/>
-                          </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--outline-variant)" opacity={0.1} vertical={false} />
-                        <XAxis 
-                          dataKey="date" 
-                          stroke="var(--on-surface-variant)" 
-                          fontSize={10}
-                          tickLine={false}
-                          axisLine={false}
-                          tickFormatter={(val) => new Date(val).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                        />
-                        <YAxis stroke="var(--on-surface-variant)" fontSize={10} tickLine={false} axisLine={false} />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'var(--surface)', 
-                            border: '1px solid var(--outline-variant)', 
-                            borderRadius: '16px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-                          }}
-                          itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                        />
-                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '12px', fontWeight: 'bold' }} />
-                        <Area type="monotone" name="Novos Usuários" dataKey="registrations" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorReg)" />
-                        <Area type="monotone" name="Gerações" dataKey="generations" stroke="var(--secondary)" strokeWidth={3} fillOpacity={1} fill="url(#colorGen)" />
+                        <XAxis dataKey="date" stroke="var(--on-surface-variant)" fontSize={10} />
+                        <YAxis stroke="var(--on-surface-variant)" fontSize={10} />
+                        <Tooltip contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--outline-variant)', borderRadius: '16px' }} />
+                        <Area type="monotone" name="Novos Usuários" dataKey="registrations" stroke="var(--primary)" fillOpacity={1} fill="url(#colorReg)" />
                       </AreaChart>
                     </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Engagement Segmentation Chart */}
-                  <div className="lg:col-span-2 p-8 rounded-3xl bg-[var(--surface)] border border-[var(--outline-variant)]/30 shadow-sm relative group">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                      <div>
-                        <h3 className="font-serif text-xl font-bold mb-1">Engajamento</h3>
-                        <p className="text-sm text-[var(--on-surface-variant)]">Distribuição da base de usuários</p>
-                      </div>
-                    </div>
-                    <div className="h-[300px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RePieChart>
-                          <Pie
-                            data={engagementData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={70}
-                            outerRadius={90}
-                            paddingAngle={8}
-                            dataKey="value"
-                            stroke="none"
-                          >
-                            {engagementData.map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={[ 'var(--primary)', 'var(--secondary)', 'var(--mint)' ][index % 3]} 
-                                className="hover:opacity-80 transition-opacity cursor-pointer"
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip 
-                             contentStyle={{ 
-                               backgroundColor: 'var(--surface)', 
-                               border: '1px solid var(--outline-variant)', 
-                               borderRadius: '16px',
-                               boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-                             }}
-                          />
-                          <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
-                        </RePieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  {/* Retention Signal Card */}
-                  <div className="p-8 rounded-3xl bg-gradient-to-br from-[var(--primary)] to-[var(--green-lt)] text-white shadow-xl flex flex-col justify-between group overflow-hidden relative">
-                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
-                    <div>
-                      <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-                        <TrendingUp className="w-6 h-6 text-white" />
-                      </div>
-                      <h4 className="font-serif text-2xl font-bold mb-2 tracking-tight">Sinais de Retenção</h4>
-                      <p className="text-white/80 text-sm leading-relaxed">
-                        Seu engajamento atual sugere uma base sólida com potencial de escalonamento para planos Enterprise.
-                      </p>
-                    </div>
-                    <div className="mt-8">
-                      <div className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm">
-                        <span className="text-[10px] font-bold tracking-widest uppercase opacity-60">Status de Crescimento</span>
-                        <div className="text-xl font-bold mt-1">+15% Recorrência</div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -602,82 +494,37 @@ export default function AdminPage() {
             {/* Users Tab */}
             {tab === 'users' && (
               <div className="space-y-6 animate-fade-up">
-                {/* Search Bar Premium */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="relative group w-full md:w-[450px]">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--on-surface-variant)] group-focus-within:text-[var(--primary)] transition-colors" />
-                    <input
-                      type="text"
-                      placeholder="Identificar especialista por email ou ID..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="w-full h-12 pl-12 pr-6 rounded-2xl border border-[var(--outline-variant)]/30 bg-[var(--surface)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all shadow-sm"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--on-surface-variant)] uppercase tracking-widest px-4 py-2 rounded-xl bg-[var(--surface-variant)]/30">
-                    <Users className="w-4 h-4" />
-                    <span>{filteredUsers.length} Membros Encontrados</span>
-                  </div>
+                <div className="relative group w-full md:w-[450px]">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--on-surface-variant)]" />
+                  <input
+                    type="text"
+                    placeholder="Buscar usuário..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full h-12 pl-12 pr-6 rounded-2xl border border-[var(--outline-variant)]/30 bg-[var(--surface)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                  />
                 </div>
-
-                {/* Table Premium */}
                 <div className="overflow-hidden rounded-3xl border border-[var(--outline-variant)]/30 bg-[var(--surface)] shadow-sm">
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-[var(--surface-variant)]/20 border-b border-[var(--outline-variant)]/20">
-                          <th className="text-left px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Identidade / Especialista</th>
+                          <th className="text-left px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Identidade</th>
                           <th className="text-center px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Créditos</th>
-                          <th className="text-center px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Gerações</th>
-                          <th className="text-left px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)] hidden lg:table-cell">Data de Ingresso</th>
                           <th className="text-right px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-[var(--on-surface-variant)]">Gerenciamento</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredUsers.map((u) => (
-                          <tr key={u.id} className="group border-b border-[var(--outline-variant)]/10 hover:bg-[var(--surface-variant)]/10 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-[var(--background)] flex items-center justify-center text-xs font-bold border border-[var(--outline-variant)]/20 group-hover:border-[var(--primary)]/50 transition-colors">
-                                  {u.email?.[0].toUpperCase()}
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-semibold text-[var(--foreground)] truncate max-w-[200px]">{u.email || '—'}</span>
-                                  <span className="text-[10px] font-mono text-[var(--on-surface-variant)] opacity-60">ID: {u.id.slice(0, 12)}...</span>
-                                </div>
-                              </div>
-                            </td>
+                          <tr key={u.id} className="border-b border-[var(--outline-variant)]/10 hover:bg-[var(--surface-variant)]/10">
+                            <td className="px-6 py-4 text-sm font-semibold">{u.email || '—'}</td>
                             <td className="text-center px-6 py-4">
-                              <div className={`inline-flex items-center justify-center px-3 py-1 rounded-lg text-xs font-bold
-                                ${u.tokens <= 0 
-                                  ? 'bg-red-500/10 text-red-500' 
-                                  : 'bg-[var(--primary)]/10 text-[var(--primary)]'}`}
-                              >
-                                {u.tokens}
-                              </div>
-                            </td>
-                            <td className="text-center px-6 py-4 text-sm font-medium text-[var(--on-surface-variant)]">
-                              {u.total_generations}
-                            </td>
-                            <td className="px-6 py-4 text-xs text-[var(--on-surface-variant)] hidden lg:table-cell">
-                              {formatDate(u.created_at)}
+                              <span className="px-3 py-1 rounded-lg text-xs font-bold bg-[var(--primary)]/10 text-[var(--primary)]">{u.tokens}</span>
                             </td>
                             <td className="px-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-2">
-                                <button
-                                  onClick={() => resetUser(u.id, u.email)}
-                                  className="p-2 rounded-xl hover:bg-[var(--primary)]/10 text-[var(--on-surface-variant)] hover:text-[var(--primary)] transition-all"
-                                  title="Resetar para 30 créditos"
-                                >
-                                  <RotateCcw className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => deleteUser(u.id, u.email)}
-                                  className="p-2 rounded-xl hover:bg-red-500/10 text-[var(--on-surface-variant)] hover:text-red-500 transition-all"
-                                  title="Remover acesso"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                <button onClick={() => resetUser(u.id, u.email)} className="p-2 rounded-xl hover:bg-[var(--primary)]/10"><RotateCcw className="w-4 h-4" /></button>
+                                <button onClick={() => deleteUser(u.id, u.email)} className="p-2 rounded-xl hover:bg-red-500/10 text-red-500"><Trash2 className="w-4 h-4" /></button>
                               </div>
                             </td>
                           </tr>
@@ -1440,6 +1287,7 @@ export default function AdminPage() {
       </main>
 
       <ShareToast message={toast} onDismiss={dismissToast} />
+
       {/* Token Edit Modal */}
       {editingTokens && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
