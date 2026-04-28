@@ -62,7 +62,7 @@ export default function LandingPage() {
             >
               Começar Agora <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-[var(--duration-short4)]" />
             </button>
-            <div className="relative">
+            <div className="relative group">
               <button
                 onClick={() => setShowDemoMessage(true)}
                 className="m3-btn-tonal h-14 px-8 gap-2.5 md3-label-large backdrop-blur-sm state-layer m3-touch-target"
@@ -70,13 +70,13 @@ export default function LandingPage() {
                 <Play className="w-5 h-5" /> Ver Demonstração
               </button>
               
-              {/* Floating "Em breve" message */}
+              {/* Floating "Em breve" message — Premium Toast */}
               <div 
-                className={`absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 rounded-[var(--shape-medium)] bg-[var(--surface-container-high)] border border-[var(--outline-variant)] shadow-lg transition-all duration-500 pointer-events-none whitespace-nowrap z-20
-                ${showDemoMessage ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+                className={`absolute -top-14 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-full bg-[var(--primary-container)]/90 backdrop-blur-md border border-[var(--primary)]/20 shadow-2xl transition-all duration-700 pointer-events-none whitespace-nowrap z-50
+                ${showDemoMessage ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}
               >
-                <p className="md3-label-medium text-[var(--primary)] font-bold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" /> Em breve...
+                <p className="md3-label-medium text-[var(--on-primary-container)] font-bold flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 animate-pulse" /> Vídeo em breve...
                 </p>
               </div>
             </div>
