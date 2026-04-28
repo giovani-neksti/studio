@@ -158,17 +158,11 @@ function StudioContent() {
   };
 
   const handleGenerate = async () => {
-    if (!credits || credits <= 0) return;
-    if (!hasUpload) {
-      showToast("Envie uma foto do produto para começar", "info");
-      return;
-    }
-
     const isBatchMode = showBatch && selections.batchFiles && selections.batchFiles.length > 0;
-    const requiredCredits = isBatchMode ? selections.batchFiles.length : 1;
+    const requiredTokens = isBatchMode ? selections.batchFiles.length * 5 : 1; 
 
-    if (!userIsAdmin && (credits ?? 0) < requiredCredits) {
-      showToast("Seus créditos acabaram — veja nossos planos para continuar criando", "warn");
+    if (!userIsAdmin && (credits ?? 0) < 1) {
+      showToast("Seus tokens acabaram — faça uma recarga para continuar criando", "warn");
       return;
     }
 
@@ -414,7 +408,7 @@ function StudioContent() {
     setIsSidebarOpen(true);
   };
 
-  const canGenerate = !isGenerating && (credits ?? 0) > 0 && hasUpload && !creditsLoading;
+  const canGenerate = !isGenerating && (credits ?? 0) >= 1 && hasUpload && !creditsLoading;
 
   const liveSelections = { ...selections };
   const uploadKeys = Object.keys(selections).filter(k => k.startsWith('upload_') && selections[k]);
@@ -499,9 +493,9 @@ function StudioContent() {
           {/* M3 Badge-style credits */}
           <div
             className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-large"
-            style={{ color: userIsAdmin || (credits ?? 0) > 1 ? 'var(--primary)' : 'var(--error)' }}
+            style={{ color: userIsAdmin || (credits ?? 0) >= 1 ? 'var(--primary)' : 'var(--error)' }}
           >
-            <Gem className="w-4 h-4" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Créditos</span>
+            <Gem className="w-4 h-4" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Tokens</span>
           </div>
 
           {/* Batch Mode Toggle — M3 Filter Chip */}

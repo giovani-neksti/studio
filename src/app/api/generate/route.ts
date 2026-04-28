@@ -143,25 +143,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── Deduzir 1 crédito (atômico) ──
-    const { data: newCredits, error: creditError } = await supabaseAdmin
-      .rpc('decrement_credit', { user_id: user.id });
-
-    if (creditError) {
-      return NextResponse.json(
-        { error: 'Sem créditos disponíveis. Faça upgrade do seu plano.' },
-        { status: 403 }
-      );
-    }
-
-    creditDeducted = true;
-
-    // If credits just hit 0, notify user by email
-    if (newCredits === 0 && user.email) {
-      sendCreditsExhaustedEmail(user.email).catch(() => {});
-    }
-
-    lap('auth+credits');
+    lap('auth');
 
     // ── 1. Parse FormData ──
     let formData: FormData;
@@ -348,18 +330,8 @@ export async function POST(req: Request) {
     }
 
     if (!aiData) {
-      // Reembolsar crédito — geração falhou completamente
-      if (creditDeducted && userId) {
-        try {
-          await supabaseAdmin.rpc('refund_credit', { user_id: userId });
-          creditDeducted = false;
-          console.log(`[Generate] Crédito reembolsado para ${userId}`);
-        } catch (refundErr: any) {
-          console.error(`[Generate] Falha ao reembolsar crédito: ${refundErr.message}`);
-        }
-      }
       return NextResponse.json(
-        { error: 'A IA está instável no momento. Seu crédito foi devolvido — tente novamente!', refunded: true },
+        { error: 'A IA está instável no momento. Tente novamente em alguns instantes!' },
         { status: 502 }
       );
     }
@@ -370,40 +342,51 @@ export async function POST(req: Request) {
     const generatedBase64 = generatedPart?.inlineData?.data;
 
     if (!generatedBase64) {
-      // Reembolsar crédito — IA não gerou imagem
-      if (creditDeducted && userId) {
-        try {
-          await supabaseAdmin.rpc('refund_credit', { user_id: userId });
-          creditDeducted = false;
-          console.log(`[Generate] Crédito reembolsado (sem imagem) para ${userId}`);
-        } catch (e: any) { console.error(`[Generate] Falha refund: ${e.message}`); }
-      }
-
       const blockReason = aiData.candidates?.[0]?.finishReason;
       const safetyRatings = aiData.candidates?.[0]?.safetyRatings;
       console.error('[Generate] IA não retornou imagem. finishReason:', blockReason, 'safety:', JSON.stringify(safetyRatings));
 
       if (blockReason === 'SAFETY') {
         return NextResponse.json(
-          { error: 'A IA bloqueou esta imagem por filtros de segurança. Tente com outra foto.', refunded: true },
+          { error: 'A IA bloqueou esta imagem por filtros de segurança. Tente com outra foto.' },
           { status: 422 }
         );
       }
 
       return NextResponse.json(
-        { error: 'A IA não gerou a imagem desta vez. Seu crédito foi devolvido — tente novamente!', refunded: true },
+        { error: 'A IA não gerou a imagem desta vez. Tente novamente!' },
         { status: 422 }
       );
     }
 
-    // ── Extract usage metadata and calculate real cost ──
+    // ── Extract usage metadata and calculate token cost ──
     const usageMetadata = aiData.usageMetadata || {};
     const inputTokens = usageMetadata.promptTokenCount || 0;
-    const outputTokens = usageMetadata.candidatesTokenCount || 0;
-
+    
+    // Matriz de Custo: 1 token a cada R$ 0,05 centavos de custo real
+    // Dólar fixado em 5.7 para o cálculo interno
+    const USD_TO_BRL = 5.7;
+    const COST_PER_TOKEN_BRL = 0.05;
+    
     const inputCostUsd = (inputTokens / 1_000_000) * 1.25;
     const outputImageCostUsd = 0.04;
     const totalCostUsd = inputCostUsd + outputImageCostUsd;
+    const totalCostBrl = totalCostUsd * USD_TO_BRL;
+
+    // Cálculo base de tokens
+    let tokensToDeduct = Math.ceil(totalCostBrl / COST_PER_TOKEN_BRL);
+
+    // Recursos Diamante: +2 tokens por cada recurso especial selecionado
+    // Verifica se existem chaves 'diamond_' ou seleções específicas na UI
+    const diamondFeaturesCount = Object.keys(selections).filter(k => 
+      (k.startsWith('diamond_') && selections[k] === true) || 
+      (['high_res', 'pro_mode', 'remove_bg'].includes(k) && selections[k] === true)
+    ).length;
+
+    tokensToDeduct += (diamondFeaturesCount * 2);
+
+    // Garantir mínimo de 1 token (embora o cálculo sempre dê mais)
+    tokensToDeduct = Math.max(tokensToDeduct, 1);
 
     // ── 6. Salvar imagem gerada (comprimida para WebP) ──
     let generatedUrl: string;
@@ -431,9 +414,23 @@ export async function POST(req: Request) {
 
     lap('generated image saved');
 
-    // ── 7. Registro no banco de dados ──
-    // Aguarda o upload original que rodou em paralelo
+    // ── 7. Registro no banco de dados e Dedução de Tokens ──
     const originalUrl = await originalUploadPromise;
+
+    // Executa a dedução com lógica de overdraft (saldo negativo)
+    const { data: newTokens, error: deductError } = await supabaseAdmin
+      .rpc('deduct_tokens', { 
+        user_id: user.id, 
+        amount_to_deduct: tokensToDeduct 
+      });
+
+    if (deductError || newTokens === -999) {
+      console.error('[Generate] Falha na dedução ou saldo insuficiente:', deductError);
+      // Se não tinha nem 1 token, barramos aqui (mesmo que a imagem tenha sido gerada, o que é raro pelo check do front)
+      if (newTokens === -999) {
+        return NextResponse.json({ error: 'Saldo de tokens insuficiente.' }, { status: 403 });
+      }
+    }
 
     const { error: dbError } = await supabaseAdmin.from('generations').insert({
       user_id: user.id,
@@ -443,14 +440,9 @@ export async function POST(req: Request) {
       prompt: finalPrompt,
       selections,
       input_tokens: inputTokens,
-      output_tokens: outputTokens,
+      output_tokens: tokensToDeduct, // Guardamos o custo em tokens aqui para referência
       cost_usd: parseFloat(totalCostUsd.toFixed(6)),
     });
-
-    if (dbError) {
-      // Non-fatal: image was generated and saved, just log the DB error
-      console.error('[Generate] Erro ao registrar no banco:', dbError);
-    }
 
     lap(`DONE (${usedModel}) — total`);
     return NextResponse.json({ url: generatedUrl });
@@ -458,23 +450,12 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[Generate] Erro:", error.message);
 
-    // Reembolsar crédito se foi cobrado mas a geração não completou
-    let refunded = false;
-    if (creditDeducted && userId) {
-      try {
-        await supabaseAdmin.rpc('refund_credit', { user_id: userId });
-        refunded = true;
-        console.log(`[Generate] Crédito reembolsado (catch) para ${userId}`);
-      } catch (e: any) { console.error(`[Generate] Falha refund (catch): ${e.message}`); }
-    }
-
     const userMessage = error.message?.startsWith('[VertexAI')
       ? 'Erro no serviço de IA. Tente novamente em alguns instantes.'
       : error.message || 'Erro inesperado. Tente novamente.';
 
     return NextResponse.json({
-      error: refunded ? `${userMessage} Seu crédito foi devolvido.` : userMessage,
-      refunded,
+      error: userMessage,
     }, { status: 500 });
   }
 }
