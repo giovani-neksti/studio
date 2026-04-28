@@ -4,7 +4,6 @@ import { ADMIN_EMAILS } from '@/lib/admin';
 
 export async function GET(req: Request) {
   try {
-    // Auth: verify JWT and check admin email
     const authHeader = req.headers.get('authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
@@ -17,62 +16,77 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
     }
 
-    // Fetch all profiles
-    const { data: profiles, error: profilesError } = await supabaseAdmin
+    // Tenta buscar perfis com a coluna nova 'tokens', se falhar tenta 'credits'
+    let { data: profiles, error: profilesError } = await supabaseAdmin
       .from('profiles')
       .select('id, email, tokens, total_generations, created_at, updated_at')
       .order('created_at', { ascending: false });
 
-    if (profilesError) throw profilesError;
+    if (profilesError) {
+      // Fallback para o sistema antigo de créditos se a migração ainda não foi rodada
+      const { data: legacyProfiles, error: legacyError } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, credits, total_generations, created_at, updated_at')
+        .order('created_at', { ascending: false });
+      
+      if (legacyError) throw legacyError;
+      
+      // Mapeia 'credits' para 'tokens' para manter o frontend funcionando
+      profiles = (legacyProfiles || []).map(p => ({
+        ...p,
+        tokens: p.credits
+      }));
+    }
 
-    // Fetch recent generations (last 50)
-    const { data: generations, error: genError } = await supabaseAdmin
+    // Tenta buscar gerações com a coluna 'output_tokens'
+    let { data: generations, error: genError } = await supabaseAdmin
       .from('generations')
       .select('id, niche, created_at, original_image_url, generated_image_url, showcase, output_tokens')
       .order('created_at', { ascending: false })
       .limit(50);
 
-    if (genError) throw genError;
+    if (genError) {
+      // Fallback se output_tokens não existir
+      const { data: legacyGens, error: legacyGenError } = await supabaseAdmin
+        .from('generations')
+        .select('id, niche, created_at, original_image_url, generated_image_url, showcase')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (legacyGenError) throw legacyGenError;
+      generations = legacyGens || [];
+    }
 
-    // Aggregate stats
+    // Agregação de estatísticas
     const totalUsers = profiles?.length ?? 0;
     const totalTokens = profiles?.reduce((sum, p) => sum + (p.tokens || 0), 0) ?? 0;
     const totalGenerations = profiles?.reduce((sum, p) => sum + (p.total_generations || 0), 0) ?? 0;
 
-    // Users registered today
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const newUsersToday = profiles?.filter(p => new Date(p.created_at) >= todayStart).length ?? 0;
 
-    // Users registered this month
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
     const newUsersMonth = profiles?.filter(p => new Date(p.created_at) >= monthStart).length ?? 0;
 
-    // Generations today
     const generationsToday = generations?.filter(g => new Date(g.created_at) >= todayStart).length ?? 0;
-
-    // Active users (generated at least once)
     const activeUsers = profiles?.filter(p => p.total_generations > 0).length ?? 0;
-
-    // Users with 0 tokens
     const usersNoTokens = profiles?.filter(p => (p.tokens || 0) <= 0).length ?? 0;
 
-    // Fetch recent error logs (last 100)
     const { data: errorLogs } = await supabaseAdmin
       .from('error_logs')
       .select('id, message, source, url, user_id, created_at, stack')
       .order('created_at', { ascending: false })
       .limit(100);
 
-    // Errors today
     const errorsToday = errorLogs?.filter(e => new Date(e.created_at) >= todayStart).length ?? 0;
 
     return NextResponse.json({
       stats: {
         totalUsers,
-        totalCredits: totalTokens, // keep key name for backward compatibility or change to totalTokens
+        totalCredits: totalTokens,
         totalGenerations,
         newUsersToday,
         newUsersMonth,
