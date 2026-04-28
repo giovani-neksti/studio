@@ -19,19 +19,19 @@ export async function GET(req: Request) {
       .single();
 
     if (error && error.code === 'PGRST116') {
-      // Profile doesn't exist — auto-create with 15 tokens (3 gens * 5 tokens)
+      // Profile doesn't exist — auto-create with 30 tokens
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
       const email = userData?.user?.email || '';
 
       const { data: newProfile, error: insertError } = await supabaseAdmin
         .from('profiles')
-        .insert({ id: userId, email, tokens: 15, total_generations: 0 })
+        .insert({ id: userId, email, tokens: 30, total_generations: 0 })
         .select('tokens')
         .single();
 
       if (insertError) {
         console.error('Erro ao criar perfil:', insertError);
-        return NextResponse.json({ credits: 15 });
+        return NextResponse.json({ credits: 30 });
       }
 
       return NextResponse.json({ credits: newProfile.tokens });

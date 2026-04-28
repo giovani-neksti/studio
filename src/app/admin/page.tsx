@@ -833,8 +833,10 @@ export default function AdminPage() {
                               {formatDate(g.created_at)}
                             </span>
                             {g.output_tokens && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">
-                                <Gem className="w-2.5 h-2.5" /> {g.output_tokens}
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/20 shadow-sm" title="Custo em Tokens">
+                                <Gem className="w-2.5 h-2.5" /> 
+                                <span className="opacity-70 font-medium mr-0.5">Custo:</span>
+                                {g.output_tokens}
                               </span>
                             )}
                           </div>

@@ -48,9 +48,12 @@ export async function GET(req: Request) {
       .limit(500);
 
     if (!gensError && gensWithTokens) {
-      processedGenerations = gensWithTokens;
+      processedGenerations = gensWithTokens.map(g => ({
+        ...g,
+        output_tokens: g.output_tokens && g.output_tokens > 0 ? g.output_tokens : 5
+      }));
     } else {
-      // Fallback para gerações sem output_tokens
+      // Fallback para gerações (tenta buscar sem output_tokens se a coluna não existir, embora deva existir)
       const { data: legacyGens, error: gensFallbackError } = await supabaseAdmin
         .from('generations')
         .select('id, niche, created_at, original_image_url, generated_image_url, showcase')
@@ -58,7 +61,7 @@ export async function GET(req: Request) {
         .limit(500);
       
       if (gensFallbackError) throw gensFallbackError;
-      processedGenerations = legacyGens || [];
+      processedGenerations = (legacyGens || []).map(g => ({ ...g, output_tokens: 5 }));
     }
 
     // 3. Aggregate Stats
