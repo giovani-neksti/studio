@@ -784,13 +784,6 @@ export default function AdminPage() {
                               className="w-16 bg-transparent text-[var(--foreground)] md3-label-medium outline-none text-center"
                             />
                           </div>
-                          <button
-                            onClick={refreshFinanceiro}
-                            className="flex items-center gap-2 h-10 px-4 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-medium hover:bg-[var(--on-surface-variant)]/8 transition-all"
-                          >
-                            <RefreshCw className="w-4 h-4" />
-                            Atualizar
-                          </button>
                         </div>
                       </div>
 
