@@ -49,6 +49,16 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
       features: ['2500 tokens', 'Suporte dedicado via WhatsApp', 'Acesso a todos os recursos', 'Acesso Antecipado a Modelos', 'Aproximadamente 500 gerações'],
       popular: false,
       stripeUrl: 'https://buy.stripe.com/28E5kv0ND83R3Ufg3V6Ri08',
+    },
+    {
+      name: 'Enterprise',
+      price: 'Sob Consulta',
+      credits: 'Personalizado',
+      description: 'Soluções sob medida para grandes operações e agências.',
+      features: ['Volume ilimitado de tokens', 'Gerente de conta dedicado', 'Integração via API', 'Treinamento de equipe', 'Faturamento via fatura/boleto'],
+      popular: false,
+      isEnterprise: true,
+      whatsappUrl: 'https://wa.me/5519982185983?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20plano%20Enterprise%20do%20StudioAI.',
     }
   ];
 
@@ -93,7 +103,7 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
 
         {/* Plans Grid — M3 Cards */}
         <div className="p-6 md:p-8">
-          <div className="grid md:grid-cols-3 gap-4 md:gap-5 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {plans.map((plan) => (
               <div
                 key={plan.name}
@@ -112,18 +122,26 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
                 <h3 className={`md3-title-large font-semibold mb-1.5 ${plan.popular ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>{plan.name}</h3>
                 <p className="text-[var(--on-surface-variant)] md3-body-small mb-4 min-h-[40px]">{plan.description}</p>
 
-                <div className="bg-[var(--secondary-container)] rounded-[var(--shape-medium)] p-4 text-center mb-4">
-                  <span className="text-4xl font-bold text-[var(--on-secondary-container)]">{plan.credits}</span>
-                  <div className="md3-label-large text-[var(--on-secondary-container)]/80 mt-1">Tokens</div>
-                  <div className="md3-label-small text-[var(--primary)] mt-1">
-                    aproximadamente {Math.round(parseInt(plan.credits.replace('.', '')) / 5)} gerações profissionais
+                <div className="bg-[var(--secondary-container)] rounded-[var(--shape-medium)] p-4 text-center mb-4 min-h-[120px] flex flex-col justify-center">
+                  <span className={plan.isEnterprise ? "text-2xl font-bold text-[var(--on-secondary-container)]" : "text-4xl font-bold text-[var(--on-secondary-container)]"}>
+                    {plan.credits}
+                  </span>
+                  <div className="md3-label-large text-[var(--on-secondary-container)]/80 mt-1">
+                    {plan.isEnterprise ? 'Volume sob medida' : 'Tokens'}
                   </div>
+                  {!plan.isEnterprise && (
+                    <div className="md3-label-small text-[var(--primary)] mt-1">
+                      aproximadamente {Math.round(parseInt(plan.credits.replace('.', '')) / 5)} gerações profissionais
+                    </div>
+                  )}
                 </div>
 
                 {/* Preço secundário */}
                 <div className="mb-4 text-center">
-                  <span className="md3-body-large text-[var(--on-surface-variant)]">R$ {plan.price}</span>
-                  <span className="text-[var(--outline)] md3-body-small"> /mês</span>
+                  <span className="md3-body-large text-[var(--on-surface-variant)]">
+                    {plan.isEnterprise ? '' : 'R$ '}{plan.price}
+                  </span>
+                  {!plan.isEnterprise && <span className="text-[var(--outline)] md3-body-small"> /mês</span>}
                 </div>
 
                 <div className="space-y-2.5 mb-6 flex-1">
@@ -139,13 +157,19 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
 
                 {/* M3 Filled / Outlined Button */}
                 <button
-                  onClick={() => window.open(buildStripeUrl(plan.stripeUrl), '_blank')}
+                  onClick={() => {
+                    if (plan.isEnterprise && plan.whatsappUrl) {
+                      window.open(plan.whatsappUrl, '_blank');
+                    } else if (plan.stripeUrl) {
+                      window.open(buildStripeUrl(plan.stripeUrl), '_blank');
+                    }
+                  }}
                   className={`w-full h-12 rounded-[var(--shape-full)] md3-label-large transition-all duration-[var(--duration-short4)] ease-[var(--easing-standard)] state-layer m3-touch-target
                     ${plan.popular
                       ? 'm3-btn-filled'
                       : 'm3-btn-outlined'}`}
                 >
-                  Assinar {plan.name}
+                  {plan.isEnterprise ? 'Falar com Especialista' : `Assinar ${plan.name}`}
                 </button>
               </div>
             ))}
