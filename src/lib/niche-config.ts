@@ -1,6 +1,6 @@
 // Configuration for the Composition Paradigm (Fotografia de Produto assistida por IA)
 
-export type NicheKey = 'jewelry' | 'clothing' | 'shoes';
+export type NicheKey = 'jewelry';
 
 export interface DisplayOption {
   id: string;
@@ -161,81 +161,6 @@ export const nicheConfigs: Record<NicheKey, NicheConfig> = {
       { id: 'model_close_hand', name: 'Mão / Manicure', type: 'Foco no Anel', imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b2548e?w=400&q=80' },
       { id: 'model_close_wrist', name: 'Pulso', type: 'Pulseira', imageUrl: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&q=80' },
       { id: 'model_close_ear', name: 'Perfil / Orelha', type: 'Foco no Brinco', imageUrl: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80' }
-    ],
-    typographyOptions: sharedTypography,
-    textPositionOptions: sharedTextPosition,
-    textColorOptions: sharedTextColors,
-    textSizeOptions: sharedTextSizes,
-    formats: sharedFormats,
-  },
-
-  clothing: {
-    label: 'Moda & Roupas',
-    themeClass: 'theme-clothing',
-    icon: '👗',
-    tagline: 'Imagens editoriais a partir de fotos da sua confecção',
-    categories: ['Camisa / Blusa', 'Calça / Saia', 'Vestido', 'Casaco / Jaqueta', 'Conjunto', 'Acessórios'],
-    solidColors: [
-      { name: 'Branco Puro', hex: '#FFFFFF' },
-      { name: 'Off-White', hex: '#F8F9FA' },
-      { name: 'Cinza Fotográfico', hex: '#E9ECEF' },
-      { name: 'Areia', hex: '#E5D9C5' },
-      { name: 'Preto Infinito', hex: '#000000' },
-    ],
-    scenarios: [
-      { title: 'Estúdio Branco', desc: 'Fundo infinito clássico (e-commerce)' },
-      { title: 'Rua de Paris', desc: 'Background europeu desfocado' },
-      { title: 'Praia ao Entardecer', desc: 'Golden hour em dunas' },
-      { title: 'Loft Industrial', desc: 'Ambiente urbano com tijolos' },
-    ],
-    displayOptions: [
-      { id: 'ghost_mannequin', label: 'Manequim Invisível' },
-      { id: 'hanger_wood', label: 'Cabide de Madeira' },
-      { id: 'hanger_metal', label: 'Cabide de Metal Clássico' },
-      { id: 'flat_lay_folded', label: 'Flat Lay (Roupa Dobrada)' },
-      { id: 'flat_lay_open', label: 'Flat Lay (Roupa Estendida)' },
-      { id: 'clothesline', label: 'Varal Estético' },
-    ],
-    humanDisplayOptions: [
-      { id: 'model_lara', name: 'Lara', type: 'Loira / Casual', imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80' },
-      { id: 'model_sofia', name: 'Sofia', type: 'Morena / Fashion', imageUrl: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?w=400&q=80' },
-      { id: 'model_yuri', name: 'Yuri', type: 'Oriental / Street', imageUrl: 'https://images.unsplash.com/photo-1514315384763-ba401779410f?w=400&q=80' }
-    ],
-    typographyOptions: sharedTypography,
-    textPositionOptions: sharedTextPosition,
-    textColorOptions: sharedTextColors,
-    textSizeOptions: sharedTextSizes,
-    formats: sharedFormats,
-  },
-
-  shoes: {
-    label: 'Calçados',
-    themeClass: 'theme-shoes',
-    icon: '👟',
-    tagline: 'Imagens de alto impacto para seus calçados urbanos e sociais',
-    categories: ['Tênis Urbano', 'Tênis Esportivo', 'Salto Alto', 'Bota / Coturno', 'Sapato Social', 'Sandália'],
-    solidColors: [
-      { name: 'Cinza Concreto', hex: '#9E9E9E' },
-      { name: 'Laranja Neon', hex: '#FF5722' },
-      { name: 'Preto Asfalto', hex: '#212121' },
-      { name: 'Branco Studio', hex: '#FFFFFF' },
-      { name: 'Azul Elétrico', hex: '#2962FF' },
-    ],
-    scenarios: [
-      { title: 'Rua Noturna Neon', desc: 'Asfalto molhado com reflexos' },
-      { title: 'Quadra de Basquete', desc: 'Piso de madeira e luz natural' },
-      { title: 'Concreto Minimalista', desc: 'Design industrial' },
-    ],
-    displayOptions: [
-      { id: 'floating', label: 'Levitando' },
-      { id: 'pedestal', label: 'Pedestal Retrô' },
-      { id: 'acrylic_box', label: 'Caixa de Acrílico' },
-      { id: 'dynamic_angle', label: 'Ângulo Dinâmico' },
-      { id: 'shoebox_top', label: 'Sobre a Caixa' }
-    ],
-    humanDisplayOptions: [
-      { id: 'model_street_m', name: 'Kai', type: 'Urbano / Sneakerhead', imageUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=400&q=80' },
-      { id: 'model_sport_f', name: 'Bia', type: 'Esportiva / Running', imageUrl: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=400&q=80' }
     ],
     typographyOptions: sharedTypography,
     textPositionOptions: sharedTextPosition,
