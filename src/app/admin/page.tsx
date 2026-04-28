@@ -35,6 +35,9 @@ import {
   Star,
   Eye,
   Gem,
+  Trash2,
+  Pencil,
+  RotateCcw,
 } from 'lucide-react';
 import {
   LineChart,
@@ -208,6 +211,9 @@ export default function AdminPage() {
   const [showcaseFilter, setShowcaseFilter] = useState<'all' | 'showcase' | 'not_showcase'>('all');
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [engagementData, setEngagementData] = useState<EngagementPoint[]>([]);
+  const [editingTokens, setEditingTokens] = useState<{ id: string, email: string, tokens: number } | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState<string | null>(null);
+  const [isUpdatingTokens, setIsUpdatingTokens] = useState(false);
   const { canShare, shareImage, toast, dismissToast } = useShareImage();
 
   const showcaseCount = generations.filter(g => g.showcase).length;
@@ -299,6 +305,82 @@ export default function AdminPage() {
       })
       .catch(() => {})
       .finally(() => setFinLoading(false));
+  };
+
+  const updateTokens = async () => {
+    if (!editingTokens || !session?.access_token) return;
+    setIsUpdatingTokens(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId: editingTokens.id, tokens: editingTokens.tokens })
+      });
+      if (res.ok) {
+        setUsers(prev => prev.map(u => u.id === editingTokens.id ? { ...u, tokens: editingTokens.tokens } : u));
+        setEditingTokens(null);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao atualizar tokens');
+      }
+    } catch (err) {
+      alert('Erro de rede');
+    } finally {
+      setIsUpdatingTokens(false);
+    }
+  };
+
+  const deleteUser = async (userId: string, email: string) => {
+    if (!session?.access_token) return;
+    if (!confirm(`Tem certeza que deseja excluir permanentemente a conta ${email}? Isso removerá o acesso do usuário e todos os seus dados.`)) return;
+    
+    setIsDeletingUser(userId);
+    try {
+      const res = await fetch(`/api/admin/users?userId=${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u.id !== userId));
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao deletar usuário');
+      }
+    } catch (err) {
+      alert('Erro de rede');
+    } finally {
+      setIsDeletingUser(userId);
+    }
+  };
+
+  const resetUser = async (userId: string, email: string) => {
+    if (!session?.access_token) return;
+    if (!confirm(`Deseja resetar a conta de ${email} para 30 tokens?`)) return;
+    
+    setIsUpdatingTokens(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, tokens: 30 })
+      });
+      if (res.ok) {
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, tokens: 30 } : u));
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao resetar usuário');
+      }
+    } catch (err) {
+      alert('Erro de rede');
+    } finally {
+      setIsUpdatingTokens(false);
+    }
   };
 
   const testRoute = async (route: RouteTest) => {
@@ -605,7 +687,7 @@ export default function AdminPage() {
                         <th className="text-center px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Tokens</th>
                         <th className="text-center px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Gerações</th>
                         <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)] hidden md:table-cell">Cadastro</th>
-                        <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)] hidden lg:table-cell">Última Atividade</th>
+                        <th className="text-right px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Ações</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -635,8 +717,31 @@ export default function AdminPage() {
                           <td className="px-4 py-3 md3-body-small text-[var(--on-surface-variant)] hidden md:table-cell">
                             {formatDate(u.created_at)}
                           </td>
-                          <td className="px-4 py-3 md3-body-small text-[var(--on-surface-variant)] hidden lg:table-cell">
-                            {formatDate(u.updated_at)}
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => resetUser(u.id, u.email)}
+                                title="Resetar para 30 tokens"
+                                className="p-2 rounded-full hover:bg-[var(--primary)]/10 text-[var(--primary)] transition-colors"
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setEditingTokens({ id: u.id, email: u.email, tokens: u.tokens })}
+                                title="Editar tokens"
+                                className="p-2 rounded-full hover:bg-[var(--secondary)]/10 text-[var(--secondary)] transition-colors"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => deleteUser(u.id, u.email)}
+                                title="Excluir conta"
+                                className="p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-colors"
+                                disabled={isDeletingUser === u.id}
+                              >
+                                {isDeletingUser === u.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1406,6 +1511,46 @@ export default function AdminPage() {
       </main>
 
       <ShareToast message={toast} onDismiss={dismissToast} />
+      {/* Token Edit Modal */}
+      {editingTokens && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-[var(--surface-container-high)] rounded-[var(--shape-extra-large)] border border-[var(--outline-variant)]/20 p-6 shadow-2xl animate-scale-in">
+            <h3 className="md3-title-large mb-2">Editar Tokens</h3>
+            <p className="md3-body-medium text-[var(--on-surface-variant)] mb-6">
+              Alterando saldo de <strong>{editingTokens.email}</strong>
+            </p>
+            
+            <div className="mb-6">
+              <label className="md3-label-medium text-[var(--primary)] mb-2 block">Quantidade de Tokens</label>
+              <input
+                type="number"
+                value={editingTokens.tokens}
+                onChange={(e) => setEditingTokens({ ...editingTokens, tokens: parseInt(e.target.value) || 0 })}
+                className="w-full h-12 px-4 rounded-[var(--shape-medium)] bg-[var(--surface-container-highest)] border border-[var(--outline)]/30 text-[var(--foreground)] md3-body-large focus:border-[var(--primary)] outline-none transition-all"
+                autoFocus
+              />
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setEditingTokens(null)}
+                className="px-4 h-10 rounded-full md3-label-large text-[var(--primary)] hover:bg-[var(--primary)]/10 transition-colors"
+                disabled={isUpdatingTokens}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={updateTokens}
+                className="px-6 h-10 rounded-full md3-label-large bg-[var(--primary)] text-[var(--on-primary)] hover:elevation-1 disabled:opacity-50 transition-all flex items-center gap-2"
+                disabled={isUpdatingTokens}
+              >
+                {isUpdatingTokens && <Loader2 className="w-4 h-4 animate-spin" />}
+                Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
