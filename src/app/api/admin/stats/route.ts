@@ -16,28 +16,18 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
     }
 
-    // 1. Fetch ALL profiles with fallback logic
-    let processedProfiles: any[] = [];
-    const { data: profilesWithTokens, error: profilesError } = await supabaseAdmin
+    // 1. Fetch ALL profiles
+    const { data: profiles, error: profilesError } = await supabaseAdmin
       .from('profiles')
-      .select('id, email, tokens, total_generations, created_at, updated_at')
+      .select('id, email, credits, total_generations, created_at, updated_at')
       .order('created_at', { ascending: false });
 
-    if (!profilesError && profilesWithTokens) {
-      processedProfiles = profilesWithTokens;
-    } else {
-      // Fallback para credits se tokens falhar
-      const { data: profilesWithCredits, error: fallbackError } = await supabaseAdmin
-        .from('profiles')
-        .select('id, email, credits, total_generations, created_at, updated_at')
-        .order('created_at', { ascending: false });
-      
-      if (fallbackError) throw fallbackError;
-      processedProfiles = (profilesWithCredits || []).map(p => ({
-        ...p,
-        tokens: p.credits || 0
-      }));
-    }
+    if (profilesError) throw profilesError;
+
+    const processedProfiles = (profiles || []).map(p => ({
+      ...p,
+      tokens: p.credits || 0
+    }));
 
     // 2. Fetch generations with fallback logic
     let processedGenerations: any[] = [];

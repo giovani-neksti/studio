@@ -14,19 +14,19 @@ export async function GET(req: Request) {
     // Try to get existing profile
     const { data, error } = await supabaseAdmin
       .from('profiles')
-      .select('tokens')
+      .select('credits')
       .eq('id', userId)
       .single();
 
     if (error && error.code === 'PGRST116') {
-      // Profile doesn't exist — auto-create with 30 tokens
+      // Profile doesn't exist — auto-create with 30 credits
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
       const email = userData?.user?.email || '';
 
       const { data: newProfile, error: insertError } = await supabaseAdmin
         .from('profiles')
-        .insert({ id: userId, email, tokens: 30, total_generations: 0 })
-        .select('tokens')
+        .insert({ id: userId, email, credits: 30, total_generations: 0 })
+        .select('credits')
         .single();
 
       if (insertError) {
@@ -34,12 +34,12 @@ export async function GET(req: Request) {
         return NextResponse.json({ credits: 30 });
       }
 
-      return NextResponse.json({ credits: newProfile.tokens });
+      return NextResponse.json({ credits: newProfile.credits });
     }
 
     if (error) throw error;
 
-    return NextResponse.json({ credits: data.tokens });
+    return NextResponse.json({ credits: data.credits });
   } catch (error: any) {
     console.error('Erro ao buscar tokens:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

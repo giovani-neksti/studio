@@ -22,7 +22,7 @@ export async function PATCH(req: Request) {
 
     const { error } = await supabaseAdmin
       .from('profiles')
-      .update({ tokens })
+      .update({ credits: tokens })
       .eq('id', userId);
 
     if (error) throw error;
