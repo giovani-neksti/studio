@@ -498,19 +498,6 @@ function StudioContent() {
             <Gem className="w-4 h-4" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Tokens</span>
           </div>
 
-          {/* Batch Mode Toggle — M3 Filter Chip */}
-          <button
-            onClick={() => setShowBatch(!showBatch)}
-            aria-pressed={showBatch}
-            aria-label={showBatch ? 'Desativar modo batch' : 'Ativar geração em batch (até 10 produtos)'}
-            className={`hidden sm:flex items-center gap-1.5 h-8 px-4 rounded-[var(--shape-small)] md3-label-medium border transition-all duration-[var(--duration-short4)]
-              ${showBatch
-                ? 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)] border-transparent'
-                : 'bg-transparent text-[var(--on-surface-variant)] border-[var(--outline)] hover:bg-[var(--on-surface-variant)]/8'}`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Batch</span>
-          </button>
 
           {/* Desktop: My Generations — M3 Tonal Button */}
           <button
