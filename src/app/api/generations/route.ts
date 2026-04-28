@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
   const { data: generations, error, count } = await supabaseAdmin
     .from('generations')
-    .select('id, niche, original_image_url, generated_image_url, created_at', { count: 'exact' })
+    .select('id, niche, original_image_url, generated_image_url, created_at, output_tokens', { count: 'exact' })
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);

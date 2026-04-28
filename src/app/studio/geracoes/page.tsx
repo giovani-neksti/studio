@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Download, Maximize2, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Sparkles, Sun, Moon, Share2 } from 'lucide-react';
+import { ArrowLeft, Download, Maximize2, Image as ImageIcon, ChevronLeft, ChevronRight, Calendar, Sparkles, Sun, Moon, Share2, Gem } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useShareImage } from '@/hooks/useShareImage';
 import { ShareToast } from '@/components/ShareToast';
@@ -14,6 +14,7 @@ interface Generation {
   original_image_url: string;
   generated_image_url: string;
   created_at: string;
+  output_tokens?: number;
 }
 
 export default function GeracoesPage() {
@@ -173,10 +174,18 @@ export default function GeracoesPage() {
                     )}
                   </div>
 
-                  {/* Date */}
-                  <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded-[var(--shape-extra-small)] bg-[var(--surface-container)]/90 md3-label-small text-[var(--on-surface-variant)]">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(gen.created_at).toLocaleDateString('pt-BR')}
+                  {/* Date and Tokens */}
+                  <div className="absolute bottom-2 left-2 flex flex-col gap-1 items-start">
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-[var(--shape-extra-small)] bg-[var(--surface-container)]/90 md3-label-small text-[var(--on-surface-variant)]">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(gen.created_at).toLocaleDateString('pt-BR')}
+                    </div>
+                    {gen.output_tokens && gen.output_tokens > 0 && (
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-[var(--shape-extra-small)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-small font-medium shadow-sm">
+                        <Gem className="w-3 h-3" />
+                        {gen.output_tokens} Tokens
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

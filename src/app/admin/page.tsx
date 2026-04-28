@@ -34,6 +34,7 @@ import {
   Settings2,
   Star,
   Eye,
+  Gem,
 } from 'lucide-react';
 import { useShareImage } from '@/hooks/useShareImage';
 import { ShareToast } from '@/components/ShareToast';
@@ -64,7 +65,7 @@ interface ErrorLog {
 interface UserProfile {
   id: string;
   email: string;
-  credits: number;
+  tokens: number;
   total_generations: number;
   created_at: string;
   updated_at: string;
@@ -77,6 +78,7 @@ interface Generation {
   original_image_url: string;
   generated_image_url: string;
   showcase?: boolean;
+  output_tokens?: number;
 }
 
 interface FinanceiroData {
@@ -478,7 +480,7 @@ export default function AdminPage() {
                     <thead>
                       <tr className="bg-[var(--surface-container-high)] border-b border-[var(--outline-variant)]/20">
                         <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Email</th>
-                        <th className="text-center px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Créditos</th>
+                        <th className="text-center px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Tokens</th>
                         <th className="text-center px-4 py-3 md3-label-medium text-[var(--on-surface-variant)]">Gerações</th>
                         <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)] hidden md:table-cell">Cadastro</th>
                         <th className="text-left px-4 py-3 md3-label-medium text-[var(--on-surface-variant)] hidden lg:table-cell">Última Atividade</th>
@@ -497,12 +499,12 @@ export default function AdminPage() {
                           <td className="text-center px-4 py-3">
                             <span
                               className={`inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded-[var(--shape-full)] md3-label-medium
-                                ${u.credits === 0
+                                ${u.tokens <= 0
                                   ? 'bg-[var(--error-container)] text-[var(--on-error-container)]'
                                   : 'bg-[var(--primary-container)] text-[var(--on-primary-container)]'
                                 }`}
                             >
-                              {u.credits}
+                              {u.tokens}
                             </span>
                           </td>
                           <td className="text-center px-4 py-3 md3-body-medium text-[var(--on-surface-variant)]">
@@ -704,9 +706,16 @@ export default function AdminPage() {
                               <Share2 className="w-3.5 h-3.5" />
                             </button>
                           )}
-                          <span className="md3-label-small text-[var(--outline)]">
-                            {formatDate(g.created_at)}
-                          </span>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="md3-label-small text-[var(--outline)]">
+                              {formatDate(g.created_at)}
+                            </span>
+                            {g.output_tokens && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">
+                                <Gem className="w-2.5 h-2.5" /> {g.output_tokens}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
