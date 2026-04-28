@@ -42,7 +42,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="animate-fade-up stagger-2 text-[var(--on-surface-variant)] md3-body-large md:md3-headline-small max-w-2xl mb-10 leading-relaxed font-light">
-            A primeira plataforma de IA brasileira focada em compor cenários de luxo para joias, moda e calçados em segundos.
+            A primeira plataforma de IA brasileira focada em compor cenários de luxo para joalheria e acessórios em segundos.
           </p>
 
           {/* M3 Button Group — Filled + Tonal */}
@@ -54,6 +54,7 @@ export default function LandingPage() {
               Começar Agora <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-[var(--duration-short4)]" />
             </button>
             <button
+              onClick={() => alert('Em breve...')}
               className="m3-btn-tonal h-14 px-8 gap-2.5 md3-label-large backdrop-blur-sm state-layer m3-touch-target"
             >
               <Play className="w-5 h-5" /> Ver Demonstração
