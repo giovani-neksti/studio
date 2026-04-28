@@ -1143,18 +1143,7 @@ export default function AdminPage() {
                       Teste e valide as rotas em tempo real. Rotas seguras podem ser testadas sem efeitos colaterais.
                     </p>
                   </div>
-                  <button
-                    onClick={testAllSafe}
-                    disabled={!!testingRoute}
-                    className="flex items-center gap-2 h-10 px-5 rounded-[var(--shape-full)] bg-[var(--primary)] text-[var(--on-primary)] md3-label-large hover:elevation-1 transition-all disabled:opacity-50"
-                  >
-                    {testingRoute ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
-                    Testar Todas (seguras)
-                  </button>
+                  </div>
                 </div>
 
                 {/* Route Cards */}
@@ -1219,18 +1208,6 @@ export default function AdminPage() {
                                 </div>
                               </div>
                             )}
-                            <button
-                              onClick={() => testRoute(route)}
-                              disabled={!!testingRoute}
-                              className="flex items-center gap-1.5 h-9 px-4 rounded-[var(--shape-full)] border border-[var(--outline)]/40 text-[var(--foreground)] md3-label-medium hover:bg-[var(--on-surface-variant)]/8 transition-all disabled:opacity-40"
-                            >
-                              {isTesting ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <Play className="w-3.5 h-3.5" />
-                              )}
-                              Testar
-                            </button>
                           </div>
                         </div>
 
