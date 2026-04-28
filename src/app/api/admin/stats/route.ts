@@ -16,28 +16,50 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Acesso negado.' }, { status: 403 });
     }
 
-    // 1. Fetch ALL profiles for full stats and trends
-    let { data: profiles, error: profilesError } = await supabaseAdmin
+    // 1. Fetch ALL profiles with fallback logic
+    let processedProfiles: any[] = [];
+    const { data: profilesWithTokens, error: profilesError } = await supabaseAdmin
       .from('profiles')
-      .select('id, email, tokens, credits, total_generations, created_at, updated_at')
+      .select('id, email, tokens, total_generations, created_at, updated_at')
       .order('created_at', { ascending: false });
 
-    if (profilesError) throw profilesError;
+    if (!profilesError && profilesWithTokens) {
+      processedProfiles = profilesWithTokens;
+    } else {
+      // Fallback para credits se tokens falhar
+      const { data: profilesWithCredits, error: fallbackError } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, credits, total_generations, created_at, updated_at')
+        .order('created_at', { ascending: false });
+      
+      if (fallbackError) throw fallbackError;
+      processedProfiles = (profilesWithCredits || []).map(p => ({
+        ...p,
+        tokens: p.credits || 0
+      }));
+    }
 
-    // Handle fallback mapping for credits -> tokens
-    const processedProfiles = (profiles || []).map(p => ({
-      ...p,
-      tokens: p.tokens !== undefined ? p.tokens : (p.credits ?? 0)
-    }));
-
-    // 2. Fetch more generations for meaningful trends (last 500)
-    let { data: generations, error: genError } = await supabaseAdmin
+    // 2. Fetch generations with fallback logic
+    let processedGenerations: any[] = [];
+    const { data: gensWithTokens, error: gensError } = await supabaseAdmin
       .from('generations')
       .select('id, niche, created_at, original_image_url, generated_image_url, showcase, output_tokens')
       .order('created_at', { ascending: false })
       .limit(500);
 
-    if (genError) throw genError;
+    if (!gensError && gensWithTokens) {
+      processedGenerations = gensWithTokens;
+    } else {
+      // Fallback para gerações sem output_tokens
+      const { data: legacyGens, error: gensFallbackError } = await supabaseAdmin
+        .from('generations')
+        .select('id, niche, created_at, original_image_url, generated_image_url, showcase')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      
+      if (gensFallbackError) throw gensFallbackError;
+      processedGenerations = legacyGens || [];
+    }
 
     // 3. Aggregate Stats
     const totalUsers = processedProfiles.length;
@@ -48,7 +70,7 @@ export async function GET(req: Request) {
     todayStart.setHours(0, 0, 0, 0);
     
     const registrationsToday = processedProfiles.filter(p => new Date(p.created_at) >= todayStart).length;
-    const generationsToday = (generations || []).filter(g => new Date(g.created_at) >= todayStart).length;
+    const generationsToday = processedGenerations.filter(g => new Date(g.created_at) >= todayStart).length;
     const activeUsers = processedProfiles.filter(p => p.total_generations > 0).length;
     const usersNoTokens = processedProfiles.filter(p => p.tokens <= 0).length;
 
@@ -69,7 +91,7 @@ export async function GET(req: Request) {
       if (trends[date]) trends[date].registrations++;
     });
 
-    (generations || []).forEach(g => {
+    processedGenerations.forEach(g => {
       const date = new Date(g.created_at).toISOString().split('T')[0];
       if (trends[date]) trends[date].generations++;
     });
@@ -81,14 +103,13 @@ export async function GET(req: Request) {
 
     // 5. Niche Distribution
     const nicheCount: Record<string, number> = {};
-    (generations || []).forEach(g => {
+    processedGenerations.forEach(g => {
       const n = g.niche || 'jewelry';
       nicheCount[n] = (nicheCount[n] || 0) + 1;
     });
 
     const nicheData = Object.entries(nicheCount).map(([name, value]) => ({ name, value }));
 
-    // 6. Fetch error logs
     const { data: errorLogs } = await supabaseAdmin
       .from('error_logs')
       .select('id, message, source, url, user_id, created_at, stack')
@@ -114,8 +135,8 @@ export async function GET(req: Request) {
       },
       trends: trendData,
       nicheData,
-      users: processedProfiles.slice(0, 100), // Return only first 100 for list
-      recentGenerations: (generations || []).slice(0, 50), // Return only last 50 for list
+      users: processedProfiles.slice(0, 100),
+      recentGenerations: processedGenerations.slice(0, 50),
       errorLogs: errorLogs ?? [],
     });
   } catch (error: any) {
