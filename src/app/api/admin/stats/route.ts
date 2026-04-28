@@ -121,6 +121,8 @@ export async function GET(req: Request) {
     monthStart.setHours(0, 0, 0, 0);
     const registrationsMonth = processedProfiles.filter(p => new Date(p.created_at) >= monthStart).length;
 
+    const errorsToday = errorLogs?.filter(e => new Date(e.created_at) >= todayStart).length ?? 0;
+
     return NextResponse.json({
       stats: {
         totalUsers,
@@ -131,6 +133,7 @@ export async function GET(req: Request) {
         generationsToday,
         activeUsers,
         usersNoCredits: usersNoTokens,
+        errorsToday,
         totalErrors: errorLogs?.length ?? 0,
       },
       trends: trendData,

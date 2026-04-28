@@ -485,7 +485,7 @@ export default function AdminPage() {
                       <card.icon className="w-4 h-4" style={{ color: card.color }} />
                     </div>
                     <span className="text-2xl md:text-3xl font-bold" style={{ color: card.color }}>
-                      {card.value.toLocaleString('pt-BR')}
+                      {(card.value || 0).toLocaleString('pt-BR')}
                     </span>
                   </div>
                 ))}
