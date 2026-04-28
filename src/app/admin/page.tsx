@@ -1163,7 +1163,6 @@ export default function AdminPage() {
                       Teste e valide as rotas em tempo real. Rotas seguras podem ser testadas sem efeitos colaterais.
                     </p>
                   </div>
-                  </div>
                 </div>
 
                 {/* Route Cards */}
