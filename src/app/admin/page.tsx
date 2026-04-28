@@ -387,7 +387,7 @@ export default function AdminPage() {
     : [];
 
   return (
-    <div className={`min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] font-sans transition-colors duration-300`}>
+    <div className={`neksti-theme min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)] font-sans transition-colors duration-300`}>
       {/* Top Bar */}
       <nav className="h-20 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--outline-variant)]/30">
         <div className="flex items-center gap-6">

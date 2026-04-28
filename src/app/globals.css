@@ -54,11 +54,34 @@
 /* ============================================
    MATERIAL DESIGN 3 — Full Token System
    ============================================ */
-/* ============================================
-   NEKSTI BRAND — Official Identity
-   ============================================ */
 :root {
-  /* ── NEKSTI NAVY (Dominant) ── */
+  /* ── STUDIOAI JOALHERIA (Original) ── */
+  --background: #09090B;
+  --foreground: #F0F0F0;
+  --surface: #111113;
+  --surface-dim: #09090B;
+  --surface-bright: #2A2A2E;
+  --surface-variant: #2A2A2E;
+  --on-surface-variant: #B0B0B4;
+  --outline: #6E6E72;
+  --outline-variant: #2A2A2E;
+
+  --primary: #D4AF37; /* Dourado */
+  --on-primary: #1C1600;
+  --primary-container: #503E00;
+  --on-primary-container: #FFE08A;
+
+  --secondary: #C9B99A;
+  --on-secondary: #1C1600;
+
+  --radius: 0.75rem;
+  --border: #2A2A2E;
+  --input: #2A2A2E;
+  --ring: #D4AF37;
+}
+
+/* ── NEKSTI BRAND IDENTITY (Isolated for Admin) ── */
+.neksti-theme {
   --background: #0D1B2E;
   --foreground: #F8F7F4;
   --surface: #122240;
@@ -69,48 +92,19 @@
   --outline: #6B6B60;
   --outline-variant: #233752;
 
-  /* ── NEKSTI GREEN (Action) ── */
-  --primary: #2D6E45;
+  --primary: #2D6E45; /* Verde Neksti */
   --on-primary: #F8F7F4;
   --primary-container: #3D8A58;
   --on-primary-container: #F8F7F4;
 
-  /* ── NEKSTI MINT (Highlights) ── */
-  --secondary: #6DBF8A;
+  --secondary: #6DBF8A; /* Mint */
   --on-secondary: #0D1B2E;
-  --secondary-container: #2D6E45;
-  --on-secondary-container: #F8F7F4;
-
-  /* ── Support Palette ── */
-  --cream: #F8F7F4;
-  --gray-100: #F2F2F0;
-  --gray-200: #E4E4E0;
-  --gray-400: #AAAA9E;
-  --gray-600: #6B6B60;
+  
   --mint: #6DBF8A;
   --green-lt: #3D8A58;
-
-  /* ── legacy shadcn mapping ── */
-  --card: var(--surface);
-  --card-foreground: var(--foreground);
-  --popover: var(--surface-bright);
-  --popover-foreground: var(--foreground);
-  --primary-foreground: var(--on-primary);
-  --secondary-foreground: var(--on-secondary);
-  --muted: var(--surface-variant);
-  --muted-foreground: var(--gray-400);
-  --accent: var(--primary);
-  --accent-foreground: var(--on-primary);
-  --destructive: #8C1D18;
-  --destructive-foreground: #F8F7F4;
-  --border: var(--gray-200);
-  --input: var(--gray-200);
-  --ring: var(--primary);
-  --radius: 0.75rem;
 }
 
-/* ── LIGHT THEME (Cream/White) ── */
-.light {
+.neksti-theme.light {
   --background: #F8F7F4;
   --foreground: #0D1B2E;
   --surface: #FFFFFF;
@@ -125,11 +119,6 @@
   --on-primary: #FFFFFF;
   --secondary: #0D1B2E;
   --on-secondary: #FFFFFF;
-
-  --card: #FFFFFF;
-  --muted: #F2F2F0;
-  --muted-foreground: #6B6B60;
-  --border: #E4E4E0;
 }
 
 /* ============================================
@@ -428,9 +417,9 @@
 .stagger-5 { animation-delay: 250ms; }
 
 /* ============================================
-   M3 Utility Classes
+   NEKSTI Utility Classes
    ============================================ */
-.text-gradient {
+.neksti-theme .text-gradient {
   background: linear-gradient(135deg, #6DBF8A 0%, #3D8A58 50%, #2D6E45 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
