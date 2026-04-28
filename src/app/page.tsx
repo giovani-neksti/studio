@@ -64,8 +64,6 @@ export default function LandingPage() {
           <div className="animate-fade-up stagger-4 mt-14 flex flex-wrap justify-center gap-2.5">
             {[
               { icon: <Gem className="w-4 h-4" />, label: 'Joalheria' },
-              { icon: <Shirt className="w-4 h-4" />, label: 'Moda' },
-              { icon: <Footprints className="w-4 h-4" />, label: 'Calçados' },
             ].map((chip) => (
               <div
                 key={chip.label}
