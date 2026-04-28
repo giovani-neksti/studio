@@ -122,7 +122,7 @@ export default function GeracoesPage() {
             </div>
             <h2 className="md3-headline-small text-[var(--on-surface)] mb-2">Nenhuma geração ainda</h2>
             <p className="md3-body-medium text-[var(--on-surface-variant)] max-w-md">
-              Suas imagens geradas com IA aparecerão aqui. Vá ao estúdio para criar sua primeira foto profissional!
+              Suas imagens geradas com IA aparecerão aqui. Vá ao estúdio para criar sua primeira geração profissional!
             </p>
             <button
               onClick={() => router.push('/studio')}

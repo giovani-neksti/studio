@@ -27,9 +27,8 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
       name: 'Essentials',
       price: '400',
       credits: '500',
-      perCredit: 'R$ 0,80',
-      description: 'Ideal para validar produtos com imagens profissionais.',
-      features: ['500 tokens (em média 100 fotos)', 'Acesso a todos os nichos', 'Formatos sociais', 'R$ 4,00 por foto (estimado)'],
+      description: 'Ideal para validar produtos com imagens de alta qualidade.',
+      features: ['500 tokens', 'Acesso a todos os recursos', 'Formatos sociais', 'Aproximadamente 100 gerações'],
       popular: false,
       stripeUrl: 'https://buy.stripe.com/28E9AL0NDck7aiDcRJ6Ri07',
     },
@@ -37,9 +36,8 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
       name: 'Professional',
       price: '600',
       credits: '1200',
-      perCredit: 'R$ 0,50',
-      description: 'O dobro de fotos por uma fração do preço. O favorito.',
-      features: ['1200 tokens (em média 240 fotos)', 'Acesso a todos os nichos', 'Formatos sociais', 'Prioridade na fila de geração', 'R$ 2,50 por foto (estimado)'],
+      description: 'O dobro de potência para o seu e-commerce. O favorito.',
+      features: ['1200 tokens', 'Acesso a todos os recursos', 'Formatos sociais', 'Prioridade na fila de geração', 'Aproximadamente 240 gerações'],
       popular: true,
       stripeUrl: 'https://buy.stripe.com/cNi6oz67Xbg34YjeZR6Ri06',
     },
@@ -47,9 +45,8 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
       name: 'Premium',
       price: '1.000',
       credits: '2500',
-      perCredit: 'R$ 0,40',
       description: 'Para alto volume de postagens e franqueados.',
-      features: ['2500 tokens (em média 500 fotos)', 'Suporte dedicado via WhatsApp', 'Acesso a todos os nichos', 'Acesso Antecipado a Modelos', 'R$ 2,00 por foto (estimado)'],
+      features: ['2500 tokens', 'Suporte dedicado via WhatsApp', 'Acesso a todos os recursos', 'Acesso Antecipado a Modelos', 'Aproximadamente 500 gerações'],
       popular: false,
       stripeUrl: 'https://buy.stripe.com/28E5kv0ND83R3Ufg3V6Ri08',
     }
@@ -90,7 +87,7 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
         <div className="px-6 md:px-8 py-10 md:py-12 text-center border-b border-[var(--outline-variant)]/20">
           <h2 id="pricing-dialog-title" className="font-serif md3-headline-medium font-bold text-[var(--foreground)] mb-3">Escale as vendas da sua loja</h2>
           <p className="text-[var(--on-surface-variant)] md3-body-large max-w-2xl mx-auto">
-            Faça upgrade para gerar muito mais composições em alta qualidade por uma fração do preço de um estúdio fotográfico.
+            Faça upgrade para gerar composições em alta qualidade por uma fração do preço de um estúdio profissional.
           </p>
         </div>
 
@@ -115,12 +112,11 @@ export function PricingModal({ isOpen, onOpenChange, userEmail, userId }: Pricin
                 <h3 className={`md3-title-large font-semibold mb-1.5 ${plan.popular ? 'text-[var(--primary)]' : 'text-[var(--foreground)]'}`}>{plan.name}</h3>
                 <p className="text-[var(--on-surface-variant)] md3-body-small mb-4 min-h-[40px]">{plan.description}</p>
 
-                {/* Credits hero — destaque principal */}
                 <div className="bg-[var(--secondary-container)] rounded-[var(--shape-medium)] p-4 text-center mb-4">
                   <span className="text-4xl font-bold text-[var(--on-secondary-container)]">{plan.credits}</span>
-                  <div className="md3-label-large text-[var(--on-secondary-container)]/80 mt-1">fotos profissionais</div>
+                  <div className="md3-label-large text-[var(--on-secondary-container)]/80 mt-1">Tokens</div>
                   <div className="md3-label-small text-[var(--primary)] mt-1">
-                    apenas {plan.perCredit} por foto
+                    aproximadamente {Math.round(parseInt(plan.credits.replace('.', '')) / 5)} gerações profissionais
                   </div>
                 </div>
 

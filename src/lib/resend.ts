@@ -25,10 +25,10 @@ export async function sendWelcomeEmail(to: string) {
         </div>
         <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">Bem-vindo ao Neksti Studio!</h2>
         <p style="font-size: 15px; line-height: 1.6; color: #444;">
-          Sua conta foi criada com sucesso. Você já tem <strong>3 créditos grátis</strong> para começar a transformar suas fotos de produto em imagens de estúdio profissional.
+          Sua conta foi criada com sucesso. Você já tem <strong>tokens grátis</strong> para começar a transformar suas imagens de produto em imagens de estúdio profissional.
         </p>
         <p style="font-size: 15px; line-height: 1.6; color: #444;">
-          Cada crédito gera uma imagem com IA. É simples: envie a foto, escolha o cenário e pronto.
+          Cada geração consome tokens. É simples: envie a imagem, escolha o cenário e pronto.
         </p>
         <div style="text-align: center; margin: 32px 0;">
           <a href="https://studio.neksti.com.br/studio" style="display: inline-block; padding: 14px 32px; background: #6750a4; color: #fff; text-decoration: none; border-radius: 100px; font-size: 15px; font-weight: 600;">
@@ -50,22 +50,22 @@ export async function sendCreditsExhaustedEmail(to: string) {
   await r.emails.send({
     from: FROM,
     to,
-    subject: 'Seus créditos acabaram — Neksti Studio',
+    subject: 'Seus tokens acabaram — Neksti Studio',
     html: `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; color: #1a1a1a;">
         <div style="text-align: center; margin-bottom: 32px;">
           <h1 style="font-size: 24px; font-weight: 700; margin: 0;">Neksti Studio</h1>
         </div>
-        <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">Seus créditos acabaram</h2>
+        <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">Seus tokens acabaram</h2>
         <p style="font-size: 15px; line-height: 1.6; color: #444;">
-          Você usou todos os seus créditos no Neksti Studio. Para continuar gerando fotos profissionais com IA, adquira mais créditos.
+          Você usou todos os seus tokens no Neksti Studio. Para continuar criando gerações profissionais com IA, adquira mais tokens.
         </p>
         <p style="font-size: 15px; line-height: 1.6; color: #444;">
-          Temos planos a partir de <strong>R$ 29,90</strong> com créditos que não expiram.
+          Temos planos com tokens que não expiram.
         </p>
         <div style="text-align: center; margin: 32px 0;">
           <a href="https://studio.neksti.com.br/studio" style="display: inline-block; padding: 14px 32px; background: #6750a4; color: #fff; text-decoration: none; border-radius: 100px; font-size: 15px; font-weight: 600;">
-            Comprar Créditos
+            Comprar Tokens
           </a>
         </div>
         <p style="font-size: 13px; color: #888; text-align: center; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
@@ -100,8 +100,8 @@ export async function sendPurchaseConfirmationEmail(
         <div style="background: #f5f0ff; border-radius: 12px; padding: 20px; margin: 24px 0;">
           <table style="width: 100%; font-size: 15px; color: #444;">
             <tr>
-              <td style="padding: 6px 0;">Créditos adicionados</td>
-              <td style="padding: 6px 0; text-align: right; font-weight: 600;">${credits} créditos</td>
+              <td style="padding: 6px 0;">Tokens adicionados</td>
+              <td style="padding: 6px 0; text-align: right; font-weight: 600;">${credits} tokens</td>
             </tr>
             <tr>
               <td style="padding: 6px 0;">Valor pago</td>
@@ -110,7 +110,7 @@ export async function sendPurchaseConfirmationEmail(
           </table>
         </div>
         <p style="font-size: 15px; line-height: 1.6; color: #444;">
-          Seus créditos já estão disponíveis. Bom uso!
+          Seus tokens já estão disponíveis. Bom uso!
         </p>
         <div style="text-align: center; margin: 32px 0;">
           <a href="https://studio.neksti.com.br/studio" style="display: inline-block; padding: 14px 32px; background: #6750a4; color: #fff; text-decoration: none; border-radius: 100px; font-size: 15px; font-weight: 600;">

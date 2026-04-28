@@ -88,7 +88,7 @@ export default function LandingPage() {
           <div className="text-center mb-12 md:mb-16">
             <h2 className="font-serif md3-headline-large md:md3-display-small font-bold mb-4 animate-fade-up">Como funciona</h2>
             <p className="text-[var(--on-surface-variant)] md3-body-large max-w-xl mx-auto animate-fade-up stagger-1">
-              Três passos simples para transformar suas fotos de produto.
+              Três passos simples para transformar suas imagens de produto.
             </p>
           </div>
 
@@ -97,8 +97,8 @@ export default function LandingPage() {
               {
                 icon: <Camera className="w-6 h-6" />,
                 step: '01',
-                title: 'Envie a Foto',
-                description: 'Tire uma foto com seu celular. Sem câmeras profissionais, sem estúdios — só o produto e a IA.'
+                title: 'Envie a Imagem',
+                description: 'Capture uma imagem com seu celular. Sem câmeras profissionais, sem estúdios — só o produto e a IA.'
               },
               {
                 icon: <Zap className="w-6 h-6" />,
@@ -110,7 +110,7 @@ export default function LandingPage() {
                 icon: <ShieldCheck className="w-6 h-6" />,
                 step: '03',
                 title: 'Resultado Premium',
-                description: 'Em 15 segundos, sua foto estará pronta para e-commerce, redes sociais e catálogos profissionais.'
+                description: 'Em 15 segundos, sua geração estará pronta para e-commerce, redes sociais e catálogos profissionais.'
               }
             ].map((feature, idx) => (
               <div

@@ -364,7 +364,7 @@ export function Sidebar({
         return (
           <div className="space-y-5">
             <p className="md3-body-large text-[var(--on-surface-variant)]">
-              Selecione uma ou mais categorias para compor a foto.
+              Selecione uma ou mais categorias para compor a cena.
             </p>
 
             {/* Categories — M3 Filter Chip Grid (multi-select) */}
@@ -412,8 +412,8 @@ export function Sidebar({
           <div className="space-y-5">
             <p className="md3-body-large text-[var(--on-surface-variant)]">
               {selectedCategories.length > 1
-                ? <>Anexe uma foto para cada peça selecionada. <strong className="text-[var(--error)]">Obrigatório</strong></>
-                : <>Anexe a foto do seu produto. <strong className="text-[var(--error)]">Obrigatório</strong> para continuar.</>
+                ? <>Anexe uma imagem para cada peça selecionada. <strong className="text-[var(--error)]">Obrigatório</strong></>
+                : <>Anexe a imagem do seu produto. <strong className="text-[var(--error)]">Obrigatório</strong> para continuar.</>
               }
             </p>
 
@@ -445,7 +445,7 @@ export function Sidebar({
               </div>
               {showBatch && (
                 <p className="md3-body-large text-[var(--on-surface-variant)] mt-2 px-1">
-                  Gere até 10 fotos de uma só vez.
+                  Gere até 10 imagens de uma só vez.
                 </p>
               )}
             </div>
@@ -483,7 +483,7 @@ export function Sidebar({
                     >
                       <Layers className="w-8 h-8 mb-2 text-[var(--primary)]/80" aria-hidden="true" />
                       <p className="md3-title-medium text-[var(--foreground)] mb-1">Upload em Lote</p>
-                      <span className="md3-body-medium text-[var(--on-surface-variant)]">Selecione até 10 fotos</span>
+                      <span className="md3-body-medium text-[var(--on-surface-variant)]">Selecione até 10 imagens</span>
                     </button>
                   )}
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onChange={handleBatchFileUpload} tabIndex={-1} aria-hidden="true" />
@@ -530,7 +530,7 @@ export function Sidebar({
                                 <Camera className="w-6 h-6 text-[var(--primary)]" aria-hidden="true" />
                               </div>
                               <span className="md3-title-small text-[var(--primary)]">Câmera</span>
-                              <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Tirar foto agora</span>
+                              <span className="md3-body-medium text-[var(--on-surface-variant)] mt-0.5">Capturar agora</span>
                             </button>
                             <button
                               type="button"
@@ -563,8 +563,8 @@ export function Sidebar({
                 <X className="w-5 h-5 text-[var(--error)] flex-shrink-0" />
                 <span className="md3-body-large text-[var(--error)] font-medium">
                   {selectedCategories.length > 1
-                    ? 'Anexe uma foto para cada categoria selecionada.'
-                    : 'Anexe pelo menos uma foto do produto para continuar.'}
+                    ? 'Anexe uma imagem para cada categoria selecionada.'
+                    : 'Anexe pelo menos uma imagem do produto para continuar.'}
                 </span>
               </div>
             )}
@@ -946,7 +946,7 @@ export function Sidebar({
         if (selectedCategories.length === 0) return 'Selecione pelo menos uma categoria';
         return '';
       case 1:
-        if (!canProceed(1)) return selectedCategories.length > 1 ? 'Anexe uma foto para cada peça' : 'Anexe pelo menos uma foto do produto';
+        if (!canProceed(1)) return selectedCategories.length > 1 ? 'Anexe uma imagem para cada peça' : 'Anexe pelo menos uma imagem do produto';
         return '';
       case 2: return 'Escolha uma cor ou cenário de fundo';
       case 3: return 'Escolha um tipo de expositor ou modelo';
