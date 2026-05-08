@@ -22,6 +22,24 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error) {
+    // Detect chunk load failures (common after new deploys) and auto-reload
+    const isChunkError =
+      error?.message?.includes('Loading chunk') ||
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.message?.includes('Failed to load') ||
+      error?.name === 'ChunkLoadError';
+
+    if (isChunkError) {
+      // Prevent infinite reload loops
+      const lastReload = sessionStorage.getItem('chunk_reload');
+      const now = Date.now();
+      if (!lastReload || now - parseInt(lastReload) > 10000) {
+        sessionStorage.setItem('chunk_reload', now.toString());
+        window.location.reload();
+        return;
+      }
+    }
+
     reportError(error, 'error-boundary');
   }
 

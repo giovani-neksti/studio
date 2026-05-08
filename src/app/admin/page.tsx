@@ -877,7 +877,7 @@ export default function AdminPage() {
                           <div className="space-y-4">
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Total gerações</span>
-                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{usg.totalGenerations.toLocaleString('pt-BR')}</span>
+                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{(usg.totalGenerations || 0).toLocaleString('pt-BR')}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Custo total (USD)</span>
@@ -890,11 +890,11 @@ export default function AdminPage() {
                             <hr className="border-[var(--outline-variant)]/20" />
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Tokens de entrada</span>
-                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{cst.totalInputTokens.toLocaleString('pt-BR')}</span>
+                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{(cst.totalInputTokens || 0).toLocaleString('pt-BR')}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Tokens de saída</span>
-                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{cst.totalOutputTokens.toLocaleString('pt-BR')}</span>
+                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{(cst.totalOutputTokens || 0).toLocaleString('pt-BR')}</span>
                             </div>
                             <hr className="border-[var(--outline-variant)]/20" />
                             <div className="flex justify-between items-center">
@@ -913,15 +913,15 @@ export default function AdminPage() {
                           <div className="space-y-4">
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Créditos comprados</span>
-                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{usg.totalCreditsPurchased.toLocaleString('pt-BR')}</span>
+                              <span className="md3-title-medium font-bold text-[var(--foreground)]">{(usg.totalCreditsPurchased || 0).toLocaleString('pt-BR')}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Gerações grátis (3 iniciais)</span>
-                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{usg.freeCreditsUsed.toLocaleString('pt-BR')}</span>
+                              <span className="md3-title-medium font-bold text-[var(--on-surface-variant)]">{(usg.freeCreditsUsed || 0).toLocaleString('pt-BR')}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="md3-body-medium text-[var(--on-surface-variant)]">Créditos restantes</span>
-                              <span className="md3-title-medium font-bold text-[var(--primary)]">{usg.totalCreditsRemaining.toLocaleString('pt-BR')}</span>
+                              <span className="md3-title-medium font-bold text-[var(--primary)]">{(usg.totalCreditsRemaining || 0).toLocaleString('pt-BR')}</span>
                             </div>
                             <hr className="border-[var(--outline-variant)]/20" />
                             <div className="flex justify-between items-center">

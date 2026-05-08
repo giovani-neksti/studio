@@ -2,14 +2,14 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { getNicheConfig, nicheConfigs, NicheKey } from '@/lib/niche-config';
+import { getNicheConfig } from '@/lib/niche-config';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar } from '@/components/Sidebar';
 import { ImagePreviewCard } from '@/components/ImagePreviewCard';
 import { GalleryModal } from '@/components/GalleryModal';
 import { PricingModal } from '@/components/PricingModal';
-import { Sparkles, LogOut, Gem, ChevronDown, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon, Layers, Plus } from 'lucide-react';
+import { Sparkles, LogOut, Gem, Images, CreditCard, ChevronLeft, ChevronRight, SlidersHorizontal, Check, ShieldCheck, History, Sun, Moon, Layers, Plus } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { NeuralBackground } from '@/components/NeuralBackground';
 import { isAdmin } from '@/lib/admin';
@@ -18,9 +18,9 @@ function StudioContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, session, loading: authLoading, signOut } = useAuth();
-  const nicheParam = searchParams.get('niche') as NicheKey | null;
+  const nicheParam = searchParams.get('niche');
   const config = getNicheConfig(nicheParam);
-  const niche = nicheParam && nicheParam in nicheConfigs ? nicheParam : 'jewelry';
+  const niche = nicheParam === 'jewelry' ? 'jewelry' : 'jewelry'; // only one niche supported
 
   const [selections, setSelections] = useState<Record<string, any>>({});
   const [isGenerating, setIsGenerating] = useState(false);
@@ -31,7 +31,6 @@ function StudioContent() {
   const [imageIndex, setImageIndex] = useState(0);
   const [recentImages, setRecentImages] = useState<string[]>([]);
 
-  const [nicheMenuOpen, setNicheMenuOpen] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
 
@@ -393,13 +392,7 @@ function StudioContent() {
     }
   };
 
-  const switchNiche = (n: NicheKey) => {
-    if (n !== 'jewelry') return;
-    router.push(`/studio?niche=${n}`);
-    setNicheMenuOpen(false);
-    setSelections({ bgTab: 'solid', displayTab: 'expositor' });
-    setImageUrl(null);
-  };
+
 
   const handleNewImage = () => {
     setSelections({ bgTab: 'solid', displayTab: 'expositor' });
@@ -435,69 +428,24 @@ function StudioContent() {
       {/* Neural network animated background — gold variant */}
       <NeuralBackground variant="gold" />
 
-      {/* ── M3 Small Top App Bar ── */}
-      <header className="theme-jewelry h-16 flex-shrink-0 flex items-center justify-between px-3 md:px-6 bg-[var(--surface-container)] z-40 relative border-b border-[var(--outline-variant)]/20">
-        {/* Left: Logo + Niche Selector */}
-        <div className="flex items-center gap-2 md:gap-3 h-full">
-          <div className="flex items-center h-full cursor-pointer py-2" onClick={() => router.push('/')}>
-            <img src="/logo_joias.png" alt="Logo" className="h-16 md:h-24 w-auto object-contain" />
-          </div>
-
-          {/* M3 Tonal Button — niche selector */}
-          <div className="relative">
-            <button
-              onClick={() => setNicheMenuOpen(!nicheMenuOpen)}
-              aria-expanded={nicheMenuOpen}
-              aria-haspopup="listbox"
-              aria-label={`Nicho selecionado: ${config.label}. Clique para alterar`}
-              className="m3-btn-tonal h-10 px-4 gap-2 md3-label-large state-layer"
-            >
-              <span className="text-sm" aria-hidden="true">{config.icon}</span>
-              <span className="hidden sm:inline">{config.label}</span>
-              <ChevronDown className={`w-4 h-4 opacity-70 transition-transform duration-[var(--duration-short4)] ${nicheMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
-            </button>
-
-            {/* M3 Menu */}
-            {nicheMenuOpen && (
-              <div role="listbox" aria-label="Nichos disponíveis" className="absolute top-full left-0 mt-1 w-56 bg-[var(--surface-container-high)] border border-[var(--outline-variant)]/30 rounded-[var(--shape-extra-small)] overflow-hidden z-50 elevation-3 animate-scale-in origin-top-left">
-                {Object.entries(nicheConfigs).map(([key, cfg]) => {
-                  const isEnabled = key === 'jewelry';
-                  const isSelected = key === niche;
-                  return (
-                    <button
-                      key={key}
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={isEnabled ? () => switchNiche(key as NicheKey) : undefined}
-                      disabled={!isEnabled}
-                      className={`w-full flex items-center gap-3 px-4 py-3 md3-body-large transition-colors duration-[var(--duration-short4)] text-left m3-touch-target
-                        ${isEnabled ? 'hover:bg-[var(--on-surface-variant)]/8' : 'opacity-[0.38] cursor-not-allowed'}
-                        ${isSelected ? 'bg-[var(--secondary-container)]' : ''}`}
-                    >
-                      <span className="text-lg w-7 text-center" aria-hidden="true">{cfg.icon}</span>
-                      <div className="flex flex-col flex-1">
-                        <span className={isSelected ? 'font-medium text-[var(--on-secondary-container)]' : ''}>{cfg.label}</span>
-                        {!isEnabled && <span className="md3-label-small text-[var(--outline)]">Em breve</span>}
-                      </div>
-                      {isSelected && <Check className="w-5 h-5 text-[var(--primary)]" aria-hidden="true" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+      {/* ── M3 Small Top App Bar — Mobile-First ── */}
+      <header className="theme-jewelry flex-shrink-0 flex items-center justify-between px-2 sm:px-3 md:px-6 bg-[var(--surface-container)] z-40 relative border-b border-[var(--outline-variant)]/20 h-14 md:h-16">
+        {/* Left: Logo */}
+        <div className="flex items-center h-full shrink-0">
+          <div className="flex items-center h-full cursor-pointer py-1" onClick={() => router.push('/')}>
+            <img src="/logo_joias.png" alt="Logo" className="h-12 sm:h-14 md:h-20 w-auto object-contain" />
           </div>
         </div>
 
-        {/* Right: Credits Badge + Desktop Actions */}
-        <div className="flex items-center gap-1.5 md:gap-2">
-          {/* M3 Badge-style credits */}
+        {/* Right: Credits Badge + Actions */}
+        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
+          {/* M3 Badge-style credits — compact on mobile */}
           <div
-            className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-large"
+            className="flex items-center gap-1.5 h-8 md:h-9 px-2.5 md:px-3.5 rounded-[var(--shape-full)] bg-[var(--surface-container-highest)] md3-label-large text-sm"
             style={{ color: userIsAdmin || (credits ?? 0) >= 1 ? 'var(--primary)' : 'var(--error)' }}
           >
-            <Gem className="w-4 h-4" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline">Tokens</span>
+            <Gem className="w-3.5 h-3.5 md:w-4 md:h-4" />{creditsLoading ? '...' : userIsAdmin ? '∞' : credits ?? 0} <span className="hidden sm:inline text-xs md:text-sm">Tokens</span>
           </div>
-
 
           {/* Desktop: My Generations — M3 Tonal Button */}
           <button
@@ -529,9 +477,9 @@ function StudioContent() {
           <button
             onClick={toggleTheme}
             aria-label={isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro'}
-            className="flex items-center justify-center w-10 h-10 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 m3-touch-target"
+            className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-[var(--shape-full)] text-[var(--on-surface-variant)] transition-colors duration-[var(--duration-short4)] hover:bg-[var(--on-surface-variant)]/8 m3-touch-target"
           >
-            {isDark ? <Sun className="w-5 h-5" aria-hidden="true" /> : <Moon className="w-5 h-5" aria-hidden="true" />}
+            {isDark ? <Sun className="w-[18px] h-[18px] md:w-5 md:h-5" aria-hidden="true" /> : <Moon className="w-[18px] h-[18px] md:w-5 md:h-5" aria-hidden="true" />}
           </button>
 
           {/* Desktop: Logout — M3 Icon Button */}
@@ -698,7 +646,7 @@ function StudioContent() {
       </nav>
 
       {/* ── Overlays ── */}
-      {nicheMenuOpen && <div aria-hidden="true" className="fixed inset-0 z-30" onClick={() => setNicheMenuOpen(false)} />}
+
       <GalleryModal isOpen={isGalleryOpen} onOpenChange={setIsGalleryOpen} niche={niche} images={recentImages} themeClass={config.themeClass} />
       <PricingModal isOpen={isPricingOpen} onOpenChange={setIsPricingOpen} userEmail={user?.email} userId={user?.id} />
 
