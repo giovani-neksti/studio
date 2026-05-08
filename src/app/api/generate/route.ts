@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { GoogleAuth } from 'google-auth-library';
 import { buildEnglishPrompt } from '@/lib/prompt-builder';
 import { sendCreditsExhaustedEmail } from '@/lib/resend';
+import { ADMIN_EMAILS } from '@/lib/admin';
 import sharp from 'sharp';
 
 export const maxDuration = 120; // 2 min máx — com imagens otimizadas, IA responde em <60s
@@ -417,19 +418,25 @@ export async function POST(req: Request) {
     // ── 7. Registro no banco de dados e Dedução de Tokens ──
     const originalUrl = await originalUploadPromise;
 
-    // Executa a dedução com lógica de overdraft (saldo negativo)
-    const { data: newTokens, error: deductError } = await supabaseAdmin
-      .rpc('deduct_tokens', { 
-        user_id: user.id, 
-        amount_to_deduct: tokensToDeduct 
-      });
+    // Admins têm tokens ilimitados — pular dedução completamente
+    const userIsAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '');
 
-    if (deductError || newTokens === -999) {
-      console.error('[Generate] Falha na dedução ou saldo insuficiente:', deductError);
-      // Se não tinha nem 1 token, barramos aqui (mesmo que a imagem tenha sido gerada, o que é raro pelo check do front)
-      if (newTokens === -999) {
-        return NextResponse.json({ error: 'Saldo de tokens insuficiente.' }, { status: 403 });
+    if (!userIsAdmin) {
+      // Executa a dedução com lógica de overdraft (saldo negativo)
+      const { data: newTokens, error: deductError } = await supabaseAdmin
+        .rpc('deduct_tokens', { 
+          user_id: user.id, 
+          amount_to_deduct: tokensToDeduct 
+        });
+
+      if (deductError || newTokens === -999) {
+        console.error('[Generate] Falha na dedução ou saldo insuficiente:', deductError);
+        if (newTokens === -999) {
+          return NextResponse.json({ error: 'Saldo de tokens insuficiente.' }, { status: 403 });
+        }
       }
+    } else {
+      console.log(`[Generate] Admin ${user.email} — dedução de tokens ignorada.`);
     }
 
     const { error: dbError } = await supabaseAdmin.from('generations').insert({
